@@ -207,6 +207,10 @@ class CriticalSection {
 #ifndef MOUSEEVENTF_FROMTOUCH
 #define MOUSEEVENTF_FROMTOUCH       0xFF515700
 #endif
+
+inline BOOL IsMouseEventFromTouch() {
+    return (::GetMessageExtraInfo() & MOUSEEVENTF_FROMTOUCH_MASK) == MOUSEEVENTF_FROMTOUCH;
+}
 /************************************************************************
  * AwtToolkit class
  */
@@ -750,5 +754,7 @@ template<typename T> inline T* SafeCreate(T* &pArg) {
         return pNew;
     }
 }
+
+POINT ScreenToBottommostChild(HWND& w, LONG ncx, LONG ncy);
 
 #endif /* AWT_TOOLKIT_H */

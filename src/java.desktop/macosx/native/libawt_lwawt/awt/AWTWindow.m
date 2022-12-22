@@ -26,7 +26,7 @@
 #include <objc/objc-runtime.h>
 #import <Cocoa/Cocoa.h>
 
-#include <java_awt_Window_CustomWindowDecoration.h>
+#include <java_awt_Window_CustomTitlebar.h>
 #import "sun_lwawt_macosx_CPlatformWindow.h"
 #import "com_apple_eawt_event_GestureHandler.h"
 #import "com_apple_eawt_FullScreenHandler.h"
@@ -354,6 +354,11 @@ AWT_NS_WINDOW_IMPLEMENTATION
 @synthesize isJustCreated;
 @synthesize javaWindowTabbingMode;
 @synthesize isEnterFullScreen;
+@synthesize customTitlebarHeight;
+@synthesize customTitlebarControlsVisible;
+@synthesize customTitlebarConstraints;
+@synthesize customTitlebarHeightConstraint;
+@synthesize customTitlebarButtonCenterXConstraints;
 
 - (void) updateMinMaxSize:(BOOL)resizable {
     if (resizable) {
@@ -449,14 +454,30 @@ AWT_NS_WINDOW_IMPLEMENTATION
                     styleBits:(jint)bits
                     frameRect:(NSRect)rect
                   contentView:(NSView *)view
-    transparentTitleBarHeight:(CGFloat)transparentTitleBarHeight
 {
 AWT_ASSERT_APPKIT_THREAD;
+
+    self = [super init];
+    if (self == nil) return nil; // no hope
+    self.javaPlatformWindow = platformWindow;
 
     NSUInteger newBits = bits;
     if (IS(bits, SHEET) && owner == nil) {
         newBits = bits & ~NSWindowStyleMaskDocModalWindow;
     }
+
+    self.customTitlebarHeight = -1.0f; // Negative means uninitialized
+    self.customTitlebarControlsVisible = YES;
+    self.customTitlebarConstraints = nil;
+    self.customTitlebarHeightConstraint = nil;
+    self.customTitlebarButtonCenterXConstraints = nil;
+    if ([self isCustomTitlebarEnabled]) {
+        // Force these properties if custom titlebar is enabled,
+        // but store original value in self.styleBits.
+        newBits |= MASK(FULL_WINDOW_CONTENT) | MASK(TRANSPARENT_TITLE_BAR);
+        newBits &= ~MASK(TITLE_VISIBLE);
+    }
+
     NSUInteger styleMask = [AWTWindow styleMaskForStyleBits:newBits];
 
     NSRect contentRect = rect; //[NSWindow contentRectForFrameRect:rect styleMask:styleMask];
@@ -466,10 +487,6 @@ AWT_ASSERT_APPKIT_THREAD;
     if (contentRect.size.height <= 0.0) {
         contentRect.size.height = 1.0;
     }
-
-    self = [super init];
-
-    if (self == nil) return nil; // no hope
 
     if (IS(bits, UTILITY) ||
         IS(bits, HUD) ||
@@ -495,10 +512,9 @@ AWT_ASSERT_APPKIT_THREAD;
 
     self.isEnabled = YES;
     self.isMinimizing = NO;
-    self.javaPlatformWindow = platformWindow;
     self.styleBits = bits;
     self.ownerWindow = owner;
-    [self setPropertiesForStyleBits:styleBits mask:MASK(_METHOD_PROP_BITMASK)];
+    [self setPropertiesForStyleBits:newBits mask:MASK(_METHOD_PROP_BITMASK)];
 
     if (IS(bits, SHEET) && owner != nil) {
         [self.nsWindow setStyleMask: NSWindowStyleMaskDocModalWindow];
@@ -510,9 +526,8 @@ AWT_ASSERT_APPKIT_THREAD;
     self.nsWindow.collectionBehavior = NSWindowCollectionBehaviorManaged;
     self.isEnterFullScreen = NO;
 
-    _transparentTitleBarHeight = transparentTitleBarHeight;
-    if (transparentTitleBarHeight != 0.0 && !self.isFullScreen) {
-        [self setUpTransparentTitleBar];
+    if ([self isCustomTitlebarEnabled] && !self.isFullScreen) {
+        [self setUpCustomTitlebar];
     }
 
     self.currentDisplayID = nil;
@@ -1182,9 +1197,61 @@ AWT_ASSERT_APPKIT_THREAD;
     }
 }
 
-- (BOOL) isTransparentTitleBarEnabled
-{
-    return _transparentTitleBarHeight != 0.0;
+- (CGFloat) getCustomTitlebarHeight {
+    CGFloat h = customTitlebarHeight;
+    if (h < 0.0f) {
+        JNIEnv *env = [ThreadUtilities getJNIEnvUncached];
+        GET_CPLATFORM_WINDOW_CLASS_RETURN(YES);
+        DECLARE_FIELD_RETURN(jf_target, jc_CPlatformWindow, "target", "Ljava/awt/Window;", 0.0f);
+        DECLARE_CLASS_RETURN(jc_Window, "java/awt/Window", 0.0f);
+        DECLARE_METHOD_RETURN(jm_internalCustomTitlebarHeight, jc_Window, "internalCustomTitlebarHeight", "()F", 0.0f);
+        DECLARE_METHOD_RETURN(jm_internalCustomTitlebarControlsVisible, jc_Window, "internalCustomTitlebarControlsVisible", "()Z", 0.0f);
+
+        jobject platformWindow = (*env)->NewLocalRef(env, self.javaPlatformWindow);
+        if (!platformWindow) return 0.0f;
+        jobject target = (*env)->GetObjectField(env, platformWindow, jf_target);
+        if (target) {
+            h = (CGFloat) (*env)->CallFloatMethod(env, target, jm_internalCustomTitlebarHeight);
+            customTitlebarControlsVisible = (BOOL) (*env)->CallBooleanMethod(env, target, jm_internalCustomTitlebarControlsVisible);
+            (*env)->DeleteLocalRef(env, target);
+        }
+        CHECK_EXCEPTION();
+        (*env)->DeleteLocalRef(env, platformWindow);
+        if (h < 0.0f) h = 0.0f;
+        customTitlebarHeight = h;
+    }
+    return h;
+}
+
+- (BOOL) isCustomTitlebarEnabled {
+    CGFloat h = customTitlebarHeight;
+    if (h < 0.0f) h = [self getCustomTitlebarHeight];
+    return h > 0.0f;
+}
+
+- (void) updateCustomTitlebarInsets:(BOOL)hasControls {
+    CGFloat leftInset;
+    if (hasControls) {
+        CGFloat shrinkingFactor = [self getCustomTitlebarButtonShrinkingFactor];
+        CGFloat horizontalButtonOffset = shrinkingFactor * DefaultHorizontalTitleBarButtonOffset;
+        leftInset = [self getCustomTitlebarHeight] + 2.0f * horizontalButtonOffset;
+    } else leftInset = 0.0f;
+
+    JNIEnv *env = [ThreadUtilities getJNIEnvUncached];
+    GET_CPLATFORM_WINDOW_CLASS();
+    DECLARE_FIELD(jf_target, jc_CPlatformWindow, "target", "Ljava/awt/Window;");
+    DECLARE_CLASS(jc_Window, "java/awt/Window");
+    DECLARE_METHOD(jm_internalCustomTitlebarUpdateInsets, jc_Window, "internalCustomTitlebarUpdateInsets", "(FF)V");
+
+    jobject platformWindow = (*env)->NewLocalRef(env, self.javaPlatformWindow);
+    if (!platformWindow) return;
+    jobject target = (*env)->GetObjectField(env, platformWindow, jf_target);
+    if (target) {
+        (*env)->CallVoidMethod(env, target, jm_internalCustomTitlebarUpdateInsets, (jfloat) leftInset, (jfloat) 0.0f);
+        (*env)->DeleteLocalRef(env, target);
+    }
+    CHECK_EXCEPTION();
+    (*env)->DeleteLocalRef(env, platformWindow);
 }
 
 - (void)windowWillEnterFullScreen:(NSNotification *)notification {
@@ -1193,8 +1260,8 @@ AWT_ASSERT_APPKIT_THREAD;
 
     self.isEnterFullScreen = YES;
 
-    if ([self isTransparentTitleBarEnabled]) {
-        [self resetTitleBar];
+    if ([self isCustomTitlebarEnabled]) {
+        [self resetCustomTitlebar];
     }
 
     JNIEnv *env = [ThreadUtilities getJNIEnv];
@@ -1212,6 +1279,10 @@ AWT_ASSERT_APPKIT_THREAD;
 - (void)windowDidEnterFullScreen:(NSNotification *)notification {
     self.isEnterFullScreen = YES;
 
+    if ([self isCustomTitlebarEnabled]) {
+        [self forceHideCustomTitlebarTitle:NO];
+        [self updateCustomTitlebarInsets:NO];
+    }
     [self allowMovingChildrenBetweenSpaces:NO];
     [self fullScreenTransitionFinished];
 
@@ -1233,8 +1304,10 @@ AWT_ASSERT_APPKIT_THREAD;
 
     [self fullScreenTransitionStarted];
 
-    if ([self isTransparentTitleBarEnabled]) {
+    if ([self isCustomTitlebarEnabled]) {
         [self setWindowControlsHidden:YES];
+        [self updateCustomTitlebarInsets:customTitlebarControlsVisible];
+        [self forceHideCustomTitlebarTitle:YES];
     }
 
     JNIEnv *env = [ThreadUtilities getJNIEnv];
@@ -1259,9 +1332,8 @@ AWT_ASSERT_APPKIT_THREAD;
 
     [self fullScreenTransitionFinished];
 
-    if ([self isTransparentTitleBarEnabled]) {
-        [self setUpTransparentTitleBar];
-        [self setWindowControlsHidden:NO];
+    if ([self isCustomTitlebarEnabled]) {
+        [self setUpCustomTitlebar];
     }
 
     JNIEnv *env = [ThreadUtilities getJNIEnv];
@@ -1356,15 +1428,13 @@ AWT_ASSERT_APPKIT_THREAD;
 
 static const CGFloat DefaultHorizontalTitleBarButtonOffset = 20.0;
 
-- (CGFloat) getTransparentTitleBarButtonShrinkingFactor
-{
+- (CGFloat) getCustomTitlebarButtonShrinkingFactor {
     CGFloat minimumHeightWithoutShrinking = 28.0; // This is the smallest macOS title bar availabe with public APIs as of Monterey
-    CGFloat shrinkingFactor = fmin(_transparentTitleBarHeight / minimumHeightWithoutShrinking, 1.0);
+    CGFloat shrinkingFactor = fmin([self getCustomTitlebarHeight] / minimumHeightWithoutShrinking, 1.0);
     return shrinkingFactor;
 }
 
-- (void) setUpTransparentTitleBar
-{
+- (void) setUpCustomTitlebar {
 
     /**
      * The view hierarchy normally looks as follows:
@@ -1387,7 +1457,7 @@ static const CGFloat DefaultHorizontalTitleBarButtonOffset = 20.0;
     NSView* zoomButtonView = [self.nsWindow standardWindowButton:NSWindowZoomButton];
     NSView* miniaturizeButtonView = [self.nsWindow standardWindowButton:NSWindowMiniaturizeButton];
     if (!closeButtonView || !zoomButtonView || !miniaturizeButtonView) {
-        NSLog(@"WARNING: setUpTransparentTitleBar closeButtonView=%@, zoomButtonView=%@, miniaturizeButtonView=%@",
+        NSLog(@"WARNING: setUpCustomTitlebar closeButtonView=%@, zoomButtonView=%@, miniaturizeButtonView=%@",
               closeButtonView, zoomButtonView, miniaturizeButtonView);
         return;
     }
@@ -1395,49 +1465,45 @@ static const CGFloat DefaultHorizontalTitleBarButtonOffset = 20.0;
     NSView* titlebarContainer = titlebar.superview;
     NSView* themeFrame = titlebarContainer.superview;
     if (!themeFrame) {
-        NSLog(@"WARNING: setUpTransparentTitleBar titlebar=%@, titlebarContainer=%@, themeFrame=%@",
+        NSLog(@"WARNING: setUpCustomTitlebar titlebar=%@, titlebarContainer=%@, themeFrame=%@",
               titlebar, titlebarContainer, themeFrame);
         return;
     }
 
-    _transparentTitleBarConstraints = [[NSMutableArray alloc] init];
+    customTitlebarConstraints = [[NSMutableArray alloc] init];
     titlebarContainer.translatesAutoresizingMaskIntoConstraints = NO;
-    _transparentTitleBarHeightConstraint = [titlebarContainer.heightAnchor constraintEqualToConstant:_transparentTitleBarHeight];
-    [_transparentTitleBarConstraints addObjectsFromArray:@[
+    customTitlebarHeightConstraint = [titlebarContainer.heightAnchor constraintEqualToConstant:[self getCustomTitlebarHeight]];
+    [customTitlebarConstraints addObjectsFromArray:@[
         [titlebarContainer.leftAnchor constraintEqualToAnchor:themeFrame.leftAnchor],
         [titlebarContainer.widthAnchor constraintEqualToAnchor:themeFrame.widthAnchor],
         [titlebarContainer.topAnchor constraintEqualToAnchor:themeFrame.topAnchor],
-        _transparentTitleBarHeightConstraint,
+        customTitlebarHeightConstraint,
     ]];
 
     AWTWindowDragView* windowDragView = [[AWTWindowDragView alloc] initWithPlatformWindow:self.javaPlatformWindow];
     [titlebar addSubview:windowDragView positioned:NSWindowBelow relativeTo:closeButtonView];
 
-    NSArray* viewsToStretch = [titlebarContainer.subviews arrayByAddingObject:windowDragView];
-    for (NSView* view in viewsToStretch)
+    [@[titlebar, windowDragView] enumerateObjectsUsingBlock:^(NSView* view, NSUInteger index, BOOL* stop)
     {
         view.translatesAutoresizingMaskIntoConstraints = NO;
-        [_transparentTitleBarConstraints addObjectsFromArray:@[
-            [view.leftAnchor constraintEqualToAnchor:titlebarContainer.leftAnchor],
-            [view.rightAnchor constraintEqualToAnchor:titlebarContainer.rightAnchor],
-            [view.topAnchor constraintEqualToAnchor:titlebarContainer.topAnchor],
-            [view.bottomAnchor constraintEqualToAnchor:titlebarContainer.bottomAnchor],
+        [customTitlebarConstraints addObjectsFromArray:@[
+                [view.leftAnchor constraintEqualToAnchor:titlebarContainer.leftAnchor],
+                [view.rightAnchor constraintEqualToAnchor:titlebarContainer.rightAnchor],
+                [view.topAnchor constraintEqualToAnchor:titlebarContainer.topAnchor],
+                [view.bottomAnchor constraintEqualToAnchor:titlebarContainer.bottomAnchor],
         ]];
-    }
+    }];
 
-    for(NSView* view in titlebar.subviews)
-    {
-        view.translatesAutoresizingMaskIntoConstraints = NO;
-    }
-
-    CGFloat shrinkingFactor = [self getTransparentTitleBarButtonShrinkingFactor];
+    CGFloat shrinkingFactor = [self getCustomTitlebarButtonShrinkingFactor];
     CGFloat horizontalButtonOffset = shrinkingFactor * DefaultHorizontalTitleBarButtonOffset;
-    _transparentTitleBarButtonCenterXConstraints = [[NSMutableArray alloc] initWithCapacity:3];
+    customTitlebarButtonCenterXConstraints = [[NSMutableArray alloc] initWithCapacity:3];
     [@[closeButtonView, miniaturizeButtonView, zoomButtonView] enumerateObjectsUsingBlock:^(NSView* button, NSUInteger index, BOOL* stop)
     {
-        NSLayoutConstraint* buttonCenterXConstraint = [button.centerXAnchor constraintEqualToAnchor:titlebarContainer.leftAnchor constant:(_transparentTitleBarHeight/2.0 + (index * horizontalButtonOffset))];
-        [_transparentTitleBarButtonCenterXConstraints addObject:buttonCenterXConstraint];
-        [_transparentTitleBarConstraints addObjectsFromArray:@[
+        button.translatesAutoresizingMaskIntoConstraints = NO;
+        NSLayoutConstraint* buttonCenterXConstraint = [button.centerXAnchor constraintEqualToAnchor:titlebarContainer.leftAnchor
+                                                       constant:([self getCustomTitlebarHeight] / 2.0 + (index * horizontalButtonOffset))];
+        [customTitlebarButtonCenterXConstraints addObject:buttonCenterXConstraint];
+        [customTitlebarConstraints addObjectsFromArray:@[
             [button.widthAnchor constraintLessThanOrEqualToAnchor:titlebarContainer.heightAnchor multiplier:0.5],
             // Those corrections are required to keep the icons perfectly round because macOS adds a constant 2 px in resulting height to their frame
             [button.heightAnchor constraintEqualToAnchor: button.widthAnchor multiplier:14.0/12.0 constant:-2.0],
@@ -1446,43 +1512,41 @@ static const CGFloat DefaultHorizontalTitleBarButtonOffset = 20.0;
         ]];
     }];
 
-    [NSLayoutConstraint activateConstraints:_transparentTitleBarConstraints];
+    [NSLayoutConstraint activateConstraints:customTitlebarConstraints];
+
+    [self setWindowControlsHidden:!customTitlebarControlsVisible];
+    [self updateCustomTitlebarInsets:customTitlebarControlsVisible];
 }
 
-- (void) updateTransparentTitleBarConstraints
-{
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        _transparentTitleBarHeightConstraint.constant = _transparentTitleBarHeight;
-        CGFloat shrinkingFactor = [self getTransparentTitleBarButtonShrinkingFactor];
-        CGFloat horizontalButtonOffset = shrinkingFactor * DefaultHorizontalTitleBarButtonOffset;
-        [_transparentTitleBarButtonCenterXConstraints enumerateObjectsUsingBlock:^(NSLayoutConstraint* buttonConstraint, NSUInteger index, BOOL *stop)
-        {
-            buttonConstraint.constant = (_transparentTitleBarHeight/2.0 + (index * horizontalButtonOffset));
-        }];
-    });
+- (void) updateCustomTitlebarConstraints {
+    customTitlebarHeightConstraint.constant = [self getCustomTitlebarHeight];
+    CGFloat shrinkingFactor = [self getCustomTitlebarButtonShrinkingFactor];
+    CGFloat horizontalButtonOffset = shrinkingFactor * DefaultHorizontalTitleBarButtonOffset;
+    [customTitlebarButtonCenterXConstraints enumerateObjectsUsingBlock:^(NSLayoutConstraint* buttonConstraint, NSUInteger index, BOOL *stop)
+    {
+        buttonConstraint.constant = ([self getCustomTitlebarHeight] / 2.0 + (index * horizontalButtonOffset));
+    }];
+    [self setWindowControlsHidden:!customTitlebarControlsVisible];
+    [self updateCustomTitlebarInsets:customTitlebarControlsVisible];
 }
 
-- (void) resetTitleBar
-{
-    // See [setUpTransparentTitleBar] for the view hierarchy we're working with
+- (void) resetCustomTitlebar {
+    // See [setUpCustomTitlebar] for the view hierarchy we're working with
     NSView* closeButtonView = [self.nsWindow standardWindowButton:NSWindowCloseButton];
     NSView* titlebar = closeButtonView.superview;
     NSView* titlebarContainer = titlebar.superview;
     if (!titlebarContainer) {
-        NSLog(@"WARNING: resetTitleBar closeButtonView=%@, titlebar=%@, titlebarContainer=%@",
+        NSLog(@"WARNING: resetCustomTitlebar closeButtonView=%@, titlebar=%@, titlebarContainer=%@",
               closeButtonView, titlebar, titlebarContainer);
         return;
     }
 
-    [NSLayoutConstraint deactivateConstraints:_transparentTitleBarConstraints];
+    [NSLayoutConstraint deactivateConstraints:customTitlebarConstraints];
 
     AWTWindowDragView* windowDragView = nil;
-    for (NSView* view in [titlebar.subviews arrayByAddingObjectsFromArray:titlebarContainer.subviews]) {
+    for (NSView* view in titlebar.subviews) {
         if ([view isMemberOfClass:[AWTWindowDragView class]]) {
             windowDragView = view;
-        }
-        if (view.translatesAutoresizingMaskIntoConstraints == NO) {
-            view.translatesAutoresizingMaskIntoConstraints = YES;
         }
     }
 
@@ -1493,56 +1557,82 @@ static const CGFloat DefaultHorizontalTitleBarButtonOffset = 20.0;
     titlebarContainer.translatesAutoresizingMaskIntoConstraints = YES;
     titlebar.translatesAutoresizingMaskIntoConstraints = YES;
 
-    _transparentTitleBarConstraints = nil;
-    _transparentTitleBarHeightConstraint = nil;
-    _transparentTitleBarButtonCenterXConstraints = nil;
+    customTitlebarConstraints = nil;
+    customTitlebarHeightConstraint = nil;
+    customTitlebarButtonCenterXConstraints = nil;
+
+    [self setWindowControlsHidden:NO];
+    [self updateCustomTitlebarInsets:NO];
 }
 
-- (void) setWindowControlsHidden: (BOOL) hidden
-{
-    [self.nsWindow standardWindowButton:NSWindowCloseButton].superview.hidden = hidden;
+- (void) setWindowControlsHidden: (BOOL) hidden {
+    [self.nsWindow standardWindowButton:NSWindowCloseButton].hidden = hidden;
+    [self.nsWindow standardWindowButton:NSWindowZoomButton].hidden = hidden;
+    [self.nsWindow standardWindowButton:NSWindowMiniaturizeButton].hidden = hidden;
 }
 
-- (BOOL) isFullScreen
-{
+- (BOOL) isFullScreen {
     NSUInteger masks = [self.nsWindow styleMask];
     return (masks & NSWindowStyleMaskFullScreen) != 0;
 }
 
-- (void) setTransparentTitleBarHeight: (CGFloat) transparentTitleBarHeight
-{
-    if (_transparentTitleBarHeight == transparentTitleBarHeight) return;
+- (void) forceHideCustomTitlebarTitle: (BOOL) hide {
+    jint bits = styleBits;
+    if (hide) bits &= ~MASK(TITLE_VISIBLE);
+    [self setPropertiesForStyleBits:bits mask:MASK(TITLE_VISIBLE)];
+}
 
-    if (_transparentTitleBarHeight != 0.0f) {
-        _transparentTitleBarHeight = transparentTitleBarHeight;
-        if (transparentTitleBarHeight == 0.0f) {
-            if (!self.isFullScreen) {
-                dispatch_sync(dispatch_get_main_queue(), ^{
-                    [self resetTitleBar];
-                });
+- (void) updateCustomTitlebar {
+    [ThreadUtilities performOnMainThreadWaiting:YES block:^(){
+
+        customTitlebarHeight = -1.0f; // Reset for lazy init
+        BOOL enabled = [self isCustomTitlebarEnabled];
+        BOOL fullscreen = [self isFullScreen];
+
+        jint mask = MASK(FULL_WINDOW_CONTENT) | MASK(TRANSPARENT_TITLE_BAR) | MASK(TITLE_VISIBLE);
+        jint newBits = styleBits;
+        if (enabled) {
+            newBits |= MASK(FULL_WINDOW_CONTENT) | MASK(TRANSPARENT_TITLE_BAR);
+            if (!fullscreen) newBits &= ~MASK(TITLE_VISIBLE);
+        }
+        // Copied from nativeSetNSWindowStyleBits:
+        // The content view must be resized first, otherwise the window will be resized to fit the existing
+        // content view.
+        NSUInteger styleMask = [AWTWindow styleMaskForStyleBits:newBits];
+        if (!fullscreen) {
+            NSRect frame = [nsWindow frame];
+            NSRect screenContentRect = [NSWindow contentRectForFrameRect:frame styleMask:styleMask];
+            NSRect contentFrame = NSMakeRect(screenContentRect.origin.x - frame.origin.x,
+                                             screenContentRect.origin.y - frame.origin.y,
+                                             screenContentRect.size.width,
+                                             screenContentRect.size.height);
+            nsWindow.contentView.frame = contentFrame;
+        }
+        // NSWindowStyleMaskFullScreen bit shouldn't be updated directly
+        [nsWindow setStyleMask:(((NSWindowStyleMask) styleMask) & ~NSWindowStyleMaskFullScreen |
+                                nsWindow.styleMask & NSWindowStyleMaskFullScreen)];
+        // calls methods on NSWindow to change other properties, based on the mask
+        [self setPropertiesForStyleBits:newBits mask:mask];
+        if (!fullscreen) [self _deliverMoveResizeEvent];
+
+        if (enabled != (customTitlebarConstraints != nil)) {
+            if (!fullscreen) {
+                if ([self isCustomTitlebarEnabled]) {
+                    [self setUpCustomTitlebar];
+                } else {
+                    [self resetCustomTitlebar];
+                }
             }
-        } else if (_transparentTitleBarHeightConstraint != nil || _transparentTitleBarButtonCenterXConstraints != nil) {
-            [self updateTransparentTitleBarConstraints];
+        } else if (enabled) {
+            [self updateCustomTitlebarConstraints];
         }
-    } else {
-        _transparentTitleBarHeight = transparentTitleBarHeight;
-        if (!self.isFullScreen) {
-            dispatch_sync(dispatch_get_main_queue(), ^{
-                [self setUpTransparentTitleBar];
-            });
-        }
-    }
+    }];
 }
 
 @end // AWTWindow
 
 @implementation AWTWindowDragView {
-    CGFloat _accumulatedDragDelta;
-    enum WindowDragState {
-        NO_DRAG,   // Mouse not dragging
-        SKIP_DRAG, // Mouse dragging in non-draggable area
-        DRAG,      // Mouse is dragging window
-    } _draggingWindow;
+    BOOL _dragging;
 }
 
 - (id) initWithPlatformWindow:(jobject)javaPlatformWindow {
@@ -1553,77 +1643,103 @@ static const CGFloat DefaultHorizontalTitleBarButtonOffset = 20.0;
     return self;
 }
 
-- (BOOL)mouseDownCanMoveWindow
-{
+- (BOOL) areCustomTitlebarNativeActionsAllowed {
+    JNIEnv *env = [ThreadUtilities getJNIEnvUncached];
+    GET_CPLATFORM_WINDOW_CLASS_RETURN(YES);
+    DECLARE_FIELD_RETURN(jf_target, jc_CPlatformWindow, "target", "Ljava/awt/Window;", YES);
+    DECLARE_CLASS_RETURN(jc_Window, "java/awt/Window", YES);
+    DECLARE_FIELD_RETURN(jf_customTitlebarHitTest, jc_Window, "customTitlebarHitTest", "I", YES);
+
+    jobject platformWindow = (*env)->NewLocalRef(env, self.javaPlatformWindow);
+    if (!platformWindow) return YES;
+    jint hitTest = java_awt_Window_CustomTitlebar_HIT_UNDEFINED;
+    jobject target = (*env)->GetObjectField(env, platformWindow, jf_target);
+    if (target) {
+        hitTest = (jint) (*env)->GetIntField(env, target, jf_customTitlebarHitTest);
+        (*env)->DeleteLocalRef(env, target);
+    }
+    CHECK_EXCEPTION();
+    (*env)->DeleteLocalRef(env, platformWindow);
+    return hitTest <= java_awt_Window_CustomTitlebar_HIT_TITLEBAR;
+}
+
+- (BOOL) mouseDownCanMoveWindow {
     return NO;
 }
 
-- (jint)hitTestCustomDecoration:(NSPoint)point
-{
-    jint returnValue = java_awt_Window_CustomWindowDecoration_NO_HIT_SPOT;
-    JNIEnv *env = [ThreadUtilities getJNIEnvUncached];
-    jobject platformWindow = (*env)->NewLocalRef(env, self.javaPlatformWindow);
-    if (platformWindow != NULL) {
-        GET_CPLATFORM_WINDOW_CLASS_RETURN(YES);
-        DECLARE_FIELD_RETURN(jf_target, jc_CPlatformWindow, "target", "Ljava/awt/Window;", YES);
-        DECLARE_CLASS_RETURN(jc_Window, "java/awt/Window", YES);
-        DECLARE_METHOD_RETURN(jm_hitTestCustomDecoration, jc_Window, "hitTestCustomDecoration", "(II)I", YES);
-        jobject awtWindow = (*env)->GetObjectField(env, platformWindow, jf_target);
-        if (awtWindow != NULL) {
-            NSRect frame = [self.window frame];
-            float windowHeight = frame.size.height;
-            returnValue = (*env)->CallIntMethod(env, awtWindow, jm_hitTestCustomDecoration, (jint) point.x,  (jint) (windowHeight - point.y));
-            CHECK_EXCEPTION();
-            (*env)->DeleteLocalRef(env, awtWindow);
-        }
-        (*env)->DeleteLocalRef(env, platformWindow);
-    }
-    return returnValue;
+- (BOOL) acceptsFirstMouse:(NSEvent *)event {
+    return YES;
 }
 
-- (void)mouseDown:(NSEvent *)event
-{
-    _draggingWindow = NO_DRAG;
-    _accumulatedDragDelta = 0.0;
-    // We don't follow the regular responder chain here since the native window swallows events in some cases
-    [[self.window contentView] deliverJavaMouseEvent:event];
+- (BOOL) shouldDelayWindowOrderingForEvent:(NSEvent *)event {
+    return [[self.window contentView] shouldDelayWindowOrderingForEvent:event];
 }
-
-- (void)mouseDragged:(NSEvent *)event
-{
-    if (_draggingWindow == NO_DRAG) {
-        jint hitSpot = [self hitTestCustomDecoration:event.locationInWindow];
-        switch (hitSpot) {
-            case java_awt_Window_CustomWindowDecoration_DRAGGABLE_AREA:
-                // Start drag only after 4px threshold inside DRAGGABLE_AREA
-                if ((_accumulatedDragDelta += fabs(event.deltaX) + fabs(event.deltaY)) <= 4.0) break;
-            case java_awt_Window_CustomWindowDecoration_NO_HIT_SPOT:
-                [self.window performWindowDragWithEvent:event];
-                _draggingWindow = DRAG;
-                break;
-            default:
-                _draggingWindow = SKIP_DRAG;
+- (void) mouseDown: (NSEvent *)event {
+    _dragging = NO;
+    [[self.window contentView] mouseDown:event];
+}
+- (void) mouseUp: (NSEvent *)event {
+    [[self.window contentView] mouseUp:event];
+    if (event.clickCount == 2 && [self areCustomTitlebarNativeActionsAllowed]) {
+        NSString *action = [[NSUserDefaults standardUserDefaults] stringForKey:@"AppleActionOnDoubleClick"];
+        if (action != nil && [action caseInsensitiveCompare:@"Minimize"] == NSOrderedSame) {
+            [self.window performMiniaturize:nil];
+        } else if (action == nil || [action caseInsensitiveCompare:@"None"] != NSOrderedSame) { // action == "Maximize" (default)
+            [self.window performZoom:nil];
         }
     }
 }
-
-- (void)mouseUp:(NSEvent *)event
-{
-    if (_draggingWindow == DRAG) {
-        _draggingWindow = NO_DRAG;
-    } else {
-        jint hitSpot = [self hitTestCustomDecoration:event.locationInWindow];
-        if (event.clickCount == 2 && hitSpot == java_awt_Window_CustomWindowDecoration_NO_HIT_SPOT) {
-            if ([[[NSUserDefaults standardUserDefaults] stringForKey:@"AppleActionOnDoubleClick"] isEqualToString:@"Maximize"]) {
-                [self.window performZoom:nil];
-            } else {
-                [self.window performMiniaturize:nil];
-            }
+- (void) rightMouseDown: (NSEvent *)event {
+    [[self.window contentView] rightMouseDown:event];
+}
+- (void) rightMouseUp: (NSEvent *)event {
+    [[self.window contentView] rightMouseUp:event];
+}
+- (void) otherMouseDown: (NSEvent *)event {
+    [[self.window contentView] otherMouseDown:event];
+}
+- (void) otherMouseUp: (NSEvent *)event {
+    [[self.window contentView] otherMouseUp:event];
+}
+- (void) mouseMoved: (NSEvent *)event {
+    [[self.window contentView] mouseMoved:event];
+}
+- (void) mouseDragged: (NSEvent *)event {
+    if (!_dragging) {
+        _dragging = YES;
+        if ([self areCustomTitlebarNativeActionsAllowed]) {
+            [self.window performWindowDragWithEvent:event];
+            return;
         }
-
-        // We don't follow the regular responder chain here since the native window swallows events in some cases
-        [[self.window contentView] deliverJavaMouseEvent:event];
     }
+    [[self.window contentView] mouseDragged:event];
+}
+- (void) rightMouseDragged: (NSEvent *)event {
+    [[self.window contentView] rightMouseDragged:event];
+}
+- (void) otherMouseDragged: (NSEvent *)event {
+    [[self.window contentView] otherMouseDragged:event];
+}
+- (void) mouseEntered: (NSEvent *)event {
+    [[self.window contentView] mouseEntered:event];
+}
+- (void) mouseExited: (NSEvent *)event {
+    [[self.window contentView] mouseExited:event];
+}
+- (void) scrollWheel: (NSEvent*) event {
+    [[self.window contentView] scrollWheel:event];
+}
+- (void) keyDown: (NSEvent *)event {
+    [[self.window contentView] keyDown:event];
+}
+- (void) keyUp: (NSEvent *)event {
+    [[self.window contentView] keyUp:event];
+}
+- (void) flagsChanged: (NSEvent *)event {
+    [[self.window contentView] flagsChanged:event];
+}
+- (BOOL) performKeyEquivalent: (NSEvent *) event {
+    return [[self.window contentView] performKeyEquivalent:event];
 }
 
 @end
@@ -1650,10 +1766,10 @@ JNIEXPORT void JNICALL Java_sun_lwawt_macosx_CPlatformWindow_nativeSetAllowAutom
 /*
  * Class:     sun_lwawt_macosx_CPlatformWindow
  * Method:    nativeCreateNSWindow
- * Signature: (JJIDDDDD)J
+ * Signature: (JJIDDDD)J
  */
 JNIEXPORT jlong JNICALL Java_sun_lwawt_macosx_CPlatformWindow_nativeCreateNSWindow
-(JNIEnv *env, jobject obj, jlong contentViewPtr, jlong ownerPtr, jlong styleBits, jdouble x, jdouble y, jdouble w, jdouble h, jdouble transparentTitleBarHeight)
+(JNIEnv *env, jobject obj, jlong contentViewPtr, jlong ownerPtr, jlong styleBits, jdouble x, jdouble y, jdouble w, jdouble h)
 {
     __block AWTWindow *window = nil;
 
@@ -1680,8 +1796,7 @@ JNI_COCOA_ENTER(env);
                                                ownerWindow:owner
                                                  styleBits:styleBits
                                                  frameRect:frameRect
-                                               contentView:contentView
-                                 transparentTitleBarHeight:(CGFloat)transparentTitleBarHeight];
+                                               contentView:contentView];
         // the window is released is CPlatformWindow.nativeDispose()
 
         if (window) {
@@ -1713,9 +1828,19 @@ JNI_COCOA_ENTER(env);
 
         AWTWindow *window = (AWTWindow*)[nsWindow delegate];
 
+        BOOL customTitlebarEnabled = [window isCustomTitlebarEnabled];
+        BOOL fullscreen = [window isFullScreen];
         // scans the bit field, and only updates the values requested by the mask
         // (this implicitly handles the _CALLBACK_PROP_BITMASK case, since those are passive reads)
-        jint newBits = window.styleBits & ~mask | bits & mask;
+        jint actualBits = window.styleBits & ~mask | bits & mask;
+        jint newBits = actualBits;
+
+        if (customTitlebarEnabled) {
+            // Force these properties if custom titlebar is enabled,
+            // but store original value in self.styleBits.
+            newBits |= MASK(FULL_WINDOW_CONTENT) | MASK(TRANSPARENT_TITLE_BAR);
+            if (!fullscreen) newBits &= ~MASK(TITLE_VISIBLE);
+        }
 
         BOOL resized = NO;
 
@@ -1723,7 +1848,8 @@ JNI_COCOA_ENTER(env);
         // The content view must be resized first, otherwise the window will be resized to fit the existing
         // content view.
         if (IS(mask, FULL_WINDOW_CONTENT)) {
-            if (IS(newBits, FULL_WINDOW_CONTENT) != IS(window.styleBits, FULL_WINDOW_CONTENT)) {
+            if ((IS(newBits, FULL_WINDOW_CONTENT) != IS(window.styleBits, FULL_WINDOW_CONTENT) ||
+                 customTitlebarEnabled) && !fullscreen) {
                 NSRect frame = [nsWindow frame];
                 NSUInteger styleMask = [AWTWindow styleMaskForStyleBits:newBits];
                 NSRect screenContentRect = [NSWindow contentRectForFrameRect:frame styleMask:styleMask];
@@ -1754,9 +1880,7 @@ JNI_COCOA_ENTER(env);
             [window setPropertiesForStyleBits:newBits mask:mask];
         }
 
-        window.styleBits = newBits;
-
-        NSString *uiStyle = [[NSUserDefaults standardUserDefaults] stringForKey:@"AppleInterfaceStyle"];
+        window.styleBits = actualBits;
 
         if (resized) {
             [window _deliverMoveResizeEvent];
@@ -2424,14 +2548,14 @@ JNIEXPORT jboolean JNICALL Java_sun_lwawt_macosx_CPlatformWindow_nativeDelayShow
 }
 
 
-JNIEXPORT void JNICALL Java_sun_lwawt_macosx_CPlatformWindow_nativeSetTransparentTitleBarHeight
-(JNIEnv *env, jclass clazz, jlong windowPtr, jfloat transparentTitleBarHeight)
+JNIEXPORT void JNICALL Java_sun_lwawt_macosx_CPlatformWindow_nativeUpdateCustomTitlebar
+(JNIEnv *env, jclass clazz, jlong windowPtr)
 {
     JNI_COCOA_ENTER(env);
 
     NSWindow *nsWindow = (NSWindow *)jlong_to_ptr(windowPtr);
     AWTWindow *window = (AWTWindow*)[nsWindow delegate];
-    [window setTransparentTitleBarHeight:((CGFloat) transparentTitleBarHeight)];
+    [window updateCustomTitlebar];
 
     JNI_COCOA_EXIT(env);
 }

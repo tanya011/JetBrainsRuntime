@@ -148,6 +148,7 @@ public:
     static void _SetIMMOption(void *param);
     static void _SynthesizeWmActivate(void *param);
     static void _NotifyModalBlocked(void *param);
+    static void _UpdateCustomTitlebar(void *param);
 
     virtual void Reshape(int x, int y, int width, int height);
 
@@ -159,8 +160,11 @@ public:
     INLINE HWND GetImeTargetComponent() { return m_imeTargetComponent; }
     INLINE void SetImeTargetComponent(HWND hwnd) { m_imeTargetComponent = hwnd; }
 
-    BOOL* m_pHasCustomDecoration;
-    BOOL HasCustomDecoration();
+    void RedrawNonClient();
+    BOOL HasCustomTitlebar();
+    static inline BOOL IsTitlebarHitTest(UINT_PTR hitTest) {
+        return hitTest == HTCAPTION || hitTest == HTMINBUTTON || hitTest == HTMAXBUTTON || hitTest == HTCLOSE;
+    }
 
 protected:
     /* The frame is undecorated. */
@@ -224,6 +228,16 @@ private:
     BOOL isInManualMoveOrSize;
     WPARAM grabbedHitTest;
     POINT savedMousePos;
+
+    float customTitlebarHeight;
+    LPARAM customTitlebarTouchDragPosition;
+
+    float GetCustomTitlebarHeight();
+    jint GetCustomTitlebarHitTest();
+    BOOL AreCustomTitlebarNativeActionsAllowed();
+    void SendMessageAtPoint(UINT msg, WPARAM w, int x, int y);
+    RECT GetSysInsets();
+    LRESULT HitTestNCA(int x, int y);
 
     /*
      * Hashtable<Thread, BlockedThreadStruct> - a table that contains all the
