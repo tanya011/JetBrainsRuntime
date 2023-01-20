@@ -461,6 +461,9 @@ public:
         return lpAdjustWindowRectExForDpi != NULL ?
                lpAdjustWindowRectExForDpi(lpRect, dwStyle, bMenu, dwExStyle, dpi) : ::AdjustWindowRectEx(lpRect, dwStyle, bMenu, dwExStyle);
     }
+    static INLINE UINT GetDpiForWindow(HWND hwnd) {
+        return lpGetDpiForWindow != NULL ? lpGetDpiForWindow(hwnd) : 96;
+    }
 
     HANDLE m_waitEvent;
     volatile DWORD eventNumber;
@@ -531,6 +534,7 @@ private:
     LRESULT m_inputMethodData;
 
     static AdjustWindowRectExForDpiFunc *lpAdjustWindowRectExForDpi;
+    static GetDpiForWindowFunc *lpGetDpiForWindow;
 
 /* track display changes - used by palette-updating code.
    This is a workaround for a windows bug that prevents

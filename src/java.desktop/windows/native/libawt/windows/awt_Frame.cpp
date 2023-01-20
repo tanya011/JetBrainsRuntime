@@ -1838,29 +1838,15 @@ void AwtFrame::SendMessageAtPoint(UINT msg, WPARAM wparam, int ncx, int ncy) {
 // Note that in non-maximized state there's 0px between top of the frame and top of the client area.
 // This method, however, still returns non-zero top inset in that case - it represents height of the resize border.
 RECT AwtFrame::GetSysInsets() {
-    RECT insets;
-    if (IsUndecorated()) {
-        ::SetRectEmpty(&insets);
-        return insets;
-    }
-    Devices::InstanceAccess devices;
-    HMONITOR hmon;
-    if (::IsZoomed(GetHWnd())) {
-        WINDOWPLACEMENT wp {sizeof(WINDOWPLACEMENT)};
-        ::GetWindowPlacement(GetHWnd(), &wp);
-        hmon = ::MonitorFromRect(&wp.rcNormalPosition, MONITOR_DEFAULTTONEAREST);
-    } else {
-        // this method can return wrong monitor in a zoomed state in multi-dpi env
-        hmon = ::MonitorFromWindow(GetHWnd(), MONITOR_DEFAULTTONEAREST);
-    }
-    AwtWin32GraphicsDevice* device = devices->GetDevice(AwtWin32GraphicsDevice::GetScreenFromHMONITOR(hmon));
-    int dpi = device ? device->GetScaleX() * 96 : 96;
-
     // GetSystemMetricsForDpi gives incorrect values, use AdjustWindowRectExForDpi for border metrics instead
+    HWND hwnd = GetHWnd();
+    DWORD style = (DWORD) GetWindowLong(hwnd, GWL_STYLE);
+    DWORD exStyle = (DWORD) GetWindowLong(hwnd, GWL_EXSTYLE);
+    style &= ~WS_CAPTION | WS_BORDER; // Remove caption but leave border
+    UINT dpi = AwtToolkit::GetDpiForWindow(hwnd);
     RECT rect = {};
-    DWORD style = WS_OVERLAPPEDWINDOW & ~WS_CAPTION;
-    if (!IsResizable()) style &= ~WS_THICKFRAME;
-    AwtToolkit::AdjustWindowRectExForDpi(&rect, style, FALSE, NULL, dpi);
+    AwtToolkit::AdjustWindowRectExForDpi(&rect, style, FALSE, exStyle, dpi);
+    RECT insets;
     ::SetRect(&insets, -rect.left, -rect.top, rect.right, rect.bottom);
     return insets;
 }
@@ -1921,15 +1907,14 @@ MsgRouting AwtFrame::WmNcCalcSize(BOOL wParam, LPNCCALCSIZE_PARAMS lpncsp, LRESU
     if (!wParam || !HasCustomTitlebar()) {
         return AwtWindow::WmNcCalcSize(wParam, lpncsp, retVal);
     }
-    RECT insets = GetSysInsets();
-    RECT* rect = &lpncsp->rgrc[0];
 
-    rect->left += insets.left;
-    rect->right -= insets.right;
-    rect->bottom -= insets.bottom;
+    RECT* rect = &lpncsp->rgrc[0];
+    LONG frameTop = rect->top;
+    DefWindowProc(WM_NCCALCSIZE, (WPARAM) wParam, (LPARAM) lpncsp);
+    rect->top = frameTop; // DefWindowProc takes into account caption height, revert this
 
     if (::IsZoomed(GetHWnd())) {
-        rect->top += insets.top;
+        rect->top += GetSysInsets().top; // We need to add top inset in maximized case
         // [moklev] Workaround for RIDER-27069, IDEA-211327
         if (!this->IsUndecorated()) {
             APPBARDATA abData;
@@ -1954,15 +1939,7 @@ MsgRouting AwtFrame::WmNcCalcSize(BOOL wParam, LPNCCALCSIZE_PARAMS lpncsp, LRESU
                         break;
                 }
             }
-            if (abData.uEdge != ABE_RIGHT) {
-                rect->right += this->ScaleUpX(1);
-            }
         }
-    }
-    else {
-        // this makes the native caption go uncovered
-        // int yBorder = ::GetSystemMetrics(SM_CYBORDER);
-        // rect->top += yBorder;
     }
     retVal = 0L;
     return mrConsume;
