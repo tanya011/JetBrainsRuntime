@@ -643,6 +643,9 @@ AWT_ASSERT_APPKIT_THREAD;
     self.nsWindow = nil;
     self.ownerWindow = nil;
     self.currentDisplayID = nil;
+    self.customTitlebarConstraints = nil;
+    self.customTitlebarHeightConstraint = nil;
+    self.customTitlebarButtonCenterXConstraints = nil;
     [super dealloc];
 }
 
@@ -1508,6 +1511,9 @@ static const CGFloat DefaultHorizontalTitleBarButtonOffset = 20.0;
     }];
 
     [NSLayoutConstraint activateConstraints:self.customTitlebarConstraints];
+    // These properties are already retained, release them so that retainCount = 1
+    [self.customTitlebarConstraints release];
+    [self.customTitlebarButtonCenterXConstraints release];
 
     [self setWindowControlsHidden:!self.customTitlebarControlsVisible];
     [self updateCustomTitlebarInsets:self.customTitlebarControlsVisible];
