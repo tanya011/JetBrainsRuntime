@@ -1980,8 +1980,9 @@ void AwtFrame::_UpdateCustomTitlebar(void* p) {
     JNI_CHECK_PEER_GOTO(self, ret);
 
     AwtFrame* frame = (AwtFrame*)pData;
+    BOOL old = frame->HasCustomTitlebar();
     frame->customTitlebarHeight = -1.0f; // Reset to uninitialized
-    frame->RedrawNonClient();
+    if (frame->HasCustomTitlebar() != old) frame->RedrawNonClient();
     ret:
     env->DeleteGlobalRef(self);
 }
