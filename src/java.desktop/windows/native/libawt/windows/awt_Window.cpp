@@ -1521,11 +1521,23 @@ BOOL AwtWindow::UpdateInsets(jobject insets)
     jobject peerSysInsets = (env)->GetObjectField(peer, AwtWindow::sysInsetsID);
     DASSERT(!safe_ExceptionOccurred(env));
 
+    // Floor resulting insets
+    int screen = GetScreenImOn();
+    Devices::InstanceAccess devices;
+    AwtWin32GraphicsDevice* device = devices->GetDevice(screen);
+    float scaleX = device == NULL ? 1.0f : device->GetScaleX();
+    float scaleY = device == NULL ? 1.0f : device->GetScaleY();
+    RECT result;
+    result.top = (LONG) floor(m_insets.top / scaleY);
+    result.bottom = (LONG) floor(m_insets.bottom / scaleY);
+    result.left = (LONG) floor(m_insets.left / scaleX);
+    result.right = (LONG) floor(m_insets.right / scaleX);
+
     if (peerInsets != NULL) { // may have been called during creation
-        (env)->SetIntField(peerInsets, AwtInsets::topID, ScaleDownY(m_insets.top));
-        (env)->SetIntField(peerInsets, AwtInsets::bottomID, ScaleDownY(m_insets.bottom));
-        (env)->SetIntField(peerInsets, AwtInsets::leftID, ScaleDownX(m_insets.left));
-        (env)->SetIntField(peerInsets, AwtInsets::rightID, ScaleDownX(m_insets.right));
+        (env)->SetIntField(peerInsets, AwtInsets::topID, result.top);
+        (env)->SetIntField(peerInsets, AwtInsets::bottomID, result.bottom);
+        (env)->SetIntField(peerInsets, AwtInsets::leftID, result.left);
+        (env)->SetIntField(peerInsets, AwtInsets::rightID, result.right);
     }
     if (peerSysInsets != NULL) {
         (env)->SetIntField(peerSysInsets, AwtInsets::topID, m_insets.top);
@@ -1535,10 +1547,10 @@ BOOL AwtWindow::UpdateInsets(jobject insets)
     }
     /* Get insets into the Inset object (if any) that was passed */
     if (insets != NULL) {
-        (env)->SetIntField(insets, AwtInsets::topID, ScaleDownY(m_insets.top));
-        (env)->SetIntField(insets, AwtInsets::bottomID, ScaleDownY(m_insets.bottom));
-        (env)->SetIntField(insets, AwtInsets::leftID, ScaleDownX(m_insets.left));
-        (env)->SetIntField(insets, AwtInsets::rightID, ScaleDownX(m_insets.right));
+        (env)->SetIntField(insets, AwtInsets::topID, result.top);
+        (env)->SetIntField(insets, AwtInsets::bottomID, result.bottom);
+        (env)->SetIntField(insets, AwtInsets::leftID, result.left);
+        (env)->SetIntField(insets, AwtInsets::rightID, result.right);
     }
     env->DeleteLocalRef(peerInsets);
 
