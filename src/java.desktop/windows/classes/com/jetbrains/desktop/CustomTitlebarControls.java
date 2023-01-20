@@ -45,9 +45,18 @@ class CustomTitlebarControls implements Serializable {
     private static Component create(Window window, float height, Map<String, Object> params, float[] dstInsets,
                                     MouseAdapter minCallback, MouseAdapter maxCallback, MouseAdapter closeCallback) {
         if (!(window instanceof Frame) && !(window instanceof Dialog)) return null;
-        CustomTitlebarControls controls = new CustomTitlebarControls(window, height, params, dstInsets,
+        CustomTitlebarControls controls = new CustomTitlebarControls(window, dstInsets,
                 minCallback, maxCallback, closeCallback);
+        controls.update(height, params);
         return controls.panel;
+    }
+
+    private static boolean update(Component controls, float height, Map<String, Object> params) {
+        if (controls instanceof IPanel p) {
+            p.controls().update(height, params);
+            p.component().revalidate();
+            return true;
+        } else return false;
     }
 
     private enum Type {
@@ -67,8 +76,8 @@ class CustomTitlebarControls implements Serializable {
         private static final State[] VALUES = values();
     }
 
-    private final Boolean dark; // null means default
-    private final EnumMap<State, Color> foreground, background;
+    private Boolean dark; // null means default
+    private EnumMap<State, Color> foreground, background;
     private EnumMap<State, Color> defaultForeground, defaultBackground;
 
     private final float[] dstInsets;
@@ -76,31 +85,15 @@ class CustomTitlebarControls implements Serializable {
     private final Container panel;
     private final IButton min, max, close;
 
-    private CustomTitlebarControls(Window window, float height, Map<String, Object> params, float[] dstInsets,
+    private CustomTitlebarControls(Window window, float[] dstInsets,
                                    MouseAdapter minCallback, MouseAdapter maxCallback, MouseAdapter closeCallback) {
-
-        dark = params.get("controls.dark") instanceof Boolean b ? b : null;
-        foreground = new EnumMap<>(State.class);
-        background = new EnumMap<>(State.class);
-        for (State state : State.VALUES) {
-            String name = state.name().toLowerCase();
-            Object f = params.get("controls.foreground." + name);
-            Object b = params.get("controls.background." + name);
-            if (f instanceof Color c) foreground.put(state, c);
-            if (b instanceof Color c) background.put(state, c);
-        }
-
         this.dstInsets = dstInsets;
         this.window = window;
         boolean lightweight = window instanceof JFrame || window instanceof JDialog;
-        boolean frame = window instanceof Frame;
-        int width = frame ? 141 : 34; // Default width
-        if (params.get("controls.width") instanceof Number n && n.intValue() > 0) width = n.intValue();
         panel = lightweight ? new LPanel() : new HPanel();
         panel.setLayout(null);
         panel.setBackground(null);
-        panel.setPreferredSize(new Dimension(width, Math.round(height)));
-        if (frame) {
+        if (window instanceof Frame) {
             min = lightweight ? new LButton() : new HButton();
             min.setType(Type.MINIMIZE);
             min.component().addMouseListener(minCallback);
@@ -119,6 +112,28 @@ class CustomTitlebarControls implements Serializable {
         close.component().addMouseListener(closeCallback);
         close.component().addMouseMotionListener(closeCallback);
         panel.add(close.component());
+    }
+
+    private void update(float height, Map<String, Object> params) {
+        // Update size
+        int width = window instanceof Frame ? 141 : 34; // Default width
+        if (params.get("controls.width") instanceof Number n && n.intValue() > 0) width = n.intValue();
+        panel.setPreferredSize(new Dimension(width, Math.round(height)));
+
+        // Update theme
+        dark = params.get("controls.dark") instanceof Boolean b ? b : null;
+
+        // Update colors
+        EnumMap<State, Color> fg = new EnumMap<>(State.class), bg = new EnumMap<>(State.class);
+        for (State state : State.VALUES) {
+            String name = state.name().toLowerCase();
+            Object f = params.get("controls.foreground." + name);
+            Object b = params.get("controls.background." + name);
+            if (f instanceof Color c) fg.put(state, c);
+            if (b instanceof Color c) bg.put(state, c);
+        }
+        foreground = fg;
+        background = bg;
     }
 
     private void layout() {
@@ -287,28 +302,34 @@ class CustomTitlebarControls implements Serializable {
                 g.fillRect(0, 4, 10, 1);
             });
             ICON_PAINTERS.put(Type.MAXIMIZE, g -> {
+                double scale = (g.getTransform().getScaleX() + g.getTransform().getScaleY()) / 2.0;
+                int t = (int) (1000.0 * Math.floor(scale) / scale); // Thickness
+                g.scale(0.001, 0.001);
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
                 g.setColor(MASK_ON);
-                g.fillRect(0, 0, 10, 10);
+                g.fillRect(0, 0, 10_000, 10_000);
                 g.setColor(MASK_OFF);
-                g.fillRect(1, 1, 8, 8);
+                g.fillRect(t, t, 10_000 - t*2, 10_000 - t*2);
             });
             ICON_PAINTERS.put(Type.RESTORE, g -> {
+                double scale = (g.getTransform().getScaleX() + g.getTransform().getScaleY()) / 2.0;
+                int t = (int) (1000.0 * Math.floor(scale) / scale); // Thickness
+                g.scale(0.001, 0.001);
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
                 g.setColor(MASK_ON);
-                g.fillRect(2, 0, 8, 8);
+                g.fillRect(2_000, 0, 8_000, 9_000 - t);
                 g.setColor(MASK_OFF);
-                g.fillRect(3, 1, 6, 6);
+                g.fillRect(2_000 + t, t, 8_000 - t*2, 9_000 - t*3);
                 g.setColor(MASK_ON);
-                g.fillRect(0, 2, 8, 8);
+                g.fillRect(0, 2_000, 9_000 - t, 8_000);
                 g.setColor(MASK_OFF);
-                g.fillRect(1, 3, 6, 6);
+                g.fillRect(t, 2_000 + t, 9_000 - t*3, 8_000 - t*2);
             });
             ICON_PAINTERS.put(Type.CLOSE, g -> {
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
                 // We need more subpixel precision here, so we have precise control of thickness and its scale.
                 // Resulting shape thickness (px) = t / s
-                final int t = 11, s = 16; // This value was carefully tuned to look like native icons.
+                final int t = 10, s = 16; // This value was carefully tuned to look like native icons.
                 // Helper variables: 0t nhx mf
                 final int h = s * 5, n = h - t, x = h + t, f = s * 10, m = f - t;
                 int[][] points = {
@@ -393,9 +414,18 @@ class CustomTitlebarControls implements Serializable {
         return map;
     }
 
-    private class HPanel extends Panel {
+    private interface IPanel extends Serializable {
+        CustomTitlebarControls controls();
+        Component component();
+    }
+
+    private class HPanel extends Panel implements IPanel {
         @Serial
         private static final long serialVersionUID = -4001281044233476450L;
+        @Override
+        public CustomTitlebarControls controls() { return CustomTitlebarControls.this; }
+        @Override
+        public Component component() { return this; }
         @Override
         public void doLayout() { CustomTitlebarControls.this.layout(); }
         @Override
@@ -409,10 +439,14 @@ class CustomTitlebarControls implements Serializable {
         }
     }
 
-    private class LPanel extends JPanel {
+    private class LPanel extends JPanel implements IPanel {
         @Serial
         private static final long serialVersionUID = -606904252949842495L;
         private LPanel() { setOpaque(false); setBorder(null); }
+        @Override
+        public CustomTitlebarControls controls() { return CustomTitlebarControls.this; }
+        @Override
+        public Component component() { return this; }
         @Override
         public void doLayout() { CustomTitlebarControls.this.layout(); }
         @Override

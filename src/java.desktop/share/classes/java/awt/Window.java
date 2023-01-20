@@ -4048,7 +4048,7 @@ public class Window extends Container implements Accessible {
             }
         }
 
-        private Window window;
+        private volatile Window window;
         private float height;
         private HashMap<String, Object> properties;
         private final float[] insets = new float[2];
@@ -4075,15 +4075,22 @@ public class Window extends Container implements Accessible {
         private float getLeftInset() { return insets[0]; }
         private float getRightInset() { return insets[1]; }
         private void forceHitTest(boolean client) {
-            if (window != null) {
-                window.pendingCustomTitlebarHitTest = client ? CustomTitlebar.HIT_CLIENT : CustomTitlebar.HIT_TITLEBAR;
-                window.applyCustomTitlebarHitTest();
+            Window w = window;
+            if (w != null) {
+                w.pendingCustomTitlebarHitTest = client ? CustomTitlebar.HIT_CLIENT : CustomTitlebar.HIT_TITLEBAR;
+                w.applyCustomTitlebarHitTest();
             }
         }
         private Window getContainingWindow() { return window; }
 
-        private synchronized void notifyUpdate() {
-            if (window != null) window.setCustomTitlebar(this);
+        private void notifyUpdate() {
+            // Do not synchronize on itself to prevent possible deadlocks, synchronize on parent window instead.
+            Window w = window;
+            if (w != null) {
+                synchronized (w) {
+                    if (w == window) w.setCustomTitlebar(this);
+                }
+            }
         }
     }
 
@@ -4193,9 +4200,14 @@ public class Window extends Container implements Accessible {
     private interface CustomTitlebarControls {
         CustomTitlebarControls INSTANCE = (CustomTitlebarControls) JBRApi.internalServiceBuilder(MethodHandles.lookup())
                 .withStatic("create", "create", "com.jetbrains.desktop.CustomTitlebarControls")
-                .withStatic("setToRootPane", "setCustomTitlebarControls", "javax.swing.JRootPane").build();
+                .withStatic("update", "update", "com.jetbrains.desktop.CustomTitlebarControls")
+                .withStatic("getFromRootPane", "getCustomTitlebarControls", "javax.swing.JRootPane")
+                .withStatic("setToRootPane",   "setCustomTitlebarControls", "javax.swing.JRootPane").build();
+
         Component create(Window window, float height, Map<String, Object> params, float[] dstInsets,
                          MouseAdapter minCallback, MouseAdapter maxCallback, MouseAdapter closeCallback);
+        boolean update(Component controls, float height, Map<String, Object> params);
+        Component getFromRootPane(Window window);
         boolean setToRootPane(Window window, Component controls);
 
         class Repainter extends WindowAdapter implements PropertyChangeListener {
@@ -4229,6 +4241,16 @@ public class Window extends Container implements Accessible {
     private void updateCustomTitlebarControls(CustomTitlebar t) {
         if (CustomTitlebarControls.INSTANCE == null) return;
         synchronized (getTreeLock()) {
+            boolean visible = t != null &&
+                    Boolean.TRUE.equals(t.getProperties().getOrDefault("controls.visible", Boolean.TRUE));
+            if (visible) {
+                // Try to update already existing controls.
+                Component old = CustomTitlebarControls.INSTANCE.getFromRootPane(this);
+                if (old == null) old = customTitlebarControls;
+                if (old != null && CustomTitlebarControls.INSTANCE.update(old, t.getHeight(), t.getProperties())) {
+                    return;
+                }
+            }
             // Find and remove existing controls repainter, if any.
             for (WindowListener l : getWindowListeners()) {
                 if (l instanceof CustomTitlebarControls.Repainter repainter) {
@@ -4239,18 +4261,19 @@ public class Window extends Container implements Accessible {
                 }
             }
             // Set up new controls.
-            Component controls = t != null && internalCustomTitlebarControlsVisible() ? CustomTitlebarControls.INSTANCE.create(
+            Component controls = visible ? CustomTitlebarControls.INSTANCE.create(
                     this, t.getHeight(), t.getProperties(), t.insets,
                     new CustomTitlebarControls.Callback(this, CustomTitlebar.HIT_MINIMIZE_BUTTON),
                     new CustomTitlebarControls.Callback(this, CustomTitlebar.HIT_MAXIMIZE_BUTTON),
                     new CustomTitlebarControls.Callback(this, CustomTitlebar.HIT_CLOSE_BUTTON)) : null;
             // Try adding to layered pane.
-            if (CustomTitlebarControls.INSTANCE.setToRootPane(this, controls)) controls = null;
-            // Or add as a heavyweight child.
-            setCustomTitlebarControls(controls);
+            if (!CustomTitlebarControls.INSTANCE.setToRootPane(this, controls)) {
+                // Or add as a heavyweight child.
+                setCustomTitlebarControls(controls);
+            }
             // Add listeners for controls repainter.
-            if(customTitlebarControls != null) {
-                CustomTitlebarControls.Repainter repainter = new CustomTitlebarControls.Repainter(customTitlebarControls);
+            if(controls != null) {
+                CustomTitlebarControls.Repainter repainter = new CustomTitlebarControls.Repainter(controls);
                 addPropertyChangeListener(repainter);
                 addWindowStateListener(repainter);
                 addWindowListener(repainter);
@@ -4321,7 +4344,7 @@ public class Window extends Container implements Accessible {
 
         void setCustomDecorationEnabled(Window window, boolean enabled) {
             window.hasCustomDecoration = enabled;
-            setTitlebar(window, enabled ? window.customDecorTitleBarHeight : 0);
+            setTitlebar(window, enabled ? Math.max(window.customDecorTitleBarHeight, 0.01f) : 0);
         }
         boolean isCustomDecorationEnabled(Window window) {
             return window.hasCustomDecoration;
@@ -4336,21 +4359,23 @@ public class Window extends Container implements Accessible {
 
         void setCustomDecorationTitleBarHeight(Window window, int height) {
             window.customDecorTitleBarHeight = height;
-            setTitlebar(window, window.hasCustomDecoration ? height : 0);
+            setTitlebar(window, window.hasCustomDecoration ? Math.max(height, 0.01f) : 0);
         }
         int getCustomDecorationTitleBarHeight(Window window) {
             return window.customDecorTitleBarHeight;
         }
 
         // Bridge from old to new API
-        private static void setTitlebar(Window window, int height) {
-            if (height <= 0) window.setCustomTitlebar(null);
+        private static void setTitlebar(Window window, float height) {
+            if (height <= 0.0f) window.setCustomTitlebar(null);
             else {
                 CustomTitlebar t = new CustomTitlebar();
                 // Old API accepts titlebar height with insets, subtract it for new API.
                 // We use bottom insets here because top insets may change when toggling custom titlebar, they are usually equal.
-                t.setHeight(window instanceof Frame f && (f.getExtendedState() & Frame.MAXIMIZED_BOTH) != 0 ?
-                        height - window.getInsets().bottom : height);
+                if (window instanceof Frame f && (f.getExtendedState() & Frame.MAXIMIZED_BOTH) != 0) {
+                    height -= window.getInsets().bottom;
+                }
+                t.setHeight(Math.max(height, 0.01f));
                 // In old API versions there were no control buttons on Windows.
                 if (System.getProperty("os.name").toLowerCase().contains("win")) t.putProperty("controls.visible", false);
                 window.setCustomTitlebar(t);

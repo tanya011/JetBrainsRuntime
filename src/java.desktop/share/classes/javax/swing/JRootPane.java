@@ -991,9 +991,17 @@ public class JRootPane extends JComponent implements Accessible {
                     rp.layoutCustomTitlebarControls();
                     rp.layeredPane.add(rp.customTitlebarControls, Integer.valueOf(1));
                 }
+                window.repaint();
             }
             return true;
         } else return false;
+    }
+
+    private static Component getCustomTitlebarControls(Window window) {
+        if (window instanceof JFrame || window instanceof JDialog) {
+            JRootPane rp = ((RootPaneContainer) window).getRootPane();
+            return rp.customTitlebarControls;
+        } else return null;
     }
 
     private void layoutCustomTitlebarControls() {
