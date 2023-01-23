@@ -81,7 +81,7 @@ public interface WindowDecorations {
         /**
          * @see #putProperty(String, Object)
          */
-        void putProperties(Map<? extends String, ?> m);
+        void putProperties(Map<String, ?> m);
 
         /**
          * Windows & macOS properties:
@@ -120,8 +120,12 @@ public interface WindowDecorations {
         float getRightInset();
 
         /**
-         * Override current hit test value for titlebar.
-         * This can affect native titlebar behavior like dragging and maximizing on double-click.
+         * By default, any component which has no cursor or mouse event listeners set is considered transparent for
+         * native titlebar actions. That is, dragging simple JPanel in titlebar area will drag the
+         * window, but dragging a JButton will not. Adding mouse listener to a component will prevent any native actions
+         * inside bounds of that component.
+         * <p>
+         * This method gives you precise control of whether to allow native titlebar actions or not.
          * <ul>
          *     <li>{@code client=true} means that mouse is currently over a client area. Native titlebar behavior is disabled.</li>
          *     <li>{@code client=false} means that mouse is currently over a non-client area. Native titlebar behavior is enabled.</li>
@@ -135,6 +139,28 @@ public interface WindowDecorations {
          * </ul></em>
          * Note that hit test value is relevant only for titlebar area, e.g. calling
          * {@code forceHitTest(false)} will not make window draggable via non-titlebar area.
+         *
+         * <h2>Example:</h2>
+         * Suppose you have a {@code JPanel} in the titlebar area. You want it to respond to right-click for
+         * some popup menu, but also retain native drag and double-click behavior.
+         * <pre>
+         *     CustomTitlebar titlebar = ...;
+         *     JPanel panel = ...;
+         *     MouseAdapter adapter = new MouseAdapter() {
+         *         private void hit() { titlebar.forceHitTest(false); }
+         *         public void mouseClicked(MouseEvent e) {
+         *             hit();
+         *             if (e.getButton() == MouseEvent.BUTTON3) ...;
+         *         }
+         *         public void mousePressed(MouseEvent e) { hit(); }
+         *         public void mouseReleased(MouseEvent e) { hit(); }
+         *         public void mouseEntered(MouseEvent e) { hit(); }
+         *         public void mouseDragged(MouseEvent e) { hit(); }
+         *         public void mouseMoved(MouseEvent e) { hit(); }
+         *     };
+         *     panel.addMouseListener(adapter);
+         *     panel.addMouseMotionListener(adapter);
+         * </pre>
          */
         void forceHitTest(boolean client);
 
