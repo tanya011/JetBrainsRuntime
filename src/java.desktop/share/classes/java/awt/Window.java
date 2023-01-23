@@ -4062,7 +4062,7 @@ public class Window extends Container implements Accessible {
         private Map<String, Object> getProperties() {
             return properties != null ? Collections.unmodifiableMap(properties) : Collections.emptyMap();
         }
-        private void putProperties(Map<? extends String, ?> m) {
+        private void putProperties(Map<String, ?> m) {
             if (properties == null) properties = new HashMap<>();
             properties.putAll(m);
             notifyUpdate();
