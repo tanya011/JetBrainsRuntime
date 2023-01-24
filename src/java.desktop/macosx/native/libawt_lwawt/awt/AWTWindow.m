@@ -388,6 +388,18 @@ AWT_NS_WINDOW_IMPLEMENTATION
     return type;
 }
 
++ (jint) affectedStyleMaskForCustomTitlebar {
+    return MASK(FULL_WINDOW_CONTENT) | MASK(TRANSPARENT_TITLE_BAR) | MASK(TITLE_VISIBLE);
+}
+
++ (jint) overrideStyleBits:(jint)styleBits customTitlebarEnabled:(BOOL)customTitlebarEnabled  fullscreen:(BOOL)fullscreen {
+    if (customTitlebarEnabled) {
+        styleBits |= MASK(FULL_WINDOW_CONTENT) | MASK(TRANSPARENT_TITLE_BAR);
+        if (!fullscreen) styleBits &= ~MASK(TITLE_VISIBLE);
+    }
+    return styleBits;
+}
+
 // updates _METHOD_PROP_BITMASK based properties on the window
 - (void) setPropertiesForStyleBits:(jint)bits mask:(jint)mask {
     if (IS(mask, RESIZABLE)) {
@@ -466,12 +478,8 @@ AWT_ASSERT_APPKIT_THREAD;
     self.customTitlebarConstraints = nil;
     self.customTitlebarHeightConstraint = nil;
     self.customTitlebarButtonCenterXConstraints = nil;
-    if (self.isCustomTitlebarEnabled) {
-        // Force these properties if custom titlebar is enabled,
-        // but store original value in self.styleBits.
-        newBits |= MASK(FULL_WINDOW_CONTENT) | MASK(TRANSPARENT_TITLE_BAR);
-        newBits &= ~MASK(TITLE_VISIBLE);
-    }
+    // Force properties if custom titlebar is enabled, but store original value in self.styleBits.
+    newBits = [AWTWindow overrideStyleBits:newBits customTitlebarEnabled:self.isCustomTitlebarEnabled fullscreen:false];
 
     NSUInteger styleMask = [AWTWindow styleMaskForStyleBits:newBits];
 
@@ -1578,56 +1586,49 @@ static const CGFloat DefaultHorizontalTitleBarButtonOffset = 20.0;
 }
 
 - (void) forceHideCustomTitlebarTitle: (BOOL) hide {
-    jint bits = styleBits;
+    jint bits = self.styleBits;
     if (hide) bits &= ~MASK(TITLE_VISIBLE);
     [self setPropertiesForStyleBits:bits mask:MASK(TITLE_VISIBLE)];
 }
 
 - (void) updateCustomTitlebar {
-    [ThreadUtilities performOnMainThreadWaiting:YES block:^(){
+    _customTitlebarHeight = -1.0f; // Reset for lazy init
+    BOOL enabled = self.isCustomTitlebarEnabled;
+    BOOL fullscreen = self.isFullScreen;
 
-        _customTitlebarHeight = -1.0f; // Reset for lazy init
-        BOOL enabled = self.isCustomTitlebarEnabled;
-        BOOL fullscreen = self.isFullScreen;
+    jint mask = [AWTWindow affectedStyleMaskForCustomTitlebar];
+    jint newBits = [AWTWindow overrideStyleBits:self.styleBits customTitlebarEnabled:enabled fullscreen:fullscreen];
+    // Copied from nativeSetNSWindowStyleBits:
+    // The content view must be resized first, otherwise the window will be resized to fit the existing
+    // content view.
+    NSUInteger styleMask = [AWTWindow styleMaskForStyleBits:newBits];
+    if (!fullscreen) {
+        NSRect frame = [nsWindow frame];
+        NSRect screenContentRect = [NSWindow contentRectForFrameRect:frame styleMask:styleMask];
+        NSRect contentFrame = NSMakeRect(screenContentRect.origin.x - frame.origin.x,
+                                         screenContentRect.origin.y - frame.origin.y,
+                                         screenContentRect.size.width,
+                                         screenContentRect.size.height);
+        nsWindow.contentView.frame = contentFrame;
+    }
+    // NSWindowStyleMaskFullScreen bit shouldn't be updated directly
+    [nsWindow setStyleMask:(((NSWindowStyleMask) styleMask) & ~NSWindowStyleMaskFullScreen |
+                            nsWindow.styleMask & NSWindowStyleMaskFullScreen)];
+    // calls methods on NSWindow to change other properties, based on the mask
+    [self setPropertiesForStyleBits:newBits mask:mask];
+    if (!fullscreen) [self _deliverMoveResizeEvent];
 
-        jint mask = MASK(FULL_WINDOW_CONTENT) | MASK(TRANSPARENT_TITLE_BAR) | MASK(TITLE_VISIBLE);
-        jint newBits = styleBits;
-        if (enabled) {
-            newBits |= MASK(FULL_WINDOW_CONTENT) | MASK(TRANSPARENT_TITLE_BAR);
-            if (!fullscreen) newBits &= ~MASK(TITLE_VISIBLE);
-        }
-        // Copied from nativeSetNSWindowStyleBits:
-        // The content view must be resized first, otherwise the window will be resized to fit the existing
-        // content view.
-        NSUInteger styleMask = [AWTWindow styleMaskForStyleBits:newBits];
+    if (enabled != (self.customTitlebarConstraints != nil)) {
         if (!fullscreen) {
-            NSRect frame = [nsWindow frame];
-            NSRect screenContentRect = [NSWindow contentRectForFrameRect:frame styleMask:styleMask];
-            NSRect contentFrame = NSMakeRect(screenContentRect.origin.x - frame.origin.x,
-                                             screenContentRect.origin.y - frame.origin.y,
-                                             screenContentRect.size.width,
-                                             screenContentRect.size.height);
-            nsWindow.contentView.frame = contentFrame;
-        }
-        // NSWindowStyleMaskFullScreen bit shouldn't be updated directly
-        [nsWindow setStyleMask:(((NSWindowStyleMask) styleMask) & ~NSWindowStyleMaskFullScreen |
-                                nsWindow.styleMask & NSWindowStyleMaskFullScreen)];
-        // calls methods on NSWindow to change other properties, based on the mask
-        [self setPropertiesForStyleBits:newBits mask:mask];
-        if (!fullscreen) [self _deliverMoveResizeEvent];
-
-        if (enabled != (self.customTitlebarConstraints != nil)) {
-            if (!fullscreen) {
-                if (self.isCustomTitlebarEnabled) {
-                    [self setUpCustomTitlebar];
-                } else {
-                    [self resetCustomTitlebar];
-                }
+            if (self.isCustomTitlebarEnabled) {
+                [self setUpCustomTitlebar];
+            } else {
+                [self resetCustomTitlebar];
             }
-        } else if (enabled) {
-            [self updateCustomTitlebarConstraints];
         }
-    }];
+    } else if (enabled) {
+        [self updateCustomTitlebarConstraints];
+    }
 }
 
 @end // AWTWindow
@@ -1834,14 +1835,8 @@ JNI_COCOA_ENTER(env);
         // scans the bit field, and only updates the values requested by the mask
         // (this implicitly handles the _CALLBACK_PROP_BITMASK case, since those are passive reads)
         jint actualBits = window.styleBits & ~mask | bits & mask;
-        jint newBits = actualBits;
-
-        if (customTitlebarEnabled) {
-            // Force these properties if custom titlebar is enabled,
-            // but store original value in self.styleBits.
-            newBits |= MASK(FULL_WINDOW_CONTENT) | MASK(TRANSPARENT_TITLE_BAR);
-            if (!fullscreen) newBits &= ~MASK(TITLE_VISIBLE);
-        }
+        // Force properties if custom titlebar is enabled, but store original value in self.styleBits.
+        jint newBits = [AWTWindow overrideStyleBits:actualBits customTitlebarEnabled:customTitlebarEnabled fullscreen:fullscreen];
 
         BOOL resized = NO;
 
@@ -2555,8 +2550,10 @@ JNIEXPORT void JNICALL Java_sun_lwawt_macosx_CPlatformWindow_nativeUpdateCustomT
     JNI_COCOA_ENTER(env);
 
     NSWindow *nsWindow = (NSWindow *)jlong_to_ptr(windowPtr);
-    AWTWindow *window = (AWTWindow*)[nsWindow delegate];
-    [window updateCustomTitlebar];
+    [ThreadUtilities performOnMainThreadWaiting:YES block:^(){
+        AWTWindow *window = (AWTWindow*)[nsWindow delegate];
+        [window updateCustomTitlebar];
+    }];
 
     JNI_COCOA_EXIT(env);
 }

@@ -983,7 +983,7 @@ public class JRootPane extends JComponent implements Accessible {
         if (window instanceof JFrame || window instanceof JDialog) {
             synchronized (window.getTreeLock()) {
                 JRootPane rp = ((RootPaneContainer) window).getRootPane();
-                if(rp.customTitlebarControls != null && rp.customTitlebarControls.getParent() == rp.layeredPane) {
+                if(rp.customTitlebarControls != null) {
                     rp.layeredPane.remove(rp.customTitlebarControls);
                 }
                 rp.customTitlebarControls = controls;
@@ -1007,8 +1007,9 @@ public class JRootPane extends JComponent implements Accessible {
     private void layoutCustomTitlebarControls() {
         Component c = customTitlebarControls;
         if (c != null) {
-            Dimension d = c.getPreferredSize();
-            c.setBounds(layeredPane.getWidth() - d.width, 0, d.width, d.height);
+            Dimension s = c.getPreferredSize();
+            int x = Math.round((layeredPane.getWidth() - s.width) * c.getAlignmentX());
+            c.setBounds(x, 0, s.width, s.height);
             customTitlebarControls.doLayout();
         }
     }
