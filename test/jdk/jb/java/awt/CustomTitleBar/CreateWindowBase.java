@@ -18,8 +18,8 @@ public class CreateWindowBase {
     protected static boolean mouseClickedToPanel1 = false;
     protected static boolean mouseClickedToPanel2 = false;
 
-    private static final int PANEL_WIDTH = 50;
-    private static final int PANEL_HEIGHT = 30;
+    protected static final int PANEL_WIDTH = 50;
+    protected static final int PANEL_HEIGHT = 30;
 
     protected static final ScheduledExecutorService EXECUTOR = Executors.newSingleThreadScheduledExecutor();
 
@@ -69,4 +69,5 @@ public class CreateWindowBase {
 
         return titleBar;
     }
+
 }

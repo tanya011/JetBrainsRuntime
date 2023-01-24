@@ -1,18 +1,20 @@
 import com.jetbrains.JBR;
 import com.jetbrains.WindowDecorations;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Paths;
 
-public class CreateDialog extends CreateWindowBase {
+/**
+ * @test
+ * @summary Regression test for JET-5194
+ * @requires (os.family == "windows" | os.family == "mac")
+ */
+
+public class CreateDialogTest extends CreateWindowBase {
 
     private static Dialog dialog;
     private static WindowDecorations.CustomTitlebar titleBar;
@@ -41,7 +43,8 @@ public class CreateDialog extends CreateWindowBase {
                     }
                 });
 
-
+                Panel panel1 = createFirstPanel();
+                Panel panel2 = createSecondPanel();
                 dialog.add(createFirstPanel());
                 dialog.add(createSecondPanel());
 
@@ -58,25 +61,45 @@ public class CreateDialog extends CreateWindowBase {
                 robot.delay(500);
                 robot.mouseMove(x, y);
                 robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-                robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+
 
                 robot.delay(500);
                 robot.mouseMove(x, y);
                 robot.mousePress(InputEvent.BUTTON2_DOWN_MASK);
-                robot.mousePress(InputEvent.BUTTON2_DOWN_MASK);
+                robot.mouseRelease(InputEvent.BUTTON2_DOWN_MASK);
 
+                int panel1X = dialog.getLocation().x +  panel1.getLocation().x + PANEL_WIDTH / 2;
+                int panel1Y = dialog.getLocation().y + panel1.getLocation().y + PANEL_HEIGHT / 2;
+                robot.delay(500);
+                robot.mouseMove(panel1X, panel1Y);
+                robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
 
-                //TODO what to do in case buttons switched vice versa
+                int panel2X = dialog.getLocation().x + panel2.getLocation().x + PANEL_WIDTH / 2;
+                int panel2Y = dialog.getLocation().y + panel2.getLocation().y + PANEL_HEIGHT / 2;
+                robot.delay(500);
+                robot.mouseMove(panel2X, panel2Y);
+                robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+            });
+        } finally {
+            SwingUtilities.invokeLater(() -> {
                 if (!leftMouseButtonClickedToTitleBar) {
                     System.out.println("Title bar didn't receive BUTTON1 click");
                 }
                 if (!rightMouseButtonClickedToTitleBar) {
                     System.out.println("Title bar didn't receive BUTTON2 click");
                 }
-            });
-        } finally {
-            SwingUtilities.invokeLater(() -> {
-                //dialog.dispose();
+
+                if (!mouseClickedToPanel1) {
+                    System.out.println("Panel1 didn't receive click");
+                }
+
+                if (!mouseClickedToPanel2) {
+                    System.out.println("Panel2 didn't receive click");
+                }
+                dialog.dispose();
             });
         }
     }
