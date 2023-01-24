@@ -38,14 +38,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-class CustomTitlebarControls implements Serializable {
+class CustomTitleBarControls implements Serializable {
     @Serial
     private static final long serialVersionUID = -8125606075697848352L;
 
     private static Component create(Window window, float height, Map<String, Object> params, float[] dstInsets,
                                     MouseAdapter minCallback, MouseAdapter maxCallback, MouseAdapter closeCallback) {
         if (!(window instanceof Frame) && !(window instanceof Dialog)) return null;
-        CustomTitlebarControls controls = new CustomTitlebarControls(window, dstInsets,
+        CustomTitleBarControls controls = new CustomTitleBarControls(window, dstInsets,
                 minCallback, maxCallback, closeCallback);
         controls.update(height, params);
         return controls.panel;
@@ -85,7 +85,7 @@ class CustomTitlebarControls implements Serializable {
     private final Container panel;
     private final IButton min, max, close;
 
-    private CustomTitlebarControls(Window window, float[] dstInsets,
+    private CustomTitleBarControls(Window window, float[] dstInsets,
                                    MouseAdapter minCallback, MouseAdapter maxCallback, MouseAdapter closeCallback) {
         this.dstInsets = dstInsets;
         this.window = window;
@@ -415,7 +415,7 @@ class CustomTitlebarControls implements Serializable {
     }
 
     private interface IPanel extends Serializable {
-        CustomTitlebarControls controls();
+        CustomTitleBarControls controls();
         Component component();
     }
 
@@ -423,16 +423,16 @@ class CustomTitlebarControls implements Serializable {
         @Serial
         private static final long serialVersionUID = -4001281044233476450L;
         @Override
-        public CustomTitlebarControls controls() { return CustomTitlebarControls.this; }
+        public CustomTitleBarControls controls() { return CustomTitleBarControls.this; }
         @Override
         public Component component() { return this; }
         @Override
-        public void doLayout() { CustomTitlebarControls.this.layout(); }
+        public void doLayout() { CustomTitleBarControls.this.layout(); }
         @Override
-        public float getAlignmentX() { return CustomTitlebarControls.this.alignment(); }
+        public float getAlignmentX() { return CustomTitleBarControls.this.alignment(); }
         @Override
         public void paint(Graphics g) {
-            CustomTitlebarControls.this.paintPanel(this, g);
+            CustomTitleBarControls.this.paintPanel(this, g);
             if (min != null) min.component().repaint();
             if (max != null) max.component().repaint();
             if (close != null) close.component().repaint();
@@ -444,15 +444,15 @@ class CustomTitlebarControls implements Serializable {
         private static final long serialVersionUID = -606904252949842495L;
         private LPanel() { setOpaque(false); setBorder(null); }
         @Override
-        public CustomTitlebarControls controls() { return CustomTitlebarControls.this; }
+        public CustomTitleBarControls controls() { return CustomTitleBarControls.this; }
         @Override
         public Component component() { return this; }
         @Override
-        public void doLayout() { CustomTitlebarControls.this.layout(); }
+        public void doLayout() { CustomTitleBarControls.this.layout(); }
         @Override
-        public float getAlignmentX() { return CustomTitlebarControls.this.alignment(); }
+        public float getAlignmentX() { return CustomTitleBarControls.this.alignment(); }
         @Override
-        public void paintComponent(Graphics g) { CustomTitlebarControls.this.paintPanel(this, g); }
+        public void paintComponent(Graphics g) { CustomTitleBarControls.this.paintPanel(this, g); }
     }
 
     private interface IButton extends Serializable {
@@ -487,7 +487,7 @@ class CustomTitlebarControls implements Serializable {
             else return State.NORMAL;
         }
         @Override
-        public void paint(Graphics g) { CustomTitlebarControls.this.paintButton(this, g); }
+        public void paint(Graphics g) { CustomTitleBarControls.this.paintButton(this, g); }
         @Override
         public void mouseClicked(MouseEvent e) {}
         @Override
@@ -527,6 +527,6 @@ class CustomTitlebarControls implements Serializable {
             else return State.NORMAL;
         }
         @Override
-        public void paintComponent(Graphics g) { CustomTitlebarControls.this.paintButton(this, g); }
+        public void paintComponent(Graphics g) { CustomTitleBarControls.this.paintButton(this, g); }
     }
 }

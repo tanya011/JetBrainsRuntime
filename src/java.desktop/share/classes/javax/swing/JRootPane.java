@@ -946,7 +946,7 @@ public class JRootPane extends JComponent implements Accessible {
                 menuBar.setBounds(0, 0, w, mbd.height);
                 contentY += mbd.height;
             }
-            layoutCustomTitlebarControls();
+            layoutCustomTitleBarControls();
             if(contentPane != null) {
                 contentPane.setBounds(0, contentY, w, h - contentY);
             }
@@ -974,22 +974,22 @@ public class JRootPane extends JComponent implements Accessible {
     }
 
 /////////////////
-// Custom titlebar controls
+// Custom title bar controls
 ////////////////
 
-    private Component customTitlebarControls;
+    private Component customTitleBarControls;
 
-    private static boolean setCustomTitlebarControls(Window window, Component controls) {
+    private static boolean setCustomTitleBarControls(Window window, Component controls) {
         if (window instanceof JFrame || window instanceof JDialog) {
             synchronized (window.getTreeLock()) {
                 JRootPane rp = ((RootPaneContainer) window).getRootPane();
-                if(rp.customTitlebarControls != null) {
-                    rp.layeredPane.remove(rp.customTitlebarControls);
+                if(rp.customTitleBarControls != null) {
+                    rp.layeredPane.remove(rp.customTitleBarControls);
                 }
-                rp.customTitlebarControls = controls;
-                if(rp.customTitlebarControls != null) {
-                    rp.layoutCustomTitlebarControls();
-                    rp.layeredPane.add(rp.customTitlebarControls, Integer.valueOf(1));
+                rp.customTitleBarControls = controls;
+                if(rp.customTitleBarControls != null) {
+                    rp.layoutCustomTitleBarControls();
+                    rp.layeredPane.add(rp.customTitleBarControls, Integer.valueOf(1));
                 }
                 window.repaint();
             }
@@ -997,20 +997,20 @@ public class JRootPane extends JComponent implements Accessible {
         } else return false;
     }
 
-    private static Component getCustomTitlebarControls(Window window) {
+    private static Component getCustomTitleBarControls(Window window) {
         if (window instanceof JFrame || window instanceof JDialog) {
             JRootPane rp = ((RootPaneContainer) window).getRootPane();
-            return rp.customTitlebarControls;
+            return rp.customTitleBarControls;
         } else return null;
     }
 
-    private void layoutCustomTitlebarControls() {
-        Component c = customTitlebarControls;
+    private void layoutCustomTitleBarControls() {
+        Component c = customTitleBarControls;
         if (c != null) {
             Dimension s = c.getPreferredSize();
             int x = Math.round((layeredPane.getWidth() - s.width) * c.getAlignmentX());
             c.setBounds(x, 0, s.width, s.height);
-            customTitlebarControls.doLayout();
+            customTitleBarControls.doLayout();
         }
     }
 

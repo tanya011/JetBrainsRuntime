@@ -37,7 +37,7 @@
 #include <dwmapi.h>
 
 #include <java_lang_Integer.h>
-#include <java_awt_Window_CustomTitlebar.h>
+#include <java_awt_Window_CustomTitleBar.h>
 #include <sun_awt_windows_WEmbeddedFrame.h>
 #include <sun_awt_windows_WEmbeddedFramePeer.h>
 
@@ -161,8 +161,8 @@ AwtFrame::AwtFrame() {
 
     isInManualMoveOrSize = FALSE;
     grabbedHitTest = 0;
-    customTitlebarHeight = -1.0f; // Negative means uninitialized
-    customTitlebarTouchDragPosition = (LPARAM) -1;
+    customTitleBarHeight = -1.0f; // Negative means uninitialized
+    customTitleBarTouchDragPosition = (LPARAM) -1;
 }
 
 AwtFrame::~AwtFrame()
@@ -605,8 +605,8 @@ MsgRouting AwtFrame::WmMouseMove(UINT flags, int x, int y) {
 }
 
 MsgRouting AwtFrame::WmNcMouseUp(WPARAM hitTest, int x, int y, int button) {
-    customTitlebarTouchDragPosition = (LPARAM) -1;
-    if (IsTitlebarHitTest(hitTest) && HasCustomTitlebar()) {
+    customTitleBarTouchDragPosition = (LPARAM) -1;
+    if (IsTitleBarHitTest(hitTest) && HasCustomTitleBar()) {
         WmMouseMessage msg = MouseButtonToWm(button);
         if (IsMouseEventFromTouch()) {
             if (button & LEFT_BUTTON) {
@@ -684,9 +684,9 @@ MsgRouting AwtFrame::WmNcMouseDown(WPARAM hitTest, int x, int y, int button) {
     if (m_grabbedWindow != NULL/* && !m_grabbedWindow->IsOneOfOwnersOf(this)*/) {
         m_grabbedWindow->Ungrab();
     }
-    customTitlebarTouchDragPosition = (LPARAM) -1;
-    if (IsTitlebarHitTest(hitTest) && HasCustomTitlebar()) {
-        // When double-clicking titlebar of native Windows apps, they respond to second mouse press, not release
+    customTitleBarTouchDragPosition = (LPARAM) -1;
+    if (IsTitleBarHitTest(hitTest) && HasCustomTitleBar()) {
+        // When double-clicking title bar of native Windows apps, they respond to second mouse press, not release
         const int LEFT_DBLCLCK = LEFT_BUTTON | DBL_CLICK;
         BOOL maximize = (button & LEFT_DBLCLCK) == LEFT_DBLCLCK && IsResizable();
         BOOL lpress = button == LEFT_BUTTON;
@@ -696,14 +696,14 @@ MsgRouting AwtFrame::WmNcMouseDown(WPARAM hitTest, int x, int y, int button) {
             if (button & LEFT_BUTTON) {
                 // Don't send mouse down events for left button touch for now, wait for NcMouseUp.
                 // In case of window drag we will not receive a NcMouseUp.
-                if (maximize) return AreCustomTitlebarNativeActionsAllowed() ? mrDoDefault : mrConsume;
+                if (maximize) return AreCustomTitleBarNativeActionsAllowed() ? mrDoDefault : mrConsume;
                 if (lpress) {
-                    customTitlebarTouchDragPosition = MAKELPARAM(x, y);
+                    customTitleBarTouchDragPosition = MAKELPARAM(x, y);
                     // Reset hit test query, we will check it in NcMouseMove
                     JNIEnv *env = (JNIEnv *) JNU_GetEnv(jvm, JNI_VERSION_1_2);
                     jobject target = GetTarget(env);
                     if (target) {
-                        env->SetIntField(target, AwtWindow::customTitlebarHitTestQueryID, java_awt_Window_CustomTitlebar_HIT_UNDEFINED);
+                        env->SetIntField(target, AwtWindow::customTitleBarHitTestQueryID, java_awt_Window_CustomTitleBar_HIT_UNDEFINED);
                         env->DeleteLocalRef(target);
                     }
                 }
@@ -714,7 +714,7 @@ MsgRouting AwtFrame::WmNcMouseDown(WPARAM hitTest, int x, int y, int button) {
             }
             return mrConsume;
         }
-        BOOL defaultAction = (maximize || lpress) && AreCustomTitlebarNativeActionsAllowed();
+        BOOL defaultAction = (maximize || lpress) && AreCustomTitleBarNativeActionsAllowed();
         BOOL defaultControl = lpress && hitTest != HTCAPTION; // Press on min/max/close button
         if (defaultAction || defaultControl) msg.flags |= MK_NOCAPTURE;
         SendMessageAtPoint(msg.mouseDown, msg.flags, x, y);
@@ -752,18 +752,18 @@ MsgRouting AwtFrame::WmNcMouseDown(WPARAM hitTest, int x, int y, int button) {
 }
 
 MsgRouting AwtFrame::WmNcMouseMove(WPARAM hitTest, int x, int y) {
-    if (IsTitlebarHitTest(hitTest) && HasCustomTitlebar()) {
-        if (customTitlebarTouchDragPosition != (LPARAM) -1 && IsMouseEventFromTouch()) {
+    if (IsTitleBarHitTest(hitTest) && HasCustomTitleBar()) {
+        if (customTitleBarTouchDragPosition != (LPARAM) -1 && IsMouseEventFromTouch()) {
             JNIEnv *env = (JNIEnv *) JNU_GetEnv(jvm, JNI_VERSION_1_2);
             jobject target = GetTarget(env);
             if (target) {
-                switch (env->GetIntField(target, AwtWindow::customTitlebarHitTestQueryID)) {
-                    case java_awt_Window_CustomTitlebar_HIT_UNDEFINED: break; // Hit test query is not ready yet, skip.
-                    case java_awt_Window_CustomTitlebar_HIT_TITLEBAR: // Apply drag behavior
+                switch (env->GetIntField(target, AwtWindow::customTitleBarHitTestQueryID)) {
+                    case java_awt_Window_CustomTitleBar_HIT_UNDEFINED: break; // Hit test query is not ready yet, skip.
+                    case java_awt_Window_CustomTitleBar_HIT_TITLEBAR: // Apply drag behavior
                         if (hitTest != HTCAPTION) break; // Native hit test didn't update yet, skip.
-                        DefWindowProc(WM_NCLBUTTONDOWN, hitTest, customTitlebarTouchDragPosition);
+                        DefWindowProc(WM_NCLBUTTONDOWN, hitTest, customTitleBarTouchDragPosition);
                     default: // Reset drag-by-touch flag
-                        customTitlebarTouchDragPosition = (LPARAM) -1;
+                        customTitleBarTouchDragPosition = (LPARAM) -1;
                 }
                 env->DeleteLocalRef(target);
             }
@@ -1784,25 +1784,25 @@ ret:
     delete nmbs;
 }
 
-// {start} Custom titlebar support
+// {start} Custom title bar support
 
-BOOL AwtFrame::HasCustomTitlebar() {
-    float h = customTitlebarHeight;
-    if (h < 0.0f) h = GetCustomTitlebarHeight();
+BOOL AwtFrame::HasCustomTitleBar() {
+    float h = customTitleBarHeight;
+    if (h < 0.0f) h = GetCustomTitleBarHeight();
     return h > 0.0f;
 }
 
-float AwtFrame::GetCustomTitlebarHeight() {
-    float h = customTitlebarHeight;
+float AwtFrame::GetCustomTitleBarHeight() {
+    float h = customTitleBarHeight;
     if (h < 0.0f) {
         JNIEnv *env = (JNIEnv *) JNU_GetEnv(jvm, JNI_VERSION_1_2);
         jobject target = GetTarget(env);
         if (target) {
-            h = env->CallFloatMethod(target, AwtWindow::internalCustomTitlebarHeightMID);
+            h = env->CallFloatMethod(target, AwtWindow::internalCustomTitleBarHeightMID);
             env->DeleteLocalRef(target);
         }
         if (h < 0.0f) h = 0.0f;
-        customTitlebarHeight = h;
+        customTitleBarHeight = h;
     }
     // Copied from AwtComponent::ScaleUpY, but without rounding
     int screen = GetScreenImOn();
@@ -1811,19 +1811,19 @@ float AwtFrame::GetCustomTitlebarHeight() {
     return device == NULL ? h : h * device->GetScaleY();
 }
 
-jint AwtFrame::GetCustomTitlebarHitTest() {
+jint AwtFrame::GetCustomTitleBarHitTest() {
     JNIEnv *env = (JNIEnv *) JNU_GetEnv(jvm, JNI_VERSION_1_2);
     jobject target = GetTarget(env);
-    jint result = java_awt_Window_CustomTitlebar_HIT_UNDEFINED;
+    jint result = java_awt_Window_CustomTitleBar_HIT_UNDEFINED;
     if (target) {
-        result = env->GetIntField(target, AwtWindow::customTitlebarHitTestID);
+        result = env->GetIntField(target, AwtWindow::customTitleBarHitTestID);
         env->DeleteLocalRef(target);
     }
     return result;
 }
 
-BOOL AwtFrame::AreCustomTitlebarNativeActionsAllowed() {
-    return GetCustomTitlebarHitTest() <= java_awt_Window_CustomTitlebar_HIT_TITLEBAR;
+BOOL AwtFrame::AreCustomTitleBarNativeActionsAllowed() {
+    return GetCustomTitleBarHitTest() <= java_awt_Window_CustomTitleBar_HIT_TITLEBAR;
 }
 
 void AwtFrame::SendMessageAtPoint(UINT msg, WPARAM wparam, int ncx, int ncy) {
@@ -1833,7 +1833,7 @@ void AwtFrame::SendMessageAtPoint(UINT msg, WPARAM wparam, int ncx, int ncy) {
     ::SendMessage(w, msg, wparam, MAKELPARAM(p.x, p.y));
 }
 
-// Returns frame border insets (without titlebar).
+// Returns frame border insets (without title bar).
 // Note that in non-maximized state there's 0px between top of the frame and top of the client area.
 // This method, however, still returns non-zero top inset in that case - it represents height of the resize border.
 RECT AwtFrame::GetSysInsets() {
@@ -1857,22 +1857,22 @@ LRESULT AwtFrame::HitTestNCA(int x, int y) {
     RECT insets = GetSysInsets();
     GetWindowRect(hwnd, &rcWindow);
 
-    float titlebarHeight = GetCustomTitlebarHeight();
-    if (::IsZoomed(hwnd)) titlebarHeight += insets.top;
+    float titleBarHeight = GetCustomTitleBarHeight();
+    if (::IsZoomed(hwnd)) titleBarHeight += insets.top;
 
     USHORT uRow = 1;
     USHORT uCol = 1;
     LRESULT captionVariant;
 
-    if (y >= rcWindow.top && y < rcWindow.top + titlebarHeight)
+    if (y >= rcWindow.top && y < rcWindow.top + titleBarHeight)
     {
         if (y < rcWindow.top + insets.top) {
             captionVariant = HTTOP;
         } else {
-            switch (GetCustomTitlebarHitTest()) {
-                case java_awt_Window_CustomTitlebar_HIT_MINIMIZE_BUTTON: captionVariant = HTMINBUTTON; break;
-                case java_awt_Window_CustomTitlebar_HIT_MAXIMIZE_BUTTON: captionVariant = HTMAXBUTTON; break;
-                case java_awt_Window_CustomTitlebar_HIT_CLOSE_BUTTON:    captionVariant = HTCLOSE;     break;
+            switch (GetCustomTitleBarHitTest()) {
+                case java_awt_Window_CustomTitleBar_HIT_MINIMIZE_BUTTON: captionVariant = HTMINBUTTON; break;
+                case java_awt_Window_CustomTitleBar_HIT_MAXIMIZE_BUTTON: captionVariant = HTMAXBUTTON; break;
+                case java_awt_Window_CustomTitleBar_HIT_CLOSE_BUTTON:    captionVariant = HTCLOSE;     break;
                 default:                                                 captionVariant = HTCAPTION;   break;
             }
         }
@@ -1903,7 +1903,7 @@ LRESULT AwtFrame::HitTestNCA(int x, int y) {
 
 MsgRouting AwtFrame::WmNcCalcSize(BOOL wParam, LPNCCALCSIZE_PARAMS lpncsp, LRESULT& retVal)
 {
-    if (!wParam || !HasCustomTitlebar()) {
+    if (!wParam || !HasCustomTitleBar()) {
         return AwtWindow::WmNcCalcSize(wParam, lpncsp, retVal);
     }
 
@@ -1946,7 +1946,7 @@ MsgRouting AwtFrame::WmNcCalcSize(BOOL wParam, LPNCCALCSIZE_PARAMS lpncsp, LRESU
 
 MsgRouting AwtFrame::WmNcHitTest(int x, int y, LRESULT& retVal)
 {
-    if (!HasCustomTitlebar()) {
+    if (!HasCustomTitleBar()) {
         return AwtWindow::WmNcHitTest(x, y, retVal);
     }
     if (::IsWindow(GetModalBlocker(GetHWnd()))) {
@@ -1960,18 +1960,18 @@ MsgRouting AwtFrame::WmNcHitTest(int x, int y, LRESULT& retVal)
 void AwtFrame::RedrawNonClient()
 {
     UINT flags = SwpFrameChangeFlags;
-    if (!HasCustomTitlebar()) {
-        // With custom titlebar enabled, SetWindowPos call below can cause WM_SIZE message being sent.
+    if (!HasCustomTitleBar()) {
+        // With custom title bar enabled, SetWindowPos call below can cause WM_SIZE message being sent.
         // If we're coming here from WFramePeer.initialize (as part of 'setResizable' call),
         // WM_SIZE message processing can happen concurrently with window flags update done as part of
         // 'setState' call), and lead to inconsistent state.
-        // So, we disable asynchronous processing in case we have custom titlebar to avoid the race condition.
+        // So, we disable asynchronous processing in case we have custom title bar to avoid the race condition.
         flags |= SWP_ASYNCWINDOWPOS;
     }
     ::SetWindowPos(GetHWnd(), (HWND) NULL, 0, 0, 0, 0, flags);
 }
 
-void AwtFrame::_UpdateCustomTitlebar(void* p) {
+void AwtFrame::_UpdateCustomTitleBar(void* p) {
     JNIEnv *env = (JNIEnv *)JNU_GetEnv(jvm, JNI_VERSION_1_2);
 
     jobject self = reinterpret_cast<jobject>(p);
@@ -1979,14 +1979,14 @@ void AwtFrame::_UpdateCustomTitlebar(void* p) {
     JNI_CHECK_PEER_GOTO(self, ret);
 
     AwtFrame* frame = (AwtFrame*)pData;
-    BOOL old = frame->HasCustomTitlebar();
-    frame->customTitlebarHeight = -1.0f; // Reset to uninitialized
-    if (frame->HasCustomTitlebar() != old) frame->RedrawNonClient();
+    BOOL old = frame->HasCustomTitleBar();
+    frame->customTitleBarHeight = -1.0f; // Reset to uninitialized
+    if (frame->HasCustomTitleBar() != old) frame->RedrawNonClient();
     ret:
     env->DeleteGlobalRef(self);
 }
 
-// {end} Custom titlebar support
+// {end} Custom title bar support
 
 /************************************************************************
  * WFramePeer native methods
@@ -2320,12 +2320,12 @@ Java_sun_awt_windows_WFramePeer_updateIcon(JNIEnv *env, jobject self)
 }
 
 JNIEXPORT void JNICALL
-Java_sun_awt_windows_WFramePeer_updateCustomTitlebar(JNIEnv *env, jclass cls, jobject peer)
+Java_sun_awt_windows_WFramePeer_updateCustomTitleBar(JNIEnv *env, jclass cls, jobject peer)
 {
     TRY;
 
-    AwtToolkit::GetInstance().InvokeFunction(AwtFrame::_UpdateCustomTitlebar, env->NewGlobalRef(peer));
-    // global ref is deleted in _UpdateCustomTitlebar()
+    AwtToolkit::GetInstance().InvokeFunction(AwtFrame::_UpdateCustomTitleBar, env->NewGlobalRef(peer));
+    // global ref is deleted in _UpdateCustomTitleBar()
 
     CATCH_BAD_ALLOC;
 }

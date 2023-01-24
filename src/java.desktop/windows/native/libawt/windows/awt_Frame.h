@@ -148,7 +148,7 @@ public:
     static void _SetIMMOption(void *param);
     static void _SynthesizeWmActivate(void *param);
     static void _NotifyModalBlocked(void *param);
-    static void _UpdateCustomTitlebar(void *param);
+    static void _UpdateCustomTitleBar(void *param);
 
     virtual void Reshape(int x, int y, int width, int height);
 
@@ -161,8 +161,8 @@ public:
     INLINE void SetImeTargetComponent(HWND hwnd) { m_imeTargetComponent = hwnd; }
 
     void RedrawNonClient();
-    BOOL HasCustomTitlebar();
-    static inline BOOL IsTitlebarHitTest(UINT_PTR hitTest) {
+    BOOL HasCustomTitleBar();
+    static inline BOOL IsTitleBarHitTest(UINT_PTR hitTest) {
         return hitTest == HTCAPTION || hitTest == HTMINBUTTON || hitTest == HTMAXBUTTON || hitTest == HTCLOSE;
     }
 
@@ -229,12 +229,12 @@ private:
     WPARAM grabbedHitTest;
     POINT savedMousePos;
 
-    float customTitlebarHeight;
-    LPARAM customTitlebarTouchDragPosition;
+    float customTitleBarHeight;
+    LPARAM customTitleBarTouchDragPosition;
 
-    float GetCustomTitlebarHeight();
-    jint GetCustomTitlebarHitTest();
-    BOOL AreCustomTitlebarNativeActionsAllowed();
+    float GetCustomTitleBarHeight();
+    jint GetCustomTitleBarHitTest();
+    BOOL AreCustomTitleBarNativeActionsAllowed();
     void SendMessageAtPoint(UINT msg, WPARAM w, int x, int y);
     RECT GetSysInsets();
     LRESULT HitTestNCA(int x, int y);

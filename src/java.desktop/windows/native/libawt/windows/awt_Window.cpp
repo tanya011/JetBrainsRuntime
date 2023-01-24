@@ -171,8 +171,8 @@ jfieldID AwtWindow::locationByPlatformID;
 jfieldID AwtWindow::autoRequestFocusID;
 jfieldID AwtWindow::securityWarningWidthID;
 jfieldID AwtWindow::securityWarningHeightID;
-jfieldID AwtWindow::customTitlebarHitTestID;
-jfieldID AwtWindow::customTitlebarHitTestQueryID;
+jfieldID AwtWindow::customTitleBarHitTestID;
+jfieldID AwtWindow::customTitleBarHitTestQueryID;
 
 jfieldID AwtWindow::windowTypeID;
 jmethodID AwtWindow::notifyWindowStateChangedMID;
@@ -181,7 +181,7 @@ jfieldID AwtWindow::sysInsetsID;
 jmethodID AwtWindow::getWarningStringMID;
 jmethodID AwtWindow::calculateSecurityWarningPositionMID;
 jmethodID AwtWindow::windowTypeNameMID;
-jmethodID AwtWindow::internalCustomTitlebarHeightMID;
+jmethodID AwtWindow::internalCustomTitleBarHeightMID;
 
 int AwtWindow::ms_instanceCounter = 0;
 HHOOK AwtWindow::ms_hCBTFilter;
@@ -3451,18 +3451,18 @@ Java_java_awt_Window_initIDs(JNIEnv *env, jclass cls)
         env->GetFieldID(cls, "securityWarningWidth", "I"));
     CHECK_NULL(AwtWindow::securityWarningHeightID =
         env->GetFieldID(cls, "securityWarningHeight", "I"));
-    CHECK_NULL(AwtWindow::customTitlebarHitTestID =
-        env->GetFieldID(cls, "customTitlebarHitTest", "I"));
-    CHECK_NULL(AwtWindow::customTitlebarHitTestQueryID =
-        env->GetFieldID(cls, "customTitlebarHitTestQuery", "I"));
+    CHECK_NULL(AwtWindow::customTitleBarHitTestID =
+        env->GetFieldID(cls, "customTitleBarHitTest", "I"));
+    CHECK_NULL(AwtWindow::customTitleBarHitTestQueryID =
+        env->GetFieldID(cls, "customTitleBarHitTestQuery", "I"));
     CHECK_NULL(AwtWindow::getWarningStringMID =
         env->GetMethodID(cls, "getWarningString", "()Ljava/lang/String;"));
     CHECK_NULL(AwtWindow::autoRequestFocusID =
         env->GetFieldID(cls, "autoRequestFocus", "Z"));
     CHECK_NULL(AwtWindow::calculateSecurityWarningPositionMID =
         env->GetMethodID(cls, "calculateSecurityWarningPosition", "(DDDD)Ljava/awt/geom/Point2D;"));
-    CHECK_NULL(AwtWindow::internalCustomTitlebarHeightMID =
-        env->GetMethodID(cls, "internalCustomTitlebarHeight", "()F"));
+    CHECK_NULL(AwtWindow::internalCustomTitleBarHeightMID =
+        env->GetMethodID(cls, "internalCustomTitleBarHeight", "()F"));
 
     jclass windowTypeClass = env->FindClass("java/awt/Window$Type");
     CHECK_NULL(windowTypeClass);

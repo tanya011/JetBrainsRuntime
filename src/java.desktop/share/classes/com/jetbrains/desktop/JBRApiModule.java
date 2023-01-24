@@ -42,6 +42,6 @@ public class JBRApiModule {
                     .withStatic("overrideGraphicsEnvironment", "overrideLocalGraphicsEnvironment", "java.awt.GraphicsEnvironment")
                     .withStatic("setLocalGraphicsEnvironmentProvider", "setLocalGraphicsEnvironmentProvider", "java.awt.GraphicsEnvironment")
                 .service("com.jetbrains.WindowDecorations", "java.awt.Window$WindowDecorations")
-                .proxy("com.jetbrains.WindowDecorations$CustomTitlebar", "java.awt.Window$CustomTitlebar");
+                .proxy("com.jetbrains.WindowDecorations$CustomTitleBar", "java.awt.Window$CustomTitleBar");
     }
 }
