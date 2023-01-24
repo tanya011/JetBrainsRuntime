@@ -33,7 +33,7 @@ import java.util.Map;
  * special behavior like dragging or maximizing on double click.
  * @implNote Behavior is platform-dependent, only macOS and Windows are supported.
  */
-@Deprecated(forRemoval=true)
+@Deprecated
 public interface CustomWindowDecoration {
 
     /*CONST java.awt.Window.*_HIT_SPOT*/

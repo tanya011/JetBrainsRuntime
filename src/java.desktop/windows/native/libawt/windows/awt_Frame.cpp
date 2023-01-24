@@ -752,7 +752,6 @@ MsgRouting AwtFrame::WmNcMouseDown(WPARAM hitTest, int x, int y, int button) {
 }
 
 MsgRouting AwtFrame::WmNcMouseMove(WPARAM hitTest, int x, int y) {
-    // For min/max/close buttons, MouseMove are the only events sent to Java.
     if (IsTitlebarHitTest(hitTest) && HasCustomTitlebar()) {
         if (customTitlebarTouchDragPosition != (LPARAM) -1 && IsMouseEventFromTouch()) {
             JNIEnv *env = (JNIEnv *) JNU_GetEnv(jvm, JNI_VERSION_1_2);

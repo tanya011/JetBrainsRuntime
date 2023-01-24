@@ -3252,7 +3252,13 @@ public class Window extends Container implements Accessible {
                     getDefaultConfiguration();
         }
         synchronized (getTreeLock()) {
-            super.setGraphicsConfiguration(gc);
+            boolean ret = updateGraphicsData(gc);
+            Component customTitlebarControls = this.customTitlebarControls;
+            if (customTitlebarControls != null) ret |= customTitlebarControls.updateGraphicsData(gc);
+            if (ret) {
+                removeNotify();
+                addNotify();
+            }
             if (log.isLoggable(PlatformLogger.Level.FINER)) {
                 log.finer("+ Window.setGraphicsConfiguration(): new GC is \n+ " + getGraphicsConfiguration_NoClientCode() + "\n+ this is " + this);
             }
@@ -4322,13 +4328,13 @@ public class Window extends Container implements Accessible {
 
     // *** Following custom decorations code is kept for backward compatibility and will be removed soon. ***
 
-    @Deprecated(forRemoval = true)
+    @Deprecated
     private transient volatile boolean hasCustomDecoration;
-    @Deprecated(forRemoval = true)
+    @Deprecated
     private transient volatile List<Map.Entry<Shape, Integer>> customDecorHitTestSpots;
-    @Deprecated(forRemoval = true)
+    @Deprecated
     private transient volatile int customDecorTitleBarHeight = -1; // 0 can be a legal value when no title bar is expected
-    @Deprecated(forRemoval = true)
+    @Deprecated
     private static class CustomWindowDecoration {
 
         CustomWindowDecoration() { CustomTitlebar.assertSupported(); }
