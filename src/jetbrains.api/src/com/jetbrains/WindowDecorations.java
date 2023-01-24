@@ -33,12 +33,18 @@ import java.util.Map;
 public interface WindowDecorations {
 
     /**
+     * If {@code customTitlebar} is not null, system-provided titlebar is removed and client area is extended to the
+     * top of the frame with window controls painted over the client area.
+     * {@code customTitlebar=null} resets to the default appearance with system-provided titlebar.
      * @see CustomTitlebar
      * @see #createCustomTitlebar()
      */
     void setCustomTitlebar(Frame frame, CustomTitlebar customTitlebar);
 
     /**
+     * If {@code customTitlebar} is not null, system-provided titlebar is removed and client area is extended to the
+     * top of the dialog with window controls painted over the client area.
+     * {@code customTitlebar=null} resets to the default appearance with system-provided titlebar.
      * @see CustomTitlebar
      * @see #createCustomTitlebar()
      */

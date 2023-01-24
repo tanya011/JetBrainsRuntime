@@ -1481,7 +1481,7 @@ public class CPlatformWindow extends CFRetainedResource implements PlatformWindo
     private static void updateCustomTitlebar(ComponentPeer peer) {
         if (peer instanceof LWWindowPeer lwwp &&
             lwwp.getPlatformWindow() instanceof CPlatformWindow cpw)  {
-            cpw.execute(ptr -> AWTThreading.executeWaitToolkit(wait -> nativeUpdateCustomTitlebar(ptr)));
+            cpw.execute(CPlatformWindow::nativeUpdateCustomTitlebar);
         }
     }
 
