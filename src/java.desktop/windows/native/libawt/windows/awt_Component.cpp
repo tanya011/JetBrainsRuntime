@@ -767,11 +767,11 @@ jobject AwtComponent::FindHeavyweightUnderCursor(BOOL useCache) {
             INT nHittest = (INT)::SendMessage(hit, WM_NCHITTEST,
                                           0, MAKELPARAM(p.x, p.y));
 
-            if (AwtFrame::IsTitlebarHitTest(nHittest)) {
+            if (AwtFrame::IsTitleBarHitTest(nHittest)) {
                 AwtWindow* window = comp->GetContainer();
                 if (window != NULL && !window->IsSimpleWindow() &&
-                    ((AwtFrame*) window)->HasCustomTitlebar()) {
-                    // In case of custom titlebar, WindowFromPoint will return root frame, so search further
+                    ((AwtFrame*) window)->HasCustomTitleBar()) {
+                    // In case of custom title bar, WindowFromPoint will return root frame, so search further
                     ScreenToBottommostChild(hit, p.x, p.y);
                     comp = AwtComponent::GetComponent(hit);
                     if (comp != NULL) nHittest = HTCLIENT;
@@ -1780,14 +1780,14 @@ LRESULT AwtComponent::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
           }
       case WM_SETCURSOR:
           mr = mrDoDefault;
-          if (LOWORD(lParam) == HTCLIENT || AwtFrame::IsTitlebarHitTest(LOWORD(lParam))) {
+          if (LOWORD(lParam) == HTCLIENT || AwtFrame::IsTitleBarHitTest(LOWORD(lParam))) {
               if (AwtComponent* comp =
                                     AwtComponent::GetComponent((HWND)wParam)) {
-                  if (AwtFrame::IsTitlebarHitTest(LOWORD(lParam))) {
+                  if (AwtFrame::IsTitleBarHitTest(LOWORD(lParam))) {
                       AwtWindow* window = comp->GetContainer();
                       if (window == NULL || window->IsSimpleWindow() ||
-                          !((AwtFrame*) window)->HasCustomTitlebar()) break;
-                      // When custom titlebar is enabled, WM_SETCURSOR is sent to root Frame, so find actual component under cursor
+                          !((AwtFrame*) window)->HasCustomTitleBar()) break;
+                      // When custom title bar is enabled, WM_SETCURSOR is sent to root Frame, so find actual component under cursor
                       HWND hwnd = (HWND) wParam;
                       POINT p;
                       ::GetCursorPos(&p);
@@ -4785,7 +4785,7 @@ MsgRouting AwtComponent::WmNcHitTest(int x, int y, LRESULT &retVal)
     AwtWindow* window = GetContainer();
     if (window == NULL || window->IsSimpleWindow()) return mrDoDefault;
     AwtFrame* frame = (AwtFrame*)window;
-    if (frame->HasCustomTitlebar() &&
+    if (frame->HasCustomTitleBar() &&
         frame->WmNcHitTest(x, y, retVal) == mrConsume) {
         retVal = HTTRANSPARENT;
         return mrConsume;

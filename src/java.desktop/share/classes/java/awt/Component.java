@@ -4914,10 +4914,10 @@ public abstract class Component implements ImageObserver, MenuContainer,
         {
             return;
         }
-        // Custom titlebar hit test is performed by all mouse events except MOUSE_EXITED and MOUSE_WHEEL
-        Window customTitlebarWindow = e.getID() >= MouseEvent.MOUSE_FIRST && e.getID() <= MouseEvent.MOUSE_LAST &&
+        // Custom title bar hit test is performed by all mouse events except MOUSE_EXITED and MOUSE_WHEEL
+        Window customTitleBarWindow = e.getID() >= MouseEvent.MOUSE_FIRST && e.getID() <= MouseEvent.MOUSE_LAST &&
                 e.getID() != MouseEvent.MOUSE_EXITED && e.getID() != MouseEvent.MOUSE_WHEEL ?
-                updateCustomTitlebarHitTest(true) : null;
+                updateCustomTitleBarHitTest(true) : null;
 
         /*
          * 2. Allow the Toolkit to pass this to AWTEventListeners.
@@ -5082,8 +5082,8 @@ public abstract class Component implements ImageObserver, MenuContainer,
             }
         }
 
-        if (customTitlebarWindow != null) {
-            customTitlebarWindow.applyCustomTitlebarHitTest();
+        if (customTitleBarWindow != null) {
+            customTitleBarWindow.applyCustomTitleBarHitTest();
         }
 
         if (SunToolkit.isTouchKeyboardAutoShowEnabled() &&
@@ -10577,13 +10577,13 @@ public abstract class Component implements ImageObserver, MenuContainer,
         INPUT_METHODS_DISABLED = true;
     }
 
-    Window updateCustomTitlebarHitTest(boolean allowNativeActions) {
+    Window updateCustomTitleBarHitTest(boolean allowNativeActions) {
         Container p = parent;
         if (p == null) return null;
         if ((eventMask & (AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK | AWTEvent.MOUSE_WHEEL_EVENT_MASK)) != 0 ||
                 mouseListener != null || mouseMotionListener != null || mouseWheelListener != null || cursor != null) {
             allowNativeActions = false;
         }
-        return p.updateCustomTitlebarHitTest(allowNativeActions);
+        return p.updateCustomTitleBarHitTest(allowNativeActions);
     }
 }

@@ -27,54 +27,54 @@ import java.awt.*;
 import java.util.Map;
 
 /**
- * Window decorations consist of titlebar, window controls and border.
- * @see WindowDecorations.CustomTitlebar
+ * Window decorations consist of title bar, window controls and border.
+ * @see WindowDecorations.CustomTitleBar
  */
 public interface WindowDecorations {
 
     /**
-     * If {@code customTitlebar} is not null, system-provided titlebar is removed and client area is extended to the
+     * If {@code customTitleBar} is not null, system-provided title bar is removed and client area is extended to the
      * top of the frame with window controls painted over the client area.
-     * {@code customTitlebar=null} resets to the default appearance with system-provided titlebar.
-     * @see CustomTitlebar
-     * @see #createCustomTitlebar()
+     * {@code customTitleBar=null} resets to the default appearance with system-provided title bar.
+     * @see CustomTitleBar
+     * @see #createCustomTitleBar()
      */
-    void setCustomTitlebar(Frame frame, CustomTitlebar customTitlebar);
+    void setCustomTitleBar(Frame frame, CustomTitleBar customTitleBar);
 
     /**
-     * If {@code customTitlebar} is not null, system-provided titlebar is removed and client area is extended to the
+     * If {@code customTitleBar} is not null, system-provided title bar is removed and client area is extended to the
      * top of the dialog with window controls painted over the client area.
-     * {@code customTitlebar=null} resets to the default appearance with system-provided titlebar.
-     * @see CustomTitlebar
-     * @see #createCustomTitlebar()
+     * {@code customTitleBar=null} resets to the default appearance with system-provided title bar.
+     * @see CustomTitleBar
+     * @see #createCustomTitleBar()
      */
-    void setCustomTitlebar(Dialog dialog, CustomTitlebar customTitlebar);
+    void setCustomTitleBar(Dialog dialog, CustomTitleBar customTitleBar);
 
     /**
-     * You must {@linkplain CustomTitlebar#setHeight(float) set titlebar height} before adding it to a window.
-     * @see CustomTitlebar
-     * @see #setCustomTitlebar(Frame, CustomTitlebar)
-     * @see #setCustomTitlebar(Dialog, CustomTitlebar)
+     * You must {@linkplain CustomTitleBar#setHeight(float) set title bar height} before adding it to a window.
+     * @see CustomTitleBar
+     * @see #setCustomTitleBar(Frame, CustomTitleBar)
+     * @see #setCustomTitleBar(Dialog, CustomTitleBar)
      */
-    CustomTitlebar createCustomTitlebar();
+    CustomTitleBar createCustomTitleBar();
 
     /**
-     * Custom titlebar allows merging of window content with native title bar,
+     * Custom title bar allows merging of window content with native title bar,
      * which is done by treating title bar as part of client area, but with some
      * special behavior like dragging or maximizing on double click.
-     * Custom titlebar has {@linkplain CustomTitlebar#getHeight()  height} and controls.
+     * Custom title bar has {@linkplain CustomTitleBar#getHeight()  height} and controls.
      * @implNote Behavior is platform-dependent, only macOS and Windows are supported.
-     * @see #setCustomTitlebar(Frame, CustomTitlebar)
+     * @see #setCustomTitleBar(Frame, CustomTitleBar)
      */
-    interface CustomTitlebar {
+    interface CustomTitleBar {
 
         /**
-         * @return titlebar height, measured in pixels from the top of client area, i.e. excluding top frame border.
+         * @return title bar height, measured in pixels from the top of client area, i.e. excluding top frame border.
          */
         float getHeight();
 
         /**
-         * @param height titlebar height, measured in pixels from the top of client area,
+         * @param height title bar height, measured in pixels from the top of client area,
          *               i.e. excluding top frame border. Must be > 0.
          */
         void setHeight(float height);
@@ -92,7 +92,7 @@ public interface WindowDecorations {
         /**
          * Windows & macOS properties:
          * <ul>
-         *     <li>{@code controls.visible} : {@link Boolean} - whether titlebar controls
+         *     <li>{@code controls.visible} : {@link Boolean} - whether title bar controls
          *         (minimize/maximize/close buttons) are visible, default = true.</li>
          * </ul>
          * Windows properties:
@@ -117,40 +117,40 @@ public interface WindowDecorations {
         void putProperty(String key, Object value);
 
         /**
-         * @return space occupied by titlebar controls on the left (px)
+         * @return space occupied by title bar controls on the left (px)
          */
         float getLeftInset();
         /**
-         * @return space occupied by titlebar controls on the right (px)
+         * @return space occupied by title bar controls on the right (px)
          */
         float getRightInset();
 
         /**
          * By default, any component which has no cursor or mouse event listeners set is considered transparent for
-         * native titlebar actions. That is, dragging simple JPanel in titlebar area will drag the
+         * native title bar actions. That is, dragging simple JPanel in title bar area will drag the
          * window, but dragging a JButton will not. Adding mouse listener to a component will prevent any native actions
          * inside bounds of that component.
          * <p>
-         * This method gives you precise control of whether to allow native titlebar actions or not.
+         * This method gives you precise control of whether to allow native title bar actions or not.
          * <ul>
-         *     <li>{@code client=true} means that mouse is currently over a client area. Native titlebar behavior is disabled.</li>
-         *     <li>{@code client=false} means that mouse is currently over a non-client area. Native titlebar behavior is enabled.</li>
+         *     <li>{@code client=true} means that mouse is currently over a client area. Native title bar behavior is disabled.</li>
+         *     <li>{@code client=false} means that mouse is currently over a non-client area. Native title bar behavior is enabled.</li>
          * </ul>
          * <em>Intended usage:
          * <ul>
          *     <li>This method must be called in response to all {@linkplain java.awt.event.MouseEvent mouse events}
          *         except {@link java.awt.event.MouseEvent#MOUSE_EXITED} and {@link java.awt.event.MouseEvent#MOUSE_WHEEL}.</li>
          *     <li>This method is called per-event, i.e. when component has multiple listeners, you only need to call it once.</li>
-         *     <li>If this method hadn't been called, titlebar behavior is reverted back to default upon processing the event.</li>
+         *     <li>If this method hadn't been called, title bar behavior is reverted back to default upon processing the event.</li>
          * </ul></em>
-         * Note that hit test value is relevant only for titlebar area, e.g. calling
-         * {@code forceHitTest(false)} will not make window draggable via non-titlebar area.
+         * Note that hit test value is relevant only for title bar area, e.g. calling
+         * {@code forceHitTest(false)} will not make window draggable via non-title bar area.
          *
          * <h2>Example:</h2>
-         * Suppose you have a {@code JPanel} in the titlebar area. You want it to respond to right-click for
+         * Suppose you have a {@code JPanel} in the title bar area. You want it to respond to right-click for
          * some popup menu, but also retain native drag and double-click behavior.
          * <pre>
-         *     CustomTitlebar titlebar = ...;
+         *     CustomTitleBar titlebar = ...;
          *     JPanel panel = ...;
          *     MouseAdapter adapter = new MouseAdapter() {
          *         private void hit() { titlebar.forceHitTest(false); }

@@ -107,7 +107,7 @@ public class CPlatformWindow extends CFRetainedResource implements PlatformWindo
     static native CPlatformWindow nativeGetTopmostPlatformWindowUnderMouse();
     private static native void nativeRaiseLevel(long nsWindowPtr, boolean popup, boolean onlyIfParentIsActive);
     private static native boolean nativeDelayShowing(long nsWindowPtr);
-    private static native void nativeUpdateCustomTitlebar(long nsWindowPtr);
+    private static native void nativeUpdateCustomTitleBar(long nsWindowPtr);
     private static native void nativeCallDeliverMoveResizeEvent(long nsWindowPtr);
     private static native void nativeSetRoundedCorners(long nsWindowPrt, float radius);
 
@@ -1478,10 +1478,10 @@ public class CPlatformWindow extends CFRetainedResource implements PlatformWindo
     }
 
     // JBR API internals
-    private static void updateCustomTitlebar(ComponentPeer peer) {
+    private static void updateCustomTitleBar(ComponentPeer peer) {
         if (peer instanceof LWWindowPeer lwwp &&
             lwwp.getPlatformWindow() instanceof CPlatformWindow cpw)  {
-            cpw.execute(CPlatformWindow::nativeUpdateCustomTitlebar);
+            cpw.execute(CPlatformWindow::nativeUpdateCustomTitleBar);
         }
     }
 
