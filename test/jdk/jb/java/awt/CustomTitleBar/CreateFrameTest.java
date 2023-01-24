@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
  * @test
  * @summary Regression test for JET-5194
  * @requires (os.family == "windows" | os.family == "mac")
+ * @run shell run.sh
  */
 public class CreateFrameTest extends CreateWindowBase {
 
