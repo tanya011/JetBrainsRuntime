@@ -30,7 +30,7 @@ public class CreateFrameTest extends CreateWindowBase {
             SwingUtilities.invokeAndWait(() -> {
                 frame = createFrame();
                 WindowDecorations.CustomTitlebar titleBar = createTitleBar(TITLE_BAR_HEIGHT, true);
-                JBR.getWindowDecorations().setCustomTitlebar(frame, titleBar);
+                JBR.getWindowDecorations().setCustomTitleBar(frame, titleBar);
 
                 frame.addMouseListener(new MouseAdapter() {
                     @Override

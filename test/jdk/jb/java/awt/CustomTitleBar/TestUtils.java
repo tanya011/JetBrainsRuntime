@@ -37,7 +37,7 @@ public class TestUtils {
         frame.setTitle("Frame");
         frame.setBounds(200, 400, 1000, 200);
 
-        JBR.getWindowDecorations().setCustomTitlebar(frame, titleBar);
+        JBR.getWindowDecorations().setCustomTitleBar(frame, titleBar);
 
         frame.setLayout(null);
         frame.setVisible(true);

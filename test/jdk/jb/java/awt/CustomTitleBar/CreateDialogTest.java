@@ -32,7 +32,7 @@ public class CreateDialogTest extends CreateWindowBase {
                 dialog = createDialog();
                 titleBar = createTitleBar(TITLE_BAR_HEIGHT, true);
                 if (JBR.isAvailable()) {
-                    JBR.getWindowDecorations().setCustomTitlebar(dialog, titleBar);
+                    JBR.getWindowDecorations().setCustomTitleBar(dialog, titleBar);
                 }
 
                 dialog.addMouseListener(new MouseAdapter() {

@@ -18,12 +18,11 @@ import com.jetbrains.WindowDecorations;
  */
 public class CommonAPITest {
 
-
     public static void main(String... args) {
         Runner defaultTitleBar = new Runner("Create title bar with default settings") {
             @Override
             public void test() {
-                WindowDecorations.CustomTitlebar titleBar = JBR.getWindowDecorations().createCustomTitlebar();
+                WindowDecorations.CustomTitlebar titleBar = JBR.getWindowDecorations().createCustomTitleBar();
                 titleBar.setHeight(TestUtils.TITLE_BAR_HEIGHT);
                 frame = TestUtils.createFrameWithCustomTitleBar(titleBar);
 
@@ -44,7 +43,7 @@ public class CommonAPITest {
         Runner hiddenSystemControls = new Runner("Hide system controls") {
             @Override
             void test() {
-                WindowDecorations.CustomTitlebar titleBar = JBR.getWindowDecorations().createCustomTitlebar();
+                WindowDecorations.CustomTitlebar titleBar = JBR.getWindowDecorations().createCustomTitleBar();
                 titleBar.setHeight(TestUtils.TITLE_BAR_HEIGHT);
                 titleBar.putProperty("controls.visible", "false");
                 frame = TestUtils.createFrameWithCustomTitleBar(titleBar);
@@ -74,7 +73,7 @@ public class CommonAPITest {
                 float initialHeight = 50;
                 float newHeight = 100;
 
-                WindowDecorations.CustomTitlebar titleBar = JBR.getWindowDecorations().createCustomTitlebar();
+                WindowDecorations.CustomTitlebar titleBar = JBR.getWindowDecorations().createCustomTitleBar();
                 titleBar.setHeight(initialHeight);
                 frame = TestUtils.createFrameWithCustomTitleBar(titleBar);
 

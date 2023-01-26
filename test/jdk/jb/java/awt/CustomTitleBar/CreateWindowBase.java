@@ -63,7 +63,7 @@ public class CreateWindowBase {
     }
 
     protected static WindowDecorations.CustomTitlebar createTitleBar(int height, boolean showControls) {
-        WindowDecorations.CustomTitlebar titleBar = JBR.getWindowDecorations().createCustomTitlebar();
+        WindowDecorations.CustomTitlebar titleBar = JBR.getWindowDecorations().createCustomTitleBar();
         titleBar.setHeight(height);
         titleBar.putProperty("controls.visible", showControls);
 
