@@ -1,20 +1,23 @@
 import com.jetbrains.JBR;
 import com.jetbrains.WindowDecorations;
 
-import java.awt.*;
-
 /**
  * @test
- * @summary Regression test for JET-5194
+ * @summary Regression test for JET-5124
  * @requires (os.family == "windows" | os.family == "mac")
  * @run shell run.sh
- * @run main/manual CommonAPITest
+ * @run main/othervm CommonAPITest -Dsun.java2d.uiScale.enabled=false
+ * @run main/othervm CommonAPITest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0
+ * @run main/othervm CommonAPITest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.25
+ * @run main/othervm CommonAPITest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.5
+ * @run main/othervm CommonAPITest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=2.0
+ * @run main/othervm CommonAPITest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=2.5
+ * @run main/othervm CommonAPITest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=3.0
+ * @run main/othervm CommonAPITest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=3.5
+ * @run main/othervm CommonAPITest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=4.0
  */
 public class CommonAPITest {
 
-
-
-    private static Frame frame;
 
     public static void main(String... args) {
         Runner defaultTitleBar = new Runner("Create title bar with default settings") {
@@ -52,6 +55,11 @@ public class CommonAPITest {
                 if (titleBar.getLeftInset() != 0 || titleBar.getRightInset() != 0) {
                     passed = false;
                     System.out.println("System controls are hidden so insets must be zero");
+                }
+
+                if (!"false".equals(titleBar.getProperties().get("controls.visible").toString())) {
+                    passed = false;
+                    System.out.println("controls.visible isn't false");
                 }
             }
         };
