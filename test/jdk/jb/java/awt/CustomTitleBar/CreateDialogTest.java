@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
  * @summary Regression test for JET-5194
  * @requires (os.family == "windows" | os.family == "mac")
  * @run shell run.sh
+ * @run main/manual CreateDialogTest
  */
 
 public class CreateDialogTest extends CreateWindowBase {
@@ -30,7 +31,9 @@ public class CreateDialogTest extends CreateWindowBase {
             SwingUtilities.invokeAndWait(() -> {
                 dialog = createDialog();
                 titleBar = createTitleBar(TITLE_BAR_HEIGHT, true);
-                JBR.getWindowDecorations().setCustomTitlebar(dialog, titleBar);
+                if (JBR.isAvailable()) {
+                    JBR.getWindowDecorations().setCustomTitlebar(dialog, titleBar);
+                }
 
                 dialog.addMouseListener(new MouseAdapter() {
                     @Override

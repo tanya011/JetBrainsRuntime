@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 # Copyright 2000-2023 JetBrains s.r.o.
 #
@@ -13,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# COMPILEJAVA and TESTJAVA are always in UNIX format, other paths are Win-style on Windows
 
 PATHTOOL=echo
 PATHTOOL_WIN=echo
@@ -42,12 +45,3 @@ fi
 "$COMPILEJAVA/bin/javac$EXE_SUFFIX" $TESTJAVACOPTS -d "$TESTCLASSES" @compile.list || exit $?
 rm "$TESTCLASSES_UNIX/module-info.class"
 exit 0
-
-
-echo "test classes"
-echo $TESTCLASSES
-
-echo "test vm opts"
-echo $TESTVMOPTS
-
-$TESTJAVA/bin/java${EXE_SUFFIX} $TESTVMOPTS $TESTCLASSES CustomDecorationTest
