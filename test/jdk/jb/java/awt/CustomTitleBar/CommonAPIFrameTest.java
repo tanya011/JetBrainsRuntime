@@ -17,6 +17,8 @@
 import com.jetbrains.JBR;
 import com.jetbrains.WindowDecorations;
 
+import java.awt.*;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +46,8 @@ public class CommonAPIFrameTest {
         tests.add(defaultTitleBar);
         tests.add(hiddenSystemControls);
         tests.add(changeTitleBarHeight);
+        tests.add(hitTest);
+        tests.add(actionListener);
 
         tests.forEach(test -> testsSuitePassed = testsSuitePassed && test.run());
 
@@ -124,6 +128,83 @@ public class CommonAPIFrameTest {
             titleBar.setHeight(newHeight);
 
             passed = passed && TestUtils.checkTitleBarHeight(titleBar, newHeight);
+        }
+    };
+
+    private static final Runner hitTest = new Runner("Hit test") {
+
+        private boolean gotMouseClick = false;
+
+        @Override
+        void test() {
+            WindowDecorations.CustomTitleBar titleBar = JBR.getWindowDecorations().createCustomTitleBar();
+            titleBar.setHeight(TestUtils.TITLE_BAR_HEIGHT);
+            window = TestUtils.createFrameWithCustomTitleBar(titleBar);
+
+            Button button = new Button();
+            button.setBounds(200, 20, 80, 40);
+            button.addMouseListener(new MouseAdapter() {
+
+                private void hit() {
+                    titleBar.forceHitTest(false);
+                }
+
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    hit();
+                    if (e.getButton() == 1) {
+                        gotMouseClick = true;
+                    }
+                }
+            });
+            window.add(button);
+
+            try {
+                Robot robot = new Robot();
+                robot.delay(1000);
+                robot.mouseMove(button.getBounds().x + button.getBounds().width / 2, button.getBounds().y + button.getBounds().height / 2);
+                robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+
+                passed = !gotMouseClick;
+            } catch (AWTException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    };
+
+    private static final Runner actionListener = new Runner("Using of action listener") {
+        @Override
+        void test() {
+            WindowDecorations.CustomTitleBar titleBar = JBR.getWindowDecorations().createCustomTitleBar();
+            titleBar.setHeight(TestUtils.TITLE_BAR_HEIGHT);
+            window = TestUtils.createFrameWithCustomTitleBar(titleBar);
+
+            Button button = new Button();
+            button.setBounds(200, 20, 50, 50);
+            button.addActionListener(e -> titleBar.putProperty("controls.visible", !(boolean)titleBar.getProperties().getOrDefault("controls.visible", true)));
+            window.add(button);
+
+            final int initialHeight = window.getHeight();
+            final int initialWidth = window.getWidth();
+
+            try {
+                Robot robot = new Robot();
+                robot.delay(1000);
+                robot.mouseMove(button.getBounds().x + button.getBounds().width / 2, button.getBounds().y + button.getBounds().height / 2);
+                robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                robot.delay(1000);
+
+                if (window.getHeight() != initialHeight || window.getWidth() != initialWidth) {
+                    passed = false;
+                    System.out.println("Adding of action listener should block native title bar behavior");
+                }
+            } catch (AWTException e) {
+                throw new RuntimeException(e);
+            }
         }
     };
 

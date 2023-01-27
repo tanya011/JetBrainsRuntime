@@ -31,9 +31,7 @@ public class CustomTitleBarAction {
 
         Button toggler = new Button();
         toggler.setBounds(200, 20, 50, 50);
-        toggler.addActionListener(e -> {
-            titleBar.putProperty("controls.visible", !(boolean)titleBar.getProperties().getOrDefault("controls.visible", true));
-        });
+        toggler.addActionListener(e -> titleBar.putProperty("controls.visible", !(boolean)titleBar.getProperties().getOrDefault("controls.visible", true)));
         frame.add(toggler);
 
         Button button = new Button();
