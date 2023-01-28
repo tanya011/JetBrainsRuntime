@@ -34,7 +34,7 @@ abstract class Runner {
 
     final boolean run(Function<WindowDecorations.CustomTitleBar, Window> windowCreator) {
         passed = true;
-        System.out.printf("RUN TEST CASE: %s\n%n", name);
+        System.out.printf("RUN TEST CASE: %s%n", name);
         try {
             SwingUtilities.invokeAndWait(() -> {
                 try {
@@ -52,9 +52,9 @@ abstract class Runner {
             SwingUtilities.invokeLater(() -> window.dispose());
         }
         if (passed) {
-            System.out.println("TEST PASSED");
+            System.out.println("TEST CASE PASSED");
         } else {
-            System.out.println("TEST FAILED");
+            System.out.println("TEST CASE FAILED");
         }
         return passed;
     }
