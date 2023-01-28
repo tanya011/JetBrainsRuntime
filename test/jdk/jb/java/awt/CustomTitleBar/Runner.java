@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
+import com.jetbrains.WindowDecorations;
+
 import javax.swing.*;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
+import java.util.function.Function;
 
 abstract class Runner {
 
+    protected WindowDecorations.CustomTitleBar titleBar;
     protected Window window;
     private final String name;
     protected boolean passed = true;
@@ -28,14 +32,20 @@ abstract class Runner {
         this.name = name;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    final boolean run(){
+    final boolean run(Function<WindowDecorations.CustomTitleBar, Window> windowCreator) {
+        passed = true;
         System.out.printf("RUN TEST CASE: %s\n%n", name);
         try {
-            SwingUtilities.invokeAndWait(this::test);
+            SwingUtilities.invokeAndWait(() -> {
+                try {
+                    prepare();
+                    window = windowCreator.apply(titleBar);
+                    test();
+                } catch (AWTException e) {
+                    passed = false;
+                    throw new RuntimeException(e);
+                }
+            });
         } catch (InterruptedException | InvocationTargetException e) {
             throw new RuntimeException(e);
         } finally {
@@ -49,6 +59,8 @@ abstract class Runner {
         return passed;
     }
 
-    abstract void test();
+    abstract void prepare();
+
+    abstract void test() throws AWTException;
 
 }

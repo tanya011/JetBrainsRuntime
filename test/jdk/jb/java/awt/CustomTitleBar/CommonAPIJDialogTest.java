@@ -18,16 +18,17 @@
  * @test
  * @summary Regression test for JET-5124
  * @requires (os.family == "windows" | os.family == "mac")
+ * @build TestUtils Runner
  * @run shell run.sh
- * @run main CommonAPIFrameTest
+ * @run main CommonAPIJDialogTest
  */
-public class CommonAPIFrameTest {
+public class CommonAPIJDialogTest {
 
     public static void main(String... args) {
-        boolean status = CommonAPISuite.runTestSuite(TestUtils::createFrameWithCustomTitleBar);
+        boolean status = CommonAPISuite.runTestSuite(TestUtils::createJDialogWithCustomTitleBar);
 
         if (!status) {
-            throw new RuntimeException("CommonAPIFrameTest FAILED");
+            throw new RuntimeException("CommonAPIJDialogTest FAILED");
         }
     }
 

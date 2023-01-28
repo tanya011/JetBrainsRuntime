@@ -17,6 +17,7 @@
 import com.jetbrains.JBR;
 import com.jetbrains.WindowDecorations;
 
+import javax.swing.*;
 import java.awt.*;
 
 public class TestUtils {
@@ -62,6 +63,27 @@ public class TestUtils {
         return frame;
     }
 
+    static Frame createJFrameWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {
+        JFrame frame = new JFrame(){
+            @Override
+            public void paint(Graphics g) {
+                Rectangle r = g.getClipBounds();
+                g.setColor(TITLE_BAR_COLOR);
+                g.fillRect(r.x, r.y, r.width, (int) TITLE_BAR_HEIGHT);
+                super.paint(g);
+            }
+        };
+        frame.setTitle("JFrame");
+        frame.setBounds(200, 400, 1000, 200);
+
+        JBR.getWindowDecorations().setCustomTitleBar(frame, titleBar);
+
+        frame.setLayout(null);
+        frame.setVisible(true);
+
+        return frame;
+    }
+
     static Dialog createDialogWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {
         Dialog dialog = new Dialog((Frame) null){
             @Override
@@ -73,6 +95,27 @@ public class TestUtils {
             }
         };
         dialog.setTitle("Dialog");
+        dialog.setBounds(200, 400, 1000, 200);
+
+        JBR.getWindowDecorations().setCustomTitleBar(dialog, titleBar);
+
+        dialog.setLayout(null);
+        dialog.setVisible(true);
+
+        return dialog;
+    }
+
+    static JDialog createJDialogWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {
+        JDialog dialog = new JDialog((Frame) null){
+            @Override
+            public void paint(Graphics g) {
+                Rectangle r = g.getClipBounds();
+                g.setColor(TITLE_BAR_COLOR);
+                g.fillRect(r.x, r.y, r.width, (int) TITLE_BAR_HEIGHT);
+                super.paint(g);
+            }
+        };
+        dialog.setTitle("JDialog");
         dialog.setBounds(200, 400, 1000, 200);
 
         JBR.getWindowDecorations().setCustomTitleBar(dialog, titleBar);
