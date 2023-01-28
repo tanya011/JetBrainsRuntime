@@ -32,66 +32,25 @@ public class CommonAPISuite {
 
     static boolean runTestSuite(Function<WindowDecorations.CustomTitleBar, Window> windowCreator) {
         final List<Runner> tests = List.of(
-                defaultTitleBar,
-                hiddenSystemControls,
                 changeTitleBarHeight,
                 hitTestNonClientArea,
+                hitTestClientArea,
                 nativeControlsVisibility,
                 actionListener
         );
 
         AtomicBoolean testsSuitePassed = new AtomicBoolean(true);
-        tests.forEach(test -> testsSuitePassed.set(testsSuitePassed.get() && test.run(TestUtils::createDialogWithCustomTitleBar)));
+        tests.forEach(test -> testsSuitePassed.set(testsSuitePassed.get() && test.run(windowCreator)));
 
         return testsSuitePassed.get();
     }
 
-    private static final Runner defaultTitleBar = new Runner("Create title bar with default settings") {
+    static boolean runTest(List<Function<WindowDecorations.CustomTitleBar, Window>> functions, Runner runner) {
+        AtomicBoolean testPassed = new AtomicBoolean(true);
+        functions.forEach(function -> testPassed.set(testPassed.get() && runner.run(function)));
 
-        @Override
-        void prepare() {
-            titleBar = JBR.getWindowDecorations().createCustomTitleBar();
-            titleBar.setHeight(TestUtils.TITLE_BAR_HEIGHT);
-        }
-
-        @Override
-        public void test() {
-            passed = passed && TestUtils.checkTitleBarHeight(titleBar, TestUtils.TITLE_BAR_HEIGHT);
-            passed = passed && TestUtils.checkFrameInsets(window);
-
-            if (titleBar.getLeftInset() == 0 && titleBar.getRightInset() == 0) {
-                passed = false;
-                System.out.println("Left or right space must be occupied by system controls");
-            }
-        }
-    };
-
-    private static final Runner hiddenSystemControls = new Runner("Hide system controls") {
-
-        private static final String PROPERTY_NAME = "controls.visible";
-
-        @Override
-        void prepare() {
-            titleBar = JBR.getWindowDecorations().createCustomTitleBar();
-            titleBar.setHeight(TestUtils.TITLE_BAR_HEIGHT);
-            titleBar.putProperty(PROPERTY_NAME, "false");
-        }
-
-        @Override
-        void test()  {
-            passed = passed && TestUtils.checkTitleBarHeight(titleBar, TestUtils.TITLE_BAR_HEIGHT);
-            passed = passed && TestUtils.checkFrameInsets(window);
-
-            if (!"false".equals(titleBar.getProperties().get(PROPERTY_NAME).toString())) {
-                passed = false;
-                System.out.println("controls.visible isn't false");
-            }
-            if (titleBar.getLeftInset() != 0 || titleBar.getRightInset() != 0) {
-                passed = false;
-                System.out.println("System controls are hidden so insets must be zero");
-            }
-        }
-    };
+        return testPassed.get();
+    }
 
     private static final Runner changeTitleBarHeight = new Runner("Changing of title bar height") {
 

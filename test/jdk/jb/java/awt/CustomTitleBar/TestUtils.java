@@ -17,13 +17,29 @@
 import com.jetbrains.JBR;
 import com.jetbrains.WindowDecorations;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import java.awt.Color;
+import java.awt.Dialog;
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.Window;
+import java.util.List;
+import java.util.function.Function;
 
 public class TestUtils {
 
     static final float TITLE_BAR_HEIGHT = 100;
     static final Color TITLE_BAR_COLOR = Color.BLUE;
+
+    private static List<Function<WindowDecorations.CustomTitleBar, Window>> windowCreationFunctions = List.of(
+            TestUtils::createDialogWithCustomTitleBar,
+            TestUtils::createFrameWithCustomTitleBar,
+            TestUtils::createJDialogWithCustomTitleBar,
+            TestUtils::createJDialogWithCustomTitleBar
+    );
 
     static boolean checkTitleBarHeight(WindowDecorations.CustomTitleBar titleBar, float expected) {
         if (titleBar.getHeight() != expected) {
@@ -40,6 +56,10 @@ public class TestUtils {
             return false;
         }
         return true;
+    }
+
+    static List<Function<WindowDecorations.CustomTitleBar, Window>> getWindowCreationFunctions() {
+        return windowCreationFunctions;
     }
 
     static Frame createFrameWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {

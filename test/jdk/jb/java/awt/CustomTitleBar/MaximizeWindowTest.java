@@ -36,7 +36,7 @@ import java.util.function.Function;
  * @run shell run.sh
  * @run main TitleBarNativeBehaviorTest
  */
-public class TitleBarNativeBehaviorTest {
+public class MaximizeWindowTest {
 
     public static void main(String... args) {
         List<Function<WindowDecorations.CustomTitleBar, Window>> functions = List.of(
@@ -50,7 +50,7 @@ public class TitleBarNativeBehaviorTest {
         functions.forEach(function -> testsSuitePassed.set(testsSuitePassed.get() && maximizeWindow.run(function)));
 
         if (!testsSuitePassed.get()) {
-            throw new RuntimeException("TitleBarNativeBehaviorTest FAILED");
+            throw new RuntimeException("MaximizeWindowTest FAILED");
         }
     }
 
