@@ -19,7 +19,7 @@
  * @summary Regression test for JET-5124
  * @requires (os.family == "windows" | os.family == "mac")
  * @run shell run.sh
- * @run main CommonAPIDialogTest -Dsun.java2d.uiScale.enabled=false
+ * @run main CommonAPIDialogTest
  */
 public class CommonAPIDialogTest {
 

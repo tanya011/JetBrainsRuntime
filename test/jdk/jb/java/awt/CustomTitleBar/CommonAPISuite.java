@@ -35,7 +35,7 @@ public class CommonAPISuite {
                 defaultTitleBar,
                 hiddenSystemControls,
                 changeTitleBarHeight,
-                hitTest,
+                hitTestNonClientArea,
                 nativeControlsVisibility,
                 actionListener
         );
@@ -99,13 +99,12 @@ public class CommonAPISuite {
 
         @Override
         void prepare() {
-            WindowDecorations.CustomTitleBar titleBar = JBR.getWindowDecorations().createCustomTitleBar();
+            titleBar = JBR.getWindowDecorations().createCustomTitleBar();
             titleBar.setHeight(initialHeight);
         }
 
         @Override
         void test() {
-            window = TestUtils.createDialogWithCustomTitleBar(titleBar);
             passed = passed && TestUtils.checkTitleBarHeight(titleBar, initialHeight);
 
             float newHeight = 100;
@@ -114,7 +113,7 @@ public class CommonAPISuite {
         }
     };
 
-    private static final Runner hitTest = new Runner("Hit test") {
+    private static final Runner hitTestNonClientArea = new Runner("Hit test non-client area") {
 
         private boolean gotMouseClick = false;
 
@@ -125,7 +124,7 @@ public class CommonAPISuite {
         }
 
         @Override
-        void test() {
+        void test() throws AWTException {
             Button button = new Button();
             button.setBounds(200, 20, 80, 40);
             button.addMouseListener(new MouseAdapter() {
@@ -144,18 +143,54 @@ public class CommonAPISuite {
             });
             window.add(button);
 
-            try {
-                Robot robot = new Robot();
-                robot.delay(1000);
-                robot.mouseMove(button.getBounds().x + button.getBounds().width / 2, button.getBounds().y + button.getBounds().height / 2);
-                robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-                robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+            Robot robot = new Robot();
+            robot.delay(1000);
+            robot.mouseMove(button.getBounds().x + button.getBounds().width / 2, button.getBounds().y + button.getBounds().height / 2);
+            robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+            robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
 
-                passed = !gotMouseClick;
-            } catch (AWTException e) {
-                throw new RuntimeException(e);
-            }
+            passed = !gotMouseClick;
         }
+    };
+
+    private static final Runner hitTestClientArea = new Runner("Hit test client area") {
+
+        private boolean gotMouseClick = false;
+        @Override
+        void prepare() {
+            titleBar = JBR.getWindowDecorations().createCustomTitleBar();
+            titleBar.setHeight(TestUtils.TITLE_BAR_HEIGHT);
+        }
+
+        @Override
+        void test() throws AWTException {
+            Button button = new Button();
+            button.setBounds(200, 20, 80, 40);
+            button.addMouseListener(new MouseAdapter() {
+
+                private void hit() {
+                    titleBar.forceHitTest(true);
+                }
+
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    hit();
+                    if (e.getButton() == 1) {
+                        gotMouseClick = true;
+                    }
+                }
+            });
+            window.add(button);
+
+            Robot robot = new Robot();
+            robot.delay(1000);
+            robot.mouseMove(button.getBounds().x + button.getBounds().width / 2, button.getBounds().y + button.getBounds().height / 2);
+            robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+            robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+
+            passed = gotMouseClick;
+        }
+
     };
 
     private static final Runner nativeControlsVisibility = new Runner("Native controls visibility") {

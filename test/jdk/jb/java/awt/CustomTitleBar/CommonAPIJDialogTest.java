@@ -18,7 +18,6 @@
  * @test
  * @summary Regression test for JET-5124
  * @requires (os.family == "windows" | os.family == "mac")
- * @build TestUtils Runner
  * @run shell run.sh
  * @run main CommonAPIJDialogTest
  */
