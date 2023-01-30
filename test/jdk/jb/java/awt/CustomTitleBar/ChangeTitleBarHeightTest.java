@@ -24,35 +24,35 @@ import util.TestUtils;
  * @summary Regression test for JET-5124
  * @requires (os.family == "windows" | os.family == "mac")
  * @run shell run.sh
- * @run main CreateTitleBarTest
+ * @run main ChangeTitleBarHeightTest
  */
-public class CreateTitleBarTest {
+public class ChangeTitleBarHeightTest {
 
     public static void main(String... args) {
-        boolean status = CommonAPISuite.runTestSuite(TestUtils.getWindowCreationFunctions(), createTitleBar);
+        boolean status = CommonAPISuite.runTestSuite(TestUtils.getWindowCreationFunctions(), changeTitleBarHeight);
 
         if (!status) {
-            throw new RuntimeException("CreateTitleBarTest FAILED");
+            throw new RuntimeException("ChangeTitleBarHeightTest FAILED");
         }
     }
 
-    private static final Runner createTitleBar = new Runner("Create title bar with default settings") {
+    private static final Runner changeTitleBarHeight = new Runner("Changing of title bar height") {
+
+        private final float initialHeight = 50;
 
         @Override
         public void prepareTitleBar() {
             titleBar = JBR.getWindowDecorations().createCustomTitleBar();
-            titleBar.setHeight(TestUtils.TITLE_BAR_HEIGHT);
+            titleBar.setHeight(initialHeight);
         }
 
         @Override
         public void test() {
-            passed = passed && TestUtils.checkTitleBarHeight(titleBar, TestUtils.TITLE_BAR_HEIGHT);
-            passed = passed && TestUtils.checkFrameInsets(window);
+            passed = passed && TestUtils.checkTitleBarHeight(titleBar, initialHeight);
 
-            if (titleBar.getLeftInset() == 0 && titleBar.getRightInset() == 0) {
-                passed = false;
-                System.out.println("Left or right space must be occupied by system controls");
-            }
+            float newHeight = 100;
+            titleBar.setHeight(newHeight);
+            passed = passed && TestUtils.checkTitleBarHeight(titleBar, newHeight);
         }
     };
 

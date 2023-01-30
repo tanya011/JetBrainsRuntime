@@ -16,6 +16,9 @@
 
 import com.jetbrains.JBR;
 import com.jetbrains.WindowDecorations;
+import util.CommonAPISuite;
+import util.Runner;
+import util.TestUtils;
 
 import java.awt.AWTException;
 import java.awt.Dialog;
@@ -25,31 +28,20 @@ import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.InputEvent;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
 
 /*
  * @test
  * @summary Regression test for JET-5124
  * @requires (os.family == "windows" | os.family == "mac")
  * @run shell run.sh
- * @run main TitleBarNativeBehaviorTest
+ * @run main MaximizeWindowTest
  */
 public class MaximizeWindowTest {
 
     public static void main(String... args) {
-        List<Function<WindowDecorations.CustomTitleBar, Window>> functions = List.of(
-                TestUtils::createDialogWithCustomTitleBar,
-                TestUtils::createFrameWithCustomTitleBar,
-                TestUtils::createJDialogWithCustomTitleBar,
-                TestUtils::createJFrameWithCustomTitleBar
-        );
+        boolean status = CommonAPISuite.runTestSuite(TestUtils.getWindowCreationFunctions(), maximizeWindow);
 
-        final AtomicBoolean testsSuitePassed = new AtomicBoolean(true);
-        functions.forEach(function -> testsSuitePassed.set(testsSuitePassed.get() && maximizeWindow.run(function)));
-
-        if (!testsSuitePassed.get()) {
+        if (!status) {
             throw new RuntimeException("MaximizeWindowTest FAILED");
         }
     }
@@ -57,13 +49,13 @@ public class MaximizeWindowTest {
     private static final Runner maximizeWindow = new Runner("Maximize frame") {
 
         @Override
-        void prepare() {
+        public void prepareTitleBar() {
             titleBar = JBR.getWindowDecorations().createCustomTitleBar();
             titleBar.setHeight(TestUtils.TITLE_BAR_HEIGHT);
         }
 
         @Override
-        void test() throws AWTException {
+        public void test() throws AWTException {
             setResizable(true);
             setWindowSize(window, titleBar);
             int initialWidth = window.getWidth();

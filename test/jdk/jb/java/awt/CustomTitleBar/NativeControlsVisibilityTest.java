@@ -15,6 +15,9 @@
  */
 
 import com.jetbrains.JBR;
+import util.CommonAPISuite;
+import util.Runner;
+import util.TestUtils;
 
 /*
  * @test
@@ -26,7 +29,7 @@ import com.jetbrains.JBR;
 public class NativeControlsVisibilityTest {
 
     public static void main(String... args) {
-        boolean status = CommonAPISuite.runTest(TestUtils.getWindowCreationFunctions(), test);
+        boolean status = CommonAPISuite.runTestSuite(TestUtils.getWindowCreationFunctions(), test);
 
         if (!status) {
             throw new RuntimeException("NativeControlsVisibilityTest FAILED");
@@ -38,14 +41,14 @@ public class NativeControlsVisibilityTest {
         private static final String PROPERTY_NAME = "controls.visible";
 
         @Override
-        void prepare() {
+        public void prepareTitleBar() {
             titleBar = JBR.getWindowDecorations().createCustomTitleBar();
             titleBar.setHeight(TestUtils.TITLE_BAR_HEIGHT);
             titleBar.putProperty(PROPERTY_NAME, "false");
         }
 
         @Override
-        void test()  {
+        public void test()  {
             passed = passed && TestUtils.checkTitleBarHeight(titleBar, TestUtils.TITLE_BAR_HEIGHT);
             passed = passed && TestUtils.checkFrameInsets(window);
 

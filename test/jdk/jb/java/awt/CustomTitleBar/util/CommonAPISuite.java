@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-/*
- * @test
- * @summary Regression test for JET-5124
- * @requires (os.family == "windows" | os.family == "mac")
- * @run shell run.sh
- * @run main CommonAPIDialogTest
- */
-public class CommonAPIDialogTest {
+package util;
 
-    public static void main(String... args) {
-        boolean status = CommonAPISuite.runTestSuite(TestUtils::createDialogWithCustomTitleBar);
+import com.jetbrains.WindowDecorations;
 
-        if (!status) {
-            throw new RuntimeException("CommonAPIDialogTest FAILED");
-        }
+import java.awt.Window;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+
+public class CommonAPISuite {
+
+    public static boolean runTestSuite(List<Function<WindowDecorations.CustomTitleBar, Window>> functions, Runner runner) {
+        AtomicBoolean testPassed = new AtomicBoolean(true);
+        functions.forEach(function -> testPassed.set(testPassed.get() && runner.run(function)));
+
+        return testPassed.get();
     }
 
 }

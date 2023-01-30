@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+package util;
+
 import com.jetbrains.JBR;
 import com.jetbrains.WindowDecorations;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.Frame;
@@ -31,17 +34,17 @@ import java.util.function.Function;
 
 public class TestUtils {
 
-    static final float TITLE_BAR_HEIGHT = 100;
-    static final Color TITLE_BAR_COLOR = Color.BLUE;
+    public static final float TITLE_BAR_HEIGHT = 100;
+    public static final Color TITLE_BAR_COLOR = Color.BLUE;
 
-    private static List<Function<WindowDecorations.CustomTitleBar, Window>> windowCreationFunctions = List.of(
-            TestUtils::createDialogWithCustomTitleBar,
+    private static final List<Function<WindowDecorations.CustomTitleBar, Window>> windowCreationFunctions = List.of(
+            TestUtils::createJFrameWithCustomTitleBar,
             TestUtils::createFrameWithCustomTitleBar,
             TestUtils::createJDialogWithCustomTitleBar,
-            TestUtils::createJDialogWithCustomTitleBar
+            TestUtils::createDialogWithCustomTitleBar
     );
 
-    static boolean checkTitleBarHeight(WindowDecorations.CustomTitleBar titleBar, float expected) {
+    public static boolean checkTitleBarHeight(WindowDecorations.CustomTitleBar titleBar, float expected) {
         if (titleBar.getHeight() != expected) {
             System.out.printf(String.format("Wrong title bar height. Actual = %f, expected = %d\n", titleBar.getHeight(), expected));
             return false;
@@ -49,7 +52,7 @@ public class TestUtils {
         return true;
     }
 
-    static boolean checkFrameInsets(Window window) {
+    public static boolean checkFrameInsets(Window window) {
         Insets insets = window.getInsets();
         if (!(insets.top == 0 && insets.right == 0 && insets.left == 0 && insets.bottom == 0)) {
             System.out.println("Frame insets must be zero, but got " + insets);
@@ -58,90 +61,86 @@ public class TestUtils {
         return true;
     }
 
-    static List<Function<WindowDecorations.CustomTitleBar, Window>> getWindowCreationFunctions() {
+    public static List<Function<WindowDecorations.CustomTitleBar, Window>> getWindowCreationFunctions() {
         return windowCreationFunctions;
     }
 
-    static Frame createFrameWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {
+    private static Frame createFrameWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {
         Frame frame = new Frame(){
             @Override
             public void paint(Graphics g) {
                 Rectangle r = g.getClipBounds();
                 g.setColor(TITLE_BAR_COLOR);
                 g.fillRect(r.x, r.y, r.width, (int) TITLE_BAR_HEIGHT);
-                super.paint(g);
             }
         };
+        frame.setName("Frame");
+
         frame.setTitle("Frame");
         frame.setBounds(200, 400, 1000, 200);
 
         JBR.getWindowDecorations().setCustomTitleBar(frame, titleBar);
 
-        frame.setLayout(null);
-        frame.setVisible(true);
-
         return frame;
     }
 
-    static Frame createJFrameWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {
-        JFrame frame = new JFrame(){
+    private static JFrame createJFrameWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {
+        JFrame frame = new JFrame();
+        frame.setContentPane(new JPanel() {
             @Override
-            public void paint(Graphics g) {
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
                 Rectangle r = g.getClipBounds();
-                g.setColor(TITLE_BAR_COLOR);
-                g.fillRect(r.x, r.y, r.width, (int) TITLE_BAR_HEIGHT);
-                super.paint(g);
+                g.setColor(Color.BLUE);
+                g.fillRect(r.x, r.y, r.width, 100);
             }
-        };
+        });
+        frame.setName("JFrame");
+
         frame.setTitle("JFrame");
         frame.setBounds(200, 400, 1000, 200);
 
         JBR.getWindowDecorations().setCustomTitleBar(frame, titleBar);
 
-        frame.setLayout(null);
-        frame.setVisible(true);
-
         return frame;
     }
 
-    static Dialog createDialogWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {
+    private static Dialog createDialogWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {
         Dialog dialog = new Dialog((Frame) null){
             @Override
             public void paint(Graphics g) {
                 Rectangle r = g.getClipBounds();
                 g.setColor(TITLE_BAR_COLOR);
                 g.fillRect(r.x, r.y, r.width, (int) TITLE_BAR_HEIGHT);
-                super.paint(g);
             }
         };
+        dialog.setName("Dialog");
+
         dialog.setTitle("Dialog");
         dialog.setBounds(200, 400, 1000, 200);
 
         JBR.getWindowDecorations().setCustomTitleBar(dialog, titleBar);
 
-        dialog.setLayout(null);
-        dialog.setVisible(true);
-
         return dialog;
     }
 
-    static JDialog createJDialogWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {
-        JDialog dialog = new JDialog((Frame) null){
+    private static JDialog createJDialogWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {
+        JDialog dialog = new JDialog();
+        dialog.setContentPane(new JPanel() {
             @Override
-            public void paint(Graphics g) {
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
                 Rectangle r = g.getClipBounds();
                 g.setColor(TITLE_BAR_COLOR);
                 g.fillRect(r.x, r.y, r.width, (int) TITLE_BAR_HEIGHT);
-                super.paint(g);
             }
-        };
+        });
+        dialog.setName("JDialog");
+
         dialog.setTitle("JDialog");
         dialog.setBounds(200, 400, 1000, 200);
 
         JBR.getWindowDecorations().setCustomTitleBar(dialog, titleBar);
-
-        dialog.setLayout(null);
-        dialog.setVisible(true);
 
         return dialog;
     }

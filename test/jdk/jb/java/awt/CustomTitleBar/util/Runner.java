@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+package util;
+
 import com.jetbrains.WindowDecorations;
 
 import javax.swing.*;
@@ -21,36 +23,35 @@ import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
 
-abstract class Runner {
+abstract public class Runner {
 
     protected WindowDecorations.CustomTitleBar titleBar;
     protected Window window;
     private final String name;
     protected boolean passed = true;
 
-    Runner(String name) {
+    public Runner(String name) {
         this.name = name;
     }
 
-    final boolean run(Function<WindowDecorations.CustomTitleBar, Window> windowCreator) {
-        passed = true;
+    public final boolean run(Function<WindowDecorations.CustomTitleBar, Window> windowCreator) {
         System.out.printf("RUN TEST CASE: %s%n", name);
+        passed = true;
+        prepareTitleBar();
+        window = windowCreator.apply(titleBar);
+        System.out.println("Created a window with the custom title bar. Window name: " + window.getName());
+        customizeWindow();
+
+        window.setVisible(true);
         try {
-            SwingUtilities.invokeAndWait(() -> {
-                try {
-                    prepare();
-                    window = windowCreator.apply(titleBar);
-                    test();
-                } catch (AWTException e) {
-                    passed = false;
-                    throw new RuntimeException(e);
-                }
-            });
-        } catch (InterruptedException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        } finally {
-            SwingUtilities.invokeLater(() -> window.dispose());
+            test();
+        } catch (AWTException e) {
+            e.printStackTrace();
+            passed = false;
         }
+
+        window.dispose();
+
         if (passed) {
             System.out.println("TEST CASE PASSED");
         } else {
@@ -59,8 +60,11 @@ abstract class Runner {
         return passed;
     }
 
-    abstract void prepare();
+    abstract public void prepareTitleBar();
 
-    abstract void test() throws AWTException;
+    protected void customizeWindow() {
+    }
+
+    abstract public void test() throws AWTException;
 
 }
