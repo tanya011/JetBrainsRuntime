@@ -125,8 +125,6 @@ public class HitTest {
 
         @Override
         public void test() throws AWTException {
-            System.out.println("created");
-
             Robot robot = new Robot();
             robot.delay(1000);
 
@@ -148,10 +146,6 @@ public class HitTest {
             robot.mouseRelease(InputEvent.BUTTON3_DOWN_MASK);
 
             robot.delay(1000);
-
-            System.out.println("1 =" + gotButton1Click);
-            System.out.println("2 =" + gotButton2Click);
-            System.out.println("3 =" + gotButton3Click);
 
             Point initialLocation = window.getLocationOnScreen();
 

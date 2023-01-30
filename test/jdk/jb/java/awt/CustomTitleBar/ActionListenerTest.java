@@ -19,7 +19,6 @@ import util.CommonAPISuite;
 import util.Runner;
 import util.TestUtils;
 
-import javax.swing.JButton;
 import java.awt.AWTException;
 import java.awt.Button;
 import java.awt.Robot;

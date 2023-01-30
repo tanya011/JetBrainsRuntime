@@ -17,8 +17,16 @@
 import com.jetbrains.JBR;
 import com.jetbrains.WindowDecorations;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Button;
+import java.awt.Color;
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.awt.TextArea;
+import java.awt.TextField;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 
 public class CustomTitleBarAction {
 

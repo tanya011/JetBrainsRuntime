@@ -30,9 +30,6 @@ PWD=`$PATHTOOL_WIN "$PWD"`
 TESTSRC_UNIX=`$PATHTOOL "$TESTSRC"`
 TESTCLASSES_UNIX=`$PATHTOOL "$TESTCLASSES"`
 
-echo "PASSSSS"
-echo $PWD
-
 SRC="$TESTSRC/../../../../../../src"
 SRC_UNIX="$TESTSRC_UNIX/../../../../../../src"
 # Generate sources
