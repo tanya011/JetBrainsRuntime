@@ -16,7 +16,7 @@
 
 import com.jetbrains.JBR;
 import util.CommonAPISuite;
-import util.Runner;
+import util.Task;
 import util.TestUtils;
 
 /*
@@ -36,7 +36,7 @@ public class ChangeTitleBarHeightTest {
         }
     }
 
-    private static final Runner changeTitleBarHeight = new Runner("Changing of title bar height") {
+    private static final Task changeTitleBarHeight = new Task("Changing of title bar height") {
 
         private final float initialHeight = 50;
 

@@ -16,7 +16,7 @@
 
 import com.jetbrains.JBR;
 import util.CommonAPISuite;
-import util.Runner;
+import util.Task;
 import util.TestUtils;
 
 /*
@@ -36,7 +36,7 @@ public class CreateTitleBarTest {
         }
     }
 
-    private static final Runner createTitleBar = new Runner("Create title bar with default settings") {
+    private static final Task createTitleBar = new Task("Create title bar with default settings") {
 
         @Override
         public void prepareTitleBar() {

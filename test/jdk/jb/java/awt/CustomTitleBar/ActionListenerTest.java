@@ -16,7 +16,7 @@
 
 import com.jetbrains.JBR;
 import util.CommonAPISuite;
-import util.Runner;
+import util.Task;
 import util.TestUtils;
 
 import java.awt.AWTException;
@@ -41,7 +41,7 @@ public class ActionListenerTest {
         }
     }
 
-    private static final Runner actionListener = new Runner("Using of action listener") {
+    private static final Task actionListener = new Task("Using of action listener") {
 
         private Button button;
 

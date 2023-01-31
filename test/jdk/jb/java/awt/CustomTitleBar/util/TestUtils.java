@@ -37,6 +37,12 @@ public class TestUtils {
     public static final float TITLE_BAR_HEIGHT = 100;
     public static final Color TITLE_BAR_COLOR = Color.BLUE;
 
+    public static final int DEFAULT_LOCATION_X = 100;
+    public static final int DEFAULT_LOCATION_Y = 100;
+    private static final int DEFAULT_WIDTH = 1200;
+    private static final int DEFAULT_HEIGHT = 600;
+
+
     private static final List<Function<WindowDecorations.CustomTitleBar, Window>> windowCreationFunctions = List.of(
             TestUtils::createJFrameWithCustomTitleBar,
             TestUtils::createFrameWithCustomTitleBar,
@@ -77,7 +83,7 @@ public class TestUtils {
         frame.setName("Frame");
 
         frame.setTitle("Frame");
-        frame.setBounds(200, 400, 1000, 200);
+        frame.setBounds(DEFAULT_LOCATION_X, DEFAULT_LOCATION_Y, DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
         JBR.getWindowDecorations().setCustomTitleBar(frame, titleBar);
 
@@ -98,7 +104,7 @@ public class TestUtils {
         frame.setName("JFrame");
 
         frame.setTitle("JFrame");
-        frame.setBounds(200, 400, 1000, 200);
+        frame.setBounds(DEFAULT_LOCATION_X, DEFAULT_LOCATION_Y, DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
         JBR.getWindowDecorations().setCustomTitleBar(frame, titleBar);
 
@@ -117,7 +123,7 @@ public class TestUtils {
         dialog.setName("Dialog");
 
         dialog.setTitle("Dialog");
-        dialog.setBounds(200, 400, 1000, 200);
+        dialog.setBounds(DEFAULT_LOCATION_X, DEFAULT_LOCATION_Y, DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
         JBR.getWindowDecorations().setCustomTitleBar(dialog, titleBar);
 
@@ -138,7 +144,7 @@ public class TestUtils {
         dialog.setName("JDialog");
 
         dialog.setTitle("JDialog");
-        dialog.setBounds(200, 400, 1000, 200);
+        dialog.setBounds(DEFAULT_LOCATION_X, DEFAULT_LOCATION_Y, DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
         JBR.getWindowDecorations().setCustomTitleBar(dialog, titleBar);
 

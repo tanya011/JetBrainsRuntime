@@ -16,8 +16,15 @@
 
 import com.jetbrains.JBR;
 import util.CommonAPISuite;
-import util.Runner;
+import util.Task;
+import util.TestHelpers;
 import util.TestUtils;
+
+import javax.imageio.ImageIO;
+import java.awt.AWTException;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.nio.file.Paths;
 
 /*
  * @test
@@ -36,7 +43,7 @@ public class NativeControlsVisibilityTest {
         }
     }
 
-    private static final Runner test = new Runner("Hide and show system controls") {
+    private static final Task test = new Task("Hide and show system controls") {
 
         private static final String PROPERTY_NAME = "controls.visible";
 
@@ -48,7 +55,7 @@ public class NativeControlsVisibilityTest {
         }
 
         @Override
-        public void test()  {
+        public void test() throws Exception {
             passed = passed && TestUtils.checkTitleBarHeight(titleBar, TestUtils.TITLE_BAR_HEIGHT);
             passed = passed && TestUtils.checkFrameInsets(window);
 
@@ -60,7 +67,9 @@ public class NativeControlsVisibilityTest {
                 passed = false;
                 System.out.println("System controls are hidden so insets must be zero");
             }
+
         }
+
     };
 
 }

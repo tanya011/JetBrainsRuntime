@@ -25,9 +25,9 @@ import java.util.function.Function;
 
 public class CommonAPISuite {
 
-    public static boolean runTestSuite(List<Function<WindowDecorations.CustomTitleBar, Window>> functions, Runner runner) {
+    public static boolean runTestSuite(List<Function<WindowDecorations.CustomTitleBar, Window>> functions, Task task) {
         AtomicBoolean testPassed = new AtomicBoolean(true);
-        functions.forEach(function -> testPassed.set(testPassed.get() && runner.run(function)));
+        functions.forEach(function -> testPassed.set(testPassed.get() && task.run(function)));
 
         return testPassed.get();
     }

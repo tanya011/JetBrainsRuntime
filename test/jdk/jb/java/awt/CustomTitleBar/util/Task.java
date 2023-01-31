@@ -18,23 +18,24 @@ package util;
 
 import com.jetbrains.WindowDecorations;
 
-import javax.swing.*;
 import java.awt.*;
-import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
 
-abstract public class Runner {
+abstract public class Task {
+
+    private final String name;
 
     protected WindowDecorations.CustomTitleBar titleBar;
     protected Window window;
-    private final String name;
     protected boolean passed = true;
 
-    public Runner(String name) {
+
+    public Task(String name) {
         this.name = name;
     }
 
     public final boolean run(Function<WindowDecorations.CustomTitleBar, Window> windowCreator) {
+        cleanup();
         System.out.printf("RUN TEST CASE: %s%n", name);
         passed = true;
         prepareTitleBar();
@@ -45,7 +46,8 @@ abstract public class Runner {
         window.setVisible(true);
         try {
             test();
-        } catch (AWTException e) {
+        } catch (Exception e) {
+            System.out.println("ERROR: An error occurred during tests execution");
             e.printStackTrace();
             passed = false;
         }
@@ -53,11 +55,14 @@ abstract public class Runner {
         window.dispose();
 
         if (passed) {
-            System.out.println("TEST CASE PASSED");
+            System.out.println("State: PASSED");
         } else {
-            System.out.println("TEST CASE FAILED");
+            System.out.println("State: FAILED");
         }
         return passed;
+    }
+
+    protected void cleanup() {
     }
 
     abstract public void prepareTitleBar();
@@ -65,6 +70,6 @@ abstract public class Runner {
     protected void customizeWindow() {
     }
 
-    abstract public void test() throws AWTException;
+    abstract public void test() throws Exception;
 
 }

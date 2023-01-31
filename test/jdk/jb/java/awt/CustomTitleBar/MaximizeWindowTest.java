@@ -17,7 +17,7 @@
 import com.jetbrains.JBR;
 import com.jetbrains.WindowDecorations;
 import util.CommonAPISuite;
-import util.Runner;
+import util.Task;
 import util.TestUtils;
 
 import java.awt.AWTException;
@@ -46,7 +46,7 @@ public class MaximizeWindowTest {
         }
     }
 
-    private static final Runner maximizeWindow = new Runner("Maximize frame") {
+    private static final Task maximizeWindow = new Task("Maximize frame") {
 
         @Override
         public void prepareTitleBar() {
@@ -119,7 +119,7 @@ public class MaximizeWindowTest {
         robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
         robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
         robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-        robot.delay(2000);
+        robot.delay(1000);
     }
 
 }
