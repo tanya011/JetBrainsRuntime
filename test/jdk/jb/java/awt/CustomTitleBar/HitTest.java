@@ -35,7 +35,9 @@ import java.util.List;
 
 /*
  * @test
- * @summary Regression test for JET-5124
+ * @bug JBR-5124
+ * @summary Verify control under native actions in custom title bar
+ * @description
  * @requires (os.family == "windows" | os.family == "mac")
  * @run shell run.sh
  * @run main HitTest

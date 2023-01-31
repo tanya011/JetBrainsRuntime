@@ -21,7 +21,8 @@ import util.TestUtils;
 
 /*
  * @test
- * @summary Regression test for JET-5124
+  * @bug JBR-5124
+ * @summary Verify modifying of title bar height
  * @requires (os.family == "windows" | os.family == "mac")
  * @run shell run.sh
  * @run main ChangeTitleBarHeightTest

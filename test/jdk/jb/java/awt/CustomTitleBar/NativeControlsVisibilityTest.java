@@ -17,18 +17,12 @@
 import com.jetbrains.JBR;
 import util.CommonAPISuite;
 import util.Task;
-import util.TestHelpers;
 import util.TestUtils;
-
-import javax.imageio.ImageIO;
-import java.awt.AWTException;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.nio.file.Paths;
 
 /*
  * @test
- * @summary Regression test for JET-5124
+ * @bug JBR-5124
+ * @summary Verify a property to change visibility of native controls
  * @requires (os.family == "windows" | os.family == "mac")
  * @run shell run.sh
  * @run main NativeControlsVisibilityTest

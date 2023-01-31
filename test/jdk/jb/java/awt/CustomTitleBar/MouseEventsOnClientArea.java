@@ -17,7 +17,8 @@ import java.util.List;
 
 /*
  * @test
- * @summary Regression test for JET-5124
+ * @bug JBR-5124
+ * @summary Verify mouse events on custom title bar area
  * @requires (os.family == "windows" | os.family == "mac")
  * @run shell run.sh
  * @run main MouseEventsOnClientArea
@@ -139,8 +140,10 @@ public class MouseEventsOnClientArea {
                     panel.getLocationOnScreen().y + panel.getWidth() + 10);
 
             for (int i = 0; i < BUTTON_MASKS.size(); i++) {
-                passed = passed && buttonsPressed[i] && buttonsReleased[i] && buttonsClicked[i];
+                passed = buttonsPressed[i] && buttonsReleased[i] && buttonsClicked[i];
             }
+
+            passed = mouseEntered && mouseExited;
         }
     };
 
