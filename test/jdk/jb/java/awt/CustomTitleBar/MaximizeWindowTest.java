@@ -31,7 +31,6 @@ import java.awt.event.InputEvent;
 
 /*
  * @test
- * @bug JBR-5124
  * @summary Verify ability to maximize window by clicking to custom title bar area
  * @requires (os.family == "windows" | os.family == "mac")
  * @run shell run.sh

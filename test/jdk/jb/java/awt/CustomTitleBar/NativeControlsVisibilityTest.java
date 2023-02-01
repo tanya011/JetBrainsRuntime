@@ -21,7 +21,6 @@ import util.TestUtils;
 
 /*
  * @test
- * @bug JBR-5124
  * @summary Verify a property to change visibility of native controls
  * @requires (os.family == "windows" | os.family == "mac")
  * @run shell run.sh

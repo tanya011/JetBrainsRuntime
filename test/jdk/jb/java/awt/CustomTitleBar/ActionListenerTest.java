@@ -26,7 +26,6 @@ import java.awt.event.InputEvent;
 
 /*
  * @test
- * @bug JBR-5124
  * @summary Verify mouse events in custom title bar's area added by ActionListener
  * @requires (os.family == "windows" | os.family == "mac")
  * @run shell run.sh

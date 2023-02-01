@@ -17,7 +17,6 @@ import java.util.List;
 
 /*
  * @test
- * @bug JBR-5124
  * @summary Verify mouse events on custom title bar area
  * @requires (os.family == "windows" | os.family == "mac")
  * @run shell run.sh
