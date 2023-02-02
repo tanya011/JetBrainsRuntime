@@ -35,7 +35,7 @@ abstract public class Task {
     }
 
     public final boolean run(Function<WindowDecorations.CustomTitleBar, Window> windowCreator) {
-        cleanup();
+        init();
         System.out.printf("RUN TEST CASE: %s%n", name);
         passed = true;
         prepareTitleBar();
@@ -52,6 +52,7 @@ abstract public class Task {
             passed = false;
         }
 
+        cleanup();
         window.dispose();
 
         if (passed) {
@@ -60,6 +61,10 @@ abstract public class Task {
             System.out.println("State: FAILED");
         }
         return passed;
+    }
+
+    protected void init() {
+
     }
 
     protected void cleanup() {

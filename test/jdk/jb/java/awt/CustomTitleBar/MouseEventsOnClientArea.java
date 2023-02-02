@@ -50,10 +50,8 @@ public class MouseEventsOnClientArea {
 
         private Panel panel;
 
-
-
         @Override
-        protected void cleanup() {
+        protected void init() {
             Arrays.fill(buttonsPressed, false);
             Arrays.fill(buttonsReleased, false);
             Arrays.fill(buttonsClicked, false);
@@ -142,7 +140,14 @@ public class MouseEventsOnClientArea {
                 passed = buttonsPressed[i] && buttonsReleased[i] && buttonsClicked[i];
             }
 
-            passed = mouseEntered && mouseExited;
+            if (!mouseEntered) {
+                System.out.println("Error: mouse enter wasn't detected");
+                passed = false;
+            }
+            if (!mouseExited) {
+                System.out.println("Error: mouse exit wasn't detected");
+                passed = false;
+            }
         }
     };
 

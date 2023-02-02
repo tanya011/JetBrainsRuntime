@@ -71,7 +71,7 @@ public class TestUtils {
         return windowCreationFunctions;
     }
 
-    private static Frame createFrameWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {
+    public static Frame createFrameWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {
         Frame frame = new Frame(){
             @Override
             public void paint(Graphics g) {
@@ -90,7 +90,7 @@ public class TestUtils {
         return frame;
     }
 
-    private static JFrame createJFrameWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {
+    public static JFrame createJFrameWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {
         JFrame frame = new JFrame();
         frame.setContentPane(new JPanel() {
             @Override
@@ -111,7 +111,7 @@ public class TestUtils {
         return frame;
     }
 
-    private static Dialog createDialogWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {
+    public static Dialog createDialogWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {
         Dialog dialog = new Dialog((Frame) null){
             @Override
             public void paint(Graphics g) {
@@ -130,7 +130,7 @@ public class TestUtils {
         return dialog;
     }
 
-    private static JDialog createJDialogWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {
+    public static JDialog createJDialogWithCustomTitleBar(WindowDecorations.CustomTitleBar titleBar) {
         JDialog dialog = new JDialog();
         dialog.setContentPane(new JPanel() {
             @Override

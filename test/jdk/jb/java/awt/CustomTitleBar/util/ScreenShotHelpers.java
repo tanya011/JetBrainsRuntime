@@ -27,9 +27,11 @@ public class ScreenShotHelpers {
         return screenShot;
     }
 
-    public static void storeScreenshot(String namePrefix, BufferedImage image) throws IOException {
+    public static String storeScreenshot(String namePrefix, BufferedImage image) throws IOException {
         final String fileName = String.format("%s-%s.png", namePrefix, UUID.randomUUID());
-        ImageIO.write(image, "png", new File(fileName));
+        File file = new File(fileName);
+        ImageIO.write(image, "png", file);
+        return file.getAbsolutePath();
     }
 
     public static RectCoordinates findRectangleTitleBar(BufferedImage image, int titleBarHeight) {
@@ -78,8 +80,6 @@ public class ScreenShotHelpers {
 
         Map<Color, Rect> map = new HashMap<>();
 
-        System.out.println(coords);
-
         for (int x = coords.x1(); x <= coords.x2(); x++) {
             for (int y = coords.y1(); y <= coords.y2(); y++) {
                 Color color = new Color(image.getRGB(x, y));
@@ -103,7 +103,6 @@ public class ScreenShotHelpers {
     }
 
     private static List<Rect> groupRects(List<Rect> rects) {
-        rects.forEach(System.out::println);
         List<Rect> found = new ArrayList<>();
 
         List<Rect> items = new ArrayList<>(rects);

@@ -81,7 +81,8 @@ public class NativeControlsVisibilityTest {
             }
 
             if (!passed) {
-                ScreenShotHelpers.storeScreenshot("native-controls-visilibity-test-" + window.getName(), image);
+                String path = ScreenShotHelpers.storeScreenshot("visible-controls-test-" + window.getName(), image);
+                System.out.println("Screenshot stored in " + path);
             }
         }
     };
@@ -124,7 +125,8 @@ public class NativeControlsVisibilityTest {
             }
 
             if (!passed) {
-                ScreenShotHelpers.storeScreenshot("native-controls-visilibity-test-" + window.getName(), image);
+                String path = ScreenShotHelpers.storeScreenshot("hidden-controls-test-" + window.getName(), image);
+                System.out.println("Screenshot stored in " + path);
             }
         }
 
