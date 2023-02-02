@@ -1,5 +1,6 @@
 package util;
 
+import java.awt.Color;
 import java.util.Objects;
 
 public class Rect {
@@ -9,15 +10,19 @@ public class Rect {
     private int x2 = -1;
     private int y2 = -1;
     private int pixelCount = 0;
+    private final Color commonColor;
 
-    public Rect() {}
+    public Rect(Color commonColor) {
+        this.commonColor = commonColor;
+    }
 
-    public Rect(int x1, int y1, int x2, int y2, int pixelCount) {
+    public Rect(int x1, int y1, int x2, int y2, int pixelCount, Color commonColor) {
         this.x1 = x1;
         this.x2 = x2;
         this.y1 = y1;
         this.y2 = y2;
         this.pixelCount = pixelCount;
+        this.commonColor = commonColor;
     }
 
     public int getX1() {
@@ -56,6 +61,10 @@ public class Rect {
         return pixelCount;
     }
 
+    public Color getCommonColor() {
+        return commonColor;
+    }
+
     @Override
     public String toString() {
         return "Rect{" +
@@ -64,6 +73,7 @@ public class Rect {
                 ", x2=" + x2 +
                 ", y2=" + y2 +
                 ", pixelCount=" + pixelCount +
+                ", commonColor=" + commonColor +
                 '}';
     }
 
