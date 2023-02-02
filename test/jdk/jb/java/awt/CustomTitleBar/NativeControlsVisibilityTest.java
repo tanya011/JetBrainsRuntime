@@ -25,13 +25,13 @@ import util.TestUtils;
 import java.awt.Color;
 import java.awt.Robot;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicReference;
 
 /*
  * @test
@@ -43,8 +43,8 @@ import java.util.stream.Collectors;
 public class NativeControlsVisibilityTest {
 
     public static void main(String... args) {
-        //boolean status = CommonAPISuite.runTestSuite(TestUtils.getWindowCreationFunctions(), hiddenControls);
-        boolean status = CommonAPISuite.runTestSuite(TestUtils.getWindowCreationFunctions(), visibleControls);
+        boolean status = CommonAPISuite.runTestSuite(TestUtils.getWindowCreationFunctions(), hiddenControls);
+        status = status && CommonAPISuite.runTestSuite(TestUtils.getWindowCreationFunctions(), visibleControls);
 
         if (!status) {
             throw new RuntimeException("NativeControlsVisibilityTest FAILED");
@@ -67,22 +67,29 @@ public class NativeControlsVisibilityTest {
             passed = passed && TestUtils.checkTitleBarHeight(titleBar, TestUtils.TITLE_BAR_HEIGHT);
             passed = passed && TestUtils.checkFrameInsets(window);
 
-            System.out.println(titleBar.getProperties().get(PROPERTY_NAME));
-
 //            if (!"true".equals(titleBar.getProperties().get(PROPERTY_NAME).toString())) {
 //                passed = false;
 //                System.out.println("controls.visible isn't true");
 //            }
-//            if (titleBar.getLeftInset() == 0 && titleBar.getRightInset() == 0) {
-//                passed = false;
-//                System.out.println("Left or right inset must be non-zero");
-//            }
+            if (titleBar.getLeftInset() == 0 && titleBar.getRightInset() == 0) {
+                passed = false;
+                System.out.println("Left or right inset must be non-zero");
+            }
 
             BufferedImage image = TestHelpers.takeScreenshot(window);
 
-            //RectCoordinates coords = TestHelpers.findRectangleTitleBar(image, (int) titleBar.getHeight());
-            detectControls(image, (int) titleBar.getHeight());
-            TestHelpers.storeScreenshot("visible", image);
+            List<Rect> foundControls = detectControls(image, (int) titleBar.getHeight(), (int) titleBar.getLeftInset(), (int) titleBar.getRightInset());
+            System.out.println("Found controls at the title bar:");
+            foundControls.forEach(System.out::println);
+
+            if (foundControls.size() != 3) {
+                passed = false;
+                System.out.println("Error: there are must be 3 controls");
+            }
+
+            if (!passed) {
+                TestHelpers.storeScreenshot("native-controls-visilibity-test-" + window.getName(), image);
+            }
         }
     };
 
@@ -111,47 +118,75 @@ public class NativeControlsVisibilityTest {
                 System.out.println("System controls are hidden so insets must be zero");
             }
 
+            BufferedImage image = TestHelpers.takeScreenshot(window);
+
+            List<Rect> foundControls = detectControls(image, (int) titleBar.getHeight(), (int) titleBar.getLeftInset(), (int) titleBar.getRightInset());
+            System.out.println("Found controls at the title bar:");
+            foundControls.forEach(System.out::println);
+
+            if (foundControls.size() != 0) {
+                passed = false;
+                System.out.println("Error: there are must be 0 controls");
+            }
+
+            if (!passed) {
+                TestHelpers.storeScreenshot("native-controls-visilibity-test-" + window.getName(), image);
+            }
         }
 
     };
 
-    private static void detectControls(BufferedImage image, int titleBarHeight) {
+    private static List<Rect> detectControls(BufferedImage image, int titleBarHeight, int leftInset, int rightInset) {
         RectCoordinates coords = TestHelpers.findRectangleTitleBar(image, titleBarHeight);
 
-        Map<Integer, Rect> map = new HashMap<>();
+        Map<Color, Rect> map = new HashMap<>();
+
+        System.out.println(coords);
 
         for (int x = coords.x1(); x <= coords.x2(); x++) {
             for (int y = coords.y1(); y <= coords.y2(); y++) {
                 Color color = new Color(image.getRGB(x, y));
                 Color adjustedColor = adjustColor(color);
-                int key = colorToInt(adjustedColor);
-                Rect rect = map.getOrDefault(key, new Rect());
+                //int key = colorToInt(adjustedColor);
+                Rect rect = map.getOrDefault(adjustedColor, new Rect(adjustedColor));
                 rect.addPoint(x, y);
-                map.put(key, rect);
+                map.put(adjustedColor, rect);
             }
         }
 
+        int checkedHeight = coords.y2() - coords.y1() + 1;
+        int checkedWidth = coords.x2() - coords.x1() + 1;
+        int pixels = checkedWidth * checkedHeight;
+        int nonCoveredAreaApprox = pixels - (leftInset * checkedHeight + rightInset * checkedHeight);
 
-        map.forEach((k, v) -> {
-            System.out.println("COLOR: " + k);
-            System.out.println(v.toString());
-        });
+        List<Rect> rects = map.values().stream().filter(v -> v.getPixelCount() < nonCoveredAreaApprox).toList();
+        List<Rect> foundControls = groupRects(rects);
 
-        Map<Color, Rect> areas = new HashMap<>();
-
-        map.keySet().forEach(key1 -> {
-            if (map.containsKey(key1)) {
-                Rect value1 = map.get(key1);
-                map.keySet().forEach(key2 -> {
-                    Rect value2 = map.get(key2);
-                });
-            }
-        });
-
+        return foundControls;
     }
 
-    private static int colorToInt(Color color) {
-        return color.getRed() * 256 * 256 + color.getGreen() * 256 + color.getBlue();
+    private static List<Rect> groupRects(List<Rect> rects) {
+        rects.forEach(System.out::println);
+        List<Rect> found = new ArrayList<>();
+
+        List<Rect> items = new ArrayList<>(rects);
+        while (!items.isEmpty()) {
+            AtomicReference<Rect> rect = new AtomicReference<>(items.remove(0));
+
+            List<Rect> restItems = new ArrayList<>();
+            items.forEach(item -> {
+                Rect intersected = intersect(rect.get(), item);
+                if (intersected != null) {
+                    rect.set(intersected);
+                } else {
+                    restItems.add(item);
+                }
+            });
+            found.add(rect.get());
+            items = restItems;
+        }
+
+        return found;
     }
 
     private static Color adjustColor(Color color) {
@@ -192,7 +227,10 @@ public class NativeControlsVisibilityTest {
         if (x1 == -1 || x2 == -1 || y1 == -1 || y2 == -1) {
             return null;
         }
-        return new Rect(x1, y1, x2, y2, r1.getPixelCount() + r2.getPixelCount());
+
+        Color commonColor = r1.getPixelCount() > r2.getPixelCount() ? r1.getCommonColor() : r2.getCommonColor();
+
+        return new Rect(x1, y1, x2, y2, r1.getPixelCount() + r2.getPixelCount(), commonColor);
     }
 
 }
