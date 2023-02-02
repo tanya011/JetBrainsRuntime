@@ -55,8 +55,60 @@ public class WindowResizeTest {
             }
 
             image = TestHelpers.takeScreenshot(window);
-            TestHelpers.storeScreenshot("window-resize-test-2-", image);
+            passed = verifyScreenshot(image);
+
+            if (!passed) {
+                TestHelpers.storeScreenshot("window-resize-test-" + window.getName(), image);
+            }
         }
     };
+
+    private static boolean verifyScreenshot(BufferedImage image) {
+        int centerX = image.getWidth() / 2;
+        int centerY = (int) (TestUtils.TITLE_BAR_HEIGHT / 2);
+
+        final int color = image.getRGB(centerX, centerY);
+
+        int startY = centerY;
+        for (int y = centerY; y >= 0; y--) {
+            if (image.getRGB(centerX, y) != color) {
+                startY = y + 1;
+                break;
+            }
+        }
+
+        int endY = centerY;
+        for (int y = centerY; y <= (int) TestUtils.TITLE_BAR_HEIGHT; y++) {
+            if (image.getRGB(centerX, y) != color) {
+                endY = y - 1;
+                break;
+            }
+        }
+
+        int startX = centerX;
+        for (int x = centerX; x >= 0; x--) {
+            if (image.getRGB(x, startY) != color) {
+                startX = x + 1;
+                break;
+            }
+        }
+
+        int endX = centerX;
+        for (int x = centerX; x < image.getWidth(); x++) {
+            if (image.getRGB(x, startY) != color) {
+                endX = x - 1;
+                break;
+            }
+        }
+
+        System.out.println("Planned title bar rectangle coordinates: (" + startX + ", " + startY + "), (" + endX + ", " + endY + ")");
+        System.out.println("w = " + image.getWidth() + " h = " + image.getHeight());
+        if (startX != image.getWidth() - endX - 1) {
+            System.out.println("Left and right non-rectangle areas widths are non equal");
+            return false;
+        }
+
+        return true;
+    }
 
 }

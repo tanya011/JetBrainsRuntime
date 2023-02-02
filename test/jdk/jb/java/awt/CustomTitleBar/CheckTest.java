@@ -1,25 +1,21 @@
-import com.jetbrains.JBR;
-import com.jetbrains.WindowDecorations;
 import util.TestHelpers;
 
 import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Graphics;
-import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
-import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 /*
  * @test
- * @summary Verify modifying of title bar height
+ * @summary Verify custom title bar in case of window resizing
  * @requires (os.family == "windows" | os.family == "mac")
  * @run shell run.sh
- * @run main CheckFullScreen
+ * @run main CheckTest
  */
-public class CheckFullScreen {
+public class CheckTest {
 
     public static void main(String... args) throws AWTException, IOException {
         Frame f = new Frame(){
@@ -31,19 +27,11 @@ public class CheckFullScreen {
                 super.paint(g);
             }
         };
-
-        WindowDecorations.CustomTitleBar titleBar = JBR.getWindowDecorations().createCustomTitleBar();
-        titleBar.setHeight(100);
-        JBR.getWindowDecorations().setCustomTitleBar(f, titleBar);
-
+        f.setBounds(100, 100, 600, 400);
         f.setVisible(true);
-        GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().setFullScreenWindow(f);
-
-        Robot robot = new Robot();
-        robot.delay(5000);
 
         BufferedImage image = TestHelpers.takeScreenshot(f);
-        TestHelpers.storeScreenshot("fillscreen", image);
+        TestHelpers.storeScreenshot("check", image);
     }
 
 }
