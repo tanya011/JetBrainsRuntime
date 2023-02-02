@@ -6,7 +6,10 @@ import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
@@ -22,8 +25,11 @@ public class TestHelpers {
 
         final String workingDir = System.getenv("PWD");
         final String fileName = String.format("AWT-Robot-screenshot-%s.bmp", UUID.randomUUID());
+        final Path path = Paths.get(workingDir, fileName);
 
-        ImageIO.write(screenShot, "BMP", Paths.get(workingDir, fileName).toFile());
+        System.out.println("path = " + path.toString());
+
+        ImageIO.write(screenShot, "png", new File(fileName));
 
         return fileName;
     }

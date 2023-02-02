@@ -3,13 +3,7 @@ import util.CommonAPISuite;
 import util.Task;
 import util.TestUtils;
 
-import java.awt.AWTException;
-import java.awt.Button;
-import java.awt.Frame;
 import java.awt.Robot;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 /*
  * @test
