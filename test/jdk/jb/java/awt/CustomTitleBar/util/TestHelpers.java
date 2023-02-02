@@ -15,23 +15,18 @@ import java.util.UUID;
 
 public class TestHelpers {
 
-    public static String takeScreenshot(Window window) throws AWTException, IOException {
+    public static BufferedImage takeScreenshot(Window window) throws AWTException {
         Robot robot = new Robot();
 
         final BufferedImage screenShot = robot.createScreenCapture(
-                new Rectangle(
-                        window.getLocation().x, window.getLocation().y, window.getWidth(), window.getHeight()));
+                new Rectangle(window.getLocationOnScreen().x, window.getLocationOnScreen().y,
+                        window.getWidth(), window.getHeight()));
+        return screenShot;
+    }
 
-
-        final String workingDir = System.getenv("PWD");
-        final String fileName = String.format("AWT-Robot-screenshot-%s.bmp", UUID.randomUUID());
-        final Path path = Paths.get(workingDir, fileName);
-
-        System.out.println("path = " + path.toString());
-
-        ImageIO.write(screenShot, "png", new File(fileName));
-
-        return fileName;
+    public static void storeScreenshot(String namePrefix, BufferedImage image) throws IOException {
+        final String fileName = String.format("%s-%s.png", namePrefix, UUID.randomUUID());
+        ImageIO.write(image, "png", new File(fileName));
     }
 
 }
