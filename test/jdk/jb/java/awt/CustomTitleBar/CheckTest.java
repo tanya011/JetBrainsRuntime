@@ -1,4 +1,4 @@
-import util.TestHelpers;
+import util.ScreenShotHelpers;
 
 import java.awt.AWTException;
 import java.awt.Color;
@@ -30,8 +30,8 @@ public class CheckTest {
         f.setBounds(100, 100, 600, 400);
         f.setVisible(true);
 
-        BufferedImage image = TestHelpers.takeScreenshot(f);
-        TestHelpers.storeScreenshot("check", image);
+        BufferedImage image = ScreenShotHelpers.takeScreenshot(f);
+        ScreenShotHelpers.storeScreenshot("check", image);
     }
 
 }

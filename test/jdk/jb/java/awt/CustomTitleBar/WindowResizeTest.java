@@ -2,7 +2,7 @@ import com.jetbrains.JBR;
 import util.CommonAPISuite;
 import util.RectCoordinates;
 import util.Task;
-import util.TestHelpers;
+import util.ScreenShotHelpers;
 import util.TestUtils;
 
 import java.awt.Dimension;
@@ -53,9 +53,9 @@ public class WindowResizeTest {
                 System.out.println("Error: title bar height has been changed");
             }
 
-            BufferedImage image = TestHelpers.takeScreenshot(window);
+            BufferedImage image = ScreenShotHelpers.takeScreenshot(window);
 
-            RectCoordinates coords = TestHelpers.findRectangleTitleBar(image, (int) titleBar.getHeight());
+            RectCoordinates coords = ScreenShotHelpers.findRectangleTitleBar(image, (int) titleBar.getHeight());
             System.out.println("Planned title bar rectangle coordinates: (" + coords.x1() + ", " + coords.y1() +
                     "), (" + coords.x2() + ", " + coords.y2() + ")");
             System.out.println("w = " + image.getWidth() + " h = " + image.getHeight());

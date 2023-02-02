@@ -1,6 +1,6 @@
 import com.jetbrains.JBR;
 import com.jetbrains.WindowDecorations;
-import util.TestHelpers;
+import util.ScreenShotHelpers;
 
 import java.awt.AWTException;
 import java.awt.Color;
@@ -42,8 +42,8 @@ public class CheckFullScreen {
         Robot robot = new Robot();
         robot.delay(5000);
 
-        BufferedImage image = TestHelpers.takeScreenshot(f);
-        TestHelpers.storeScreenshot("fillscreen", image);
+        BufferedImage image = ScreenShotHelpers.takeScreenshot(f);
+        ScreenShotHelpers.storeScreenshot("fillscreen", image);
     }
 
 }
