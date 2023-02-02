@@ -1,0 +1,82 @@
+package util;
+
+import java.util.Objects;
+
+public class Rect {
+
+    private int x1 = -1;
+    private int y1 = -1;
+    private int x2 = -1;
+    private int y2 = -1;
+    private int pixelCount = 0;
+
+    public Rect() {}
+
+    public Rect(int x1, int y1, int x2, int y2, int pixelCount) {
+        this.x1 = x1;
+        this.x2 = x2;
+        this.y1 = y1;
+        this.y2 = y2;
+        this.pixelCount = pixelCount;
+    }
+
+    public int getX1() {
+        return x1;
+    }
+
+    public int getY1() {
+        return y1;
+    }
+
+    public int getX2() {
+        return x2;
+    }
+
+    public int getY2() {
+        return y2;
+    }
+
+    public void addPoint(int x, int y) {
+        pixelCount++;
+        if (x1 == -1 || x2 == -1) {
+            x1 = x;
+            x2 = x;
+        }
+        if (y1 == -1 || y2 == -1) {
+            y1 = y;
+            y2 = y;
+        }
+        if (x < x1) x1 = x;
+        if (x > x2) x2 = x;
+        if (y < y1) y1 = y;
+        if (y > y1) y2 = y;
+    }
+
+    public int getPixelCount() {
+        return pixelCount;
+    }
+
+    @Override
+    public String toString() {
+        return "Rect{" +
+                "x1=" + x1 +
+                ", y1=" + y1 +
+                ", x2=" + x2 +
+                ", y2=" + y2 +
+                ", pixelCount=" + pixelCount +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Rect rect = (Rect) o;
+        return x1 == rect.x1 && y1 == rect.y1 && x2 == rect.x2 && y2 == rect.y2;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x1, y1, x2, y2);
+    }
+}
