@@ -84,7 +84,6 @@ public class ScreenShotHelpers {
             for (int y = coords.y1(); y <= coords.y2(); y++) {
                 Color color = new Color(image.getRGB(x, y));
                 Color adjustedColor = adjustColor(color);
-                //int key = colorToInt(adjustedColor);
                 Rect rect = map.getOrDefault(adjustedColor, new Rect(adjustedColor));
                 rect.addPoint(x, y);
                 map.put(adjustedColor, rect);
@@ -94,12 +93,12 @@ public class ScreenShotHelpers {
         int checkedHeight = coords.y2() - coords.y1() + 1;
         int checkedWidth = coords.x2() - coords.x1() + 1;
         int pixels = checkedWidth * checkedHeight;
+
         int nonCoveredAreaApprox = pixels - (leftInset * checkedHeight + rightInset * checkedHeight);
 
         List<Rect> rects = map.values().stream().filter(v -> v.getPixelCount() < nonCoveredAreaApprox).toList();
-        List<Rect> foundControls = groupRects(rects);
 
-        return foundControls;
+        return groupRects(rects);
     }
 
     private static List<Rect> groupRects(List<Rect> rects) {
