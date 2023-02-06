@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import com.jetbrains.JBR;
 import util.Rect;
 import util.ScreenShotHelpers;
@@ -33,37 +34,31 @@ import java.util.List;
  * @summary Detect and check behavior of clicking to native controls
  * @requires (os.family == "windows" | os.family == "mac")
  * @run shell run.sh
- * @run main FrameNativeControlsTest
- * @run main FrameNativeControlsTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0
- * @run main FrameNativeControlsTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.25
- * @run main FrameNativeControlsTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.5
- * @run main FrameNativeControlsTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=2.0
- * @run main FrameNativeControlsTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=2.5
- * @run main FrameNativeControlsTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=3.0
- * @run main FrameNativeControlsTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=3.5
- * @run main FrameNativeControlsTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=4.0
+ * @run main MinimizingWindowTest
+ * @run main MinimizingWindowTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0
+ * @run main MinimizingWindowTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.25
+ * @run main MinimizingWindowTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.5
+ * @run main MinimizingWindowTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=2.0
+ * @run main MinimizingWindowTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=2.5
+ * @run main MinimizingWindowTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=3.0
+ * @run main MinimizingWindowTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=3.5
+ * @run main MinimizingWindowTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=4.0
  */
-public class FrameNativeControlsTest {
+public class MinimizingWindowTest {
 
     public static void main(String... args) {
-        boolean status = frameNativeControlsClicks.run(TestUtils::createFrameWithCustomTitleBar);
+        boolean status = minimizingWindowTest.run(TestUtils::createFrameWithCustomTitleBar);
 
         if (!status) {
-            throw new RuntimeException("FrameNativeControlsTest FAILED");
+            throw new RuntimeException("MinimizingWindowTest FAILED");
         }
     }
 
-    private static final Task frameNativeControlsClicks = new Task("Frame native controls clicks") {
-        private boolean closingActionCalled;
+    private static final Task minimizingWindowTest = new Task("Frame native controls clicks") {
         private boolean iconifyingActionCalled;
-        private boolean maximizingActionDetected;
-        private boolean deiconifyindActionDetected;
+        private boolean iconifyingActionDetected;
 
         private final WindowListener windowListener = new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                closingActionCalled = true;
-            }
 
             @Override
             public void windowIconified(WindowEvent e) {
@@ -76,11 +71,8 @@ public class FrameNativeControlsTest {
             @Override
             public void windowStateChanged(WindowEvent e) {
                 System.out.println("change " + e.getOldState() + " -> " + e.getNewState());
-                if (e.getNewState() == 6) {
-                    maximizingActionDetected = true;
-                }
                 if (e.getOldState() == 1 && e.getNewState() == 0) {
-                    deiconifyindActionDetected = true;
+                    iconifyingActionDetected = true;
                 }
             }
         };
@@ -93,10 +85,8 @@ public class FrameNativeControlsTest {
 
         @Override
         protected void init() {
-            closingActionCalled = false;
             iconifyingActionCalled = false;
-            maximizingActionDetected = false;
-            deiconifyindActionDetected = false;
+            iconifyingActionDetected = false;
         }
 
         @Override
@@ -114,7 +104,7 @@ public class FrameNativeControlsTest {
         @Override
         public void test() throws Exception {
             Robot robot = new Robot();
-            robot.delay(1000);
+            robot.delay(3000);
 
             BufferedImage image = ScreenShotHelpers.takeScreenshot(window);
             List<Rect> foundControls = ScreenShotHelpers.detectControls(image,
@@ -146,23 +136,14 @@ public class FrameNativeControlsTest {
                 robot.delay(1500);
             });
 
-            if (!maximizingActionDetected) {
-                passed = false;
-                System.out.println("Error: maximizing action was not detected");
-            }
-
-            if (!closingActionCalled) {
-                passed = false;
-                System.out.println("Error: closing action was not detected");
-            }
-
-            if (!iconifyingActionCalled) {
+            if (!iconifyingActionCalled || !iconifyingActionDetected) {
                 passed = false;
                 System.out.println("Error: iconifying action was not detected");
             }
-            if (!deiconifyindActionDetected) {
-                passed = false;
-                System.out.println("Error: deiconifying action was not detected");
+
+            if (!passed) {
+                String path = ScreenShotHelpers.storeScreenshot("minimizing-window-test-" + window.getName(), image);
+                System.out.println("Screenshot stored in " + path);
             }
         }
     };

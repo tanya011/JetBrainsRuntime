@@ -46,7 +46,7 @@ import java.util.List;
 public class DialogNativeControlsTest {
 
     public static void main(String... args) {
-        boolean status = nativeControlClicks.run(TestUtils::createFrameWithCustomTitleBar);
+        boolean status = nativeControlClicks.run(TestUtils::createDialogWithCustomTitleBar);
 
         if (!status) {
             throw new RuntimeException("DialogNativeControlsTest FAILED");
@@ -104,7 +104,8 @@ public class DialogNativeControlsTest {
             robot.delay(1000);
 
             BufferedImage image = ScreenShotHelpers.takeScreenshot(window);
-            List<Rect> foundControls = ScreenShotHelpers.detectControls(image, (int) titleBar.getHeight(), (int) titleBar.getLeftInset(), (int) titleBar.getRightInset());
+            List<Rect> foundControls = ScreenShotHelpers.detectControls(image,
+                    (int) titleBar.getHeight(), (int) titleBar.getLeftInset(), (int) titleBar.getRightInset());
 
             if (foundControls.size() == 0) {
                 passed = false;

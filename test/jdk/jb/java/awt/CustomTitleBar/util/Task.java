@@ -53,6 +53,7 @@ abstract public class Task {
         }
 
         cleanup();
+        titleBar = null;
         window.dispose();
 
         if (passed) {

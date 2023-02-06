@@ -57,7 +57,7 @@ public class HiddenNativeControlsTest {
         public void prepareTitleBar() {
             titleBar = JBR.getWindowDecorations().createCustomTitleBar();
             titleBar.setHeight(TestUtils.TITLE_BAR_HEIGHT);
-            titleBar.putProperty(PROPERTY_NAME, "false");
+            titleBar.putProperty(PROPERTY_NAME, false);
         }
 
         @Override

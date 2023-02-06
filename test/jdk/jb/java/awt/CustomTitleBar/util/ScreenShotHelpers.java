@@ -35,6 +35,7 @@ public class ScreenShotHelpers {
 
     public static BufferedImage takeScreenshot(Window window) throws AWTException {
         Robot robot = new Robot();
+        robot.delay(1000);
 
         final BufferedImage screenShot = robot.createScreenCapture(
                 new Rectangle(window.getLocationOnScreen().x, window.getLocationOnScreen().y,
