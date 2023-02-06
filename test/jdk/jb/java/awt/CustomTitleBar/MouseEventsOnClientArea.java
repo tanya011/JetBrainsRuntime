@@ -129,12 +129,13 @@ public class MouseEventsOnClientArea {
                 robot.delay(500);
             });
 
-            robot.delay(100);
+            robot.delay(500);
             robot.mouseMove(panel.getLocationOnScreen().x + panel.getWidth() / 2,
                     panel.getLocationOnScreen().y + panel.getHeight() / 2);
-            robot.delay(100);
+            robot.delay(500);
             robot.mouseMove(panel.getLocationOnScreen().x + panel.getWidth() + 10,
                     panel.getLocationOnScreen().y + panel.getWidth() + 10);
+            robot.delay(500);
 
             for (int i = 0; i < BUTTON_MASKS.size(); i++) {
                 passed = buttonsPressed[i] && buttonsReleased[i] && buttonsClicked[i];

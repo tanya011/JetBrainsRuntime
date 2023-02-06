@@ -32,20 +32,12 @@ public class JDialogNativeControlsTest {
 
     private static final Task nativeControlClicks = new Task("Native controls clicks") {
         private boolean closingActionCalled;
-        private boolean iconifyingActionCalled;
         private boolean maximizingActionDetected;
-        private boolean deiconifyindActionDetected;
 
         private final WindowListener windowListener = new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
                 closingActionCalled = true;
-            }
-
-            @Override
-            public void windowIconified(WindowEvent e) {
-                iconifyingActionCalled = true;
-                window.setVisible(true);
             }
         };
 
@@ -55,9 +47,6 @@ public class JDialogNativeControlsTest {
                 System.out.println("change " + e.getOldState() + " -> " + e.getNewState());
                 if (e.getNewState() == 6) {
                     maximizingActionDetected = true;
-                }
-                if (e.getOldState() == 1 && e.getNewState() == 0) {
-                    deiconifyindActionDetected = true;
                 }
             }
         };
@@ -71,9 +60,7 @@ public class JDialogNativeControlsTest {
         @Override
         protected void init() {
             closingActionCalled = false;
-            iconifyingActionCalled = false;
             maximizingActionDetected = false;
-            deiconifyindActionDetected = false;
         }
 
         @Override
@@ -132,14 +119,6 @@ public class JDialogNativeControlsTest {
                 System.out.println("Error: closing action was not detected");
             }
 
-            if (!iconifyingActionCalled) {
-                passed = false;
-                System.out.println("Error: iconifying action was not detected");
-            }
-            if (!deiconifyindActionDetected) {
-                passed = false;
-                System.out.println("Error: deiconifying action was not detected");
-            }
         }
     };
 

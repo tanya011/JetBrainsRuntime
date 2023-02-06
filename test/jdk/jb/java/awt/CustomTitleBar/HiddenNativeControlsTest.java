@@ -55,7 +55,9 @@ public class HiddenNativeControlsTest {
         @Override
         public void test() throws Exception {
             Robot robot = new Robot();
-            robot.delay(3000);
+            robot.delay(1000);
+            robot.mouseMove(0, 0);
+            robot.delay(1000);
 
             passed = passed && TestUtils.checkTitleBarHeight(titleBar, TestUtils.TITLE_BAR_HEIGHT);
             passed = passed && TestUtils.checkFrameInsets(window);
