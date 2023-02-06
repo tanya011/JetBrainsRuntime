@@ -36,6 +36,14 @@ import java.util.List;
  * @requires (os.family == "windows" | os.family == "mac")
  * @run shell run.sh
  * @run main MouseEventsOnClientArea
+ * @run main MouseEventsOnClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0
+ * @run main MouseEventsOnClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.25
+ * @run main MouseEventsOnClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.5
+ * @run main MouseEventsOnClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=2.0
+ * @run main MouseEventsOnClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=2.5
+ * @run main MouseEventsOnClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=3.0
+ * @run main MouseEventsOnClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=3.5
+ * @run main MouseEventsOnClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=4.0
  */
 public class MouseEventsOnClientArea {
 

@@ -31,6 +31,14 @@ import java.awt.image.BufferedImage;
  * @requires (os.family == "windows" | os.family == "mac")
  * @run shell run.sh
  * @run main WindowResizeTest
+ * @run main WindowResizeTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0
+ * @run main WindowResizeTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.25
+ * @run main WindowResizeTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.5
+ * @run main WindowResizeTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=2.0
+ * @run main WindowResizeTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=2.5
+ * @run main WindowResizeTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=3.0
+ * @run main WindowResizeTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=3.5
+ * @run main WindowResizeTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=4.0
  */
 public class WindowResizeTest {
 
