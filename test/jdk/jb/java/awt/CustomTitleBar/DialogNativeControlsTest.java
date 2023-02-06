@@ -55,9 +55,7 @@ public class DialogNativeControlsTest {
 
     private static final Task nativeControlClicks = new Task("Native controls clicks") {
         private boolean closingActionCalled;
-        private boolean iconifyingActionCalled;
         private boolean maximizingActionDetected;
-        private boolean deiconifyindActionDetected;
 
         private final WindowListener windowListener = new WindowAdapter() {
             @Override
@@ -65,22 +63,13 @@ public class DialogNativeControlsTest {
                 closingActionCalled = true;
             }
 
-            @Override
-            public void windowIconified(WindowEvent e) {
-                iconifyingActionCalled = true;
-                window.setVisible(true);
-            }
         };
 
         private final WindowStateListener windowStateListener = new WindowAdapter() {
             @Override
             public void windowStateChanged(WindowEvent e) {
-                System.out.println("change " + e.getOldState() + " -> " + e.getNewState());
                 if (e.getNewState() == 6) {
                     maximizingActionDetected = true;
-                }
-                if (e.getOldState() == 1 && e.getNewState() == 0) {
-                    deiconifyindActionDetected = true;
                 }
             }
         };
@@ -94,9 +83,7 @@ public class DialogNativeControlsTest {
         @Override
         protected void init() {
             closingActionCalled = false;
-            iconifyingActionCalled = false;
             maximizingActionDetected = false;
-            deiconifyindActionDetected = false;
         }
 
         @Override
