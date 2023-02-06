@@ -43,7 +43,7 @@ public class CheckFullScreen {
         robot.delay(5000);
 
         BufferedImage image = ScreenShotHelpers.takeScreenshot(f);
-        ScreenShotHelpers.storeScreenshot("fillscreen", image);
+        ScreenShotHelpers.storeScreenshot("fullscreen", image);
     }
 
 }
