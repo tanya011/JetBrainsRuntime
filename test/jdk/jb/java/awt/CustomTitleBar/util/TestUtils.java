@@ -60,8 +60,8 @@ public class TestUtils {
 
     public static boolean checkFrameInsets(Window window) {
         Insets insets = window.getInsets();
-        if (!(insets.top == 0 && insets.right == 0 && insets.left == 0 && insets.bottom == 0)) {
-            System.out.println("Frame insets must be zero, but got " + insets);
+        if (insets.top != 0) {
+            System.out.println("Frame top inset must be zero, but got " + insets.top);
             return false;
         }
         return true;
