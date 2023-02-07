@@ -112,12 +112,14 @@ public class MaximizeWindowTest {
     }
 
     private static void doubleClickToTitleBar(Window window, WindowDecorations.CustomTitleBar titleBar) throws AWTException {
-        int leftX = window.getBounds().x + window.getInsets().left + (int) titleBar.getLeftInset();
-        int rightX = window.getBounds().x + window.getBounds().width - window.getInsets().right - (int) titleBar.getRightInset();
-        int x = window.getLocation().x + (rightX - leftX) / 2;
-        int topY = window.getBounds().y + window.getInsets().top;
-        int bottomY = window.getBounds().y + (int) TestUtils.TITLE_BAR_HEIGHT;
-        int y = window.getLocation().y + (bottomY - topY) / 2;
+        int leftX = window.getInsets().left + (int) titleBar.getLeftInset();
+        int rightX = window.getBounds().width - window.getInsets().right - (int) titleBar.getRightInset();
+        int x = window.getLocationOnScreen().x + (rightX - leftX) / 2;
+        int topY = window.getInsets().top;
+        int bottomY = (int) TestUtils.TITLE_BAR_HEIGHT;
+        int y = window.getLocationOnScreen().y + (bottomY - topY) / 2;
+
+        System.out.println("Double click to (" + x + ", " + y + ")");
 
         Robot robot = new Robot();
 
