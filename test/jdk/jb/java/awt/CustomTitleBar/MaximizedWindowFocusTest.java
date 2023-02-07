@@ -65,7 +65,7 @@ public class MaximizedWindowFocusTest {
             frame1.dispose();
             frame2 = new JFrame("Frame with custom decorations");
             WindowDecorations.CustomTitleBar titleBar = JBR.getWindowDecorations().createCustomTitleBar();
-            titleBar.setHeight(50);
+            titleBar.setHeight(100);
             JBR.getWindowDecorations().setCustomTitleBar(frame2, titleBar);
 
             frame2.addWindowFocusListener(new WindowAdapter() {
@@ -88,9 +88,11 @@ public class MaximizedWindowFocusTest {
     }
 
     private static void clickAt(int x, int y) {
+        robot.delay(500);
         robot.mouseMove(x, y);
         robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
         robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+        robot.delay(500);
     }
 
     private static void clickOn(Component component) {
