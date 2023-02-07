@@ -71,7 +71,7 @@ public class MinimizingWindowTest {
             @Override
             public void windowStateChanged(WindowEvent e) {
                 System.out.println("change " + e.getOldState() + " -> " + e.getNewState());
-                if (e.getOldState() == 1 && e.getNewState() == 0) {
+                if (e.getOldState() == 0 && e.getNewState() == 1) {
                     iconifyingActionDetected = true;
                 }
             }

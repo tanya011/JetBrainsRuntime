@@ -24,10 +24,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Dialog;
+import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.Window;
 import java.util.List;
 import java.util.function.Function;
@@ -83,7 +85,7 @@ public class TestUtils {
         frame.setName("Frame");
 
         frame.setTitle("Frame");
-        frame.setBounds(DEFAULT_LOCATION_X, DEFAULT_LOCATION_Y, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        frame.setBounds(calculateWindowBounds(frame));
 
         JBR.getWindowDecorations().setCustomTitleBar(frame, titleBar);
 
@@ -104,7 +106,7 @@ public class TestUtils {
         frame.setName("JFrame");
 
         frame.setTitle("JFrame");
-        frame.setBounds(DEFAULT_LOCATION_X, DEFAULT_LOCATION_Y, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        frame.setBounds(calculateWindowBounds(frame));
 
         JBR.getWindowDecorations().setCustomTitleBar(frame, titleBar);
 
@@ -123,7 +125,7 @@ public class TestUtils {
         dialog.setName("Dialog");
 
         dialog.setTitle("Dialog");
-        dialog.setBounds(DEFAULT_LOCATION_X, DEFAULT_LOCATION_Y, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        dialog.setBounds(calculateWindowBounds(dialog));
 
         JBR.getWindowDecorations().setCustomTitleBar(dialog, titleBar);
 
@@ -144,11 +146,21 @@ public class TestUtils {
         dialog.setName("JDialog");
 
         dialog.setTitle("JDialog");
-        dialog.setBounds(DEFAULT_LOCATION_X, DEFAULT_LOCATION_Y, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        dialog.setBounds(calculateWindowBounds(dialog));
 
         JBR.getWindowDecorations().setCustomTitleBar(dialog, titleBar);
 
         return dialog;
+    }
+
+    private static Rectangle calculateWindowBounds(Window window) {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        Insets scnMax = Toolkit.getDefaultToolkit().
+                getScreenInsets(window.getGraphicsConfiguration());
+        int maxHeight = screenSize.height - scnMax.top - scnMax.bottom;
+        int maxWidth = screenSize.width - scnMax.left - scnMax.right;
+
+        return new Rectangle(scnMax.left + 2, scnMax.top + 2, (int) (maxWidth * 0.8), (int) (maxHeight * 0.8));
     }
 
 }

@@ -101,13 +101,13 @@ public class MaximizeWindowTest {
 
 
     private static void setWindowSize(Window window, WindowDecorations.CustomTitleBar titleBar) {
-        Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
+        System.out.println("Window was created with bounds: " + window.getBounds());
 
-        int minW = (int) titleBar.getLeftInset() + (int) titleBar.getRightInset() + 10;
-        int minH = (int) titleBar.getHeight() + 10;
-        int w = Math.max(size.width / 2, minW);
-        int h = Math.max(size.height / 2, minH);
+        int w = window.getBounds().width / 2;
+        int h = window.getBounds().height / 2;
+        window.setBounds(window.getBounds().x, window.getBounds().y, w, h);
 
+        System.out.println("New window bounds: " + window.getBounds());
         window.setSize(w, h);
     }
 
@@ -119,6 +119,11 @@ public class MaximizeWindowTest {
         int bottomY = (int) TestUtils.TITLE_BAR_HEIGHT;
         int y = window.getLocationOnScreen().y + (bottomY - topY) / 2;
 
+        System.out.println("Window bounds: " + window.getBounds());
+        System.out.println("Window insets: " + window.getInsets());
+        System.out.println("Window location on screen: " + window.getLocationOnScreen());
+        System.out.println("leftX = " + leftX + ", rightX = " + rightX);
+        System.out.println("topY = " + topY + ", bottomY = " + bottomY);
         System.out.println("Double click to (" + x + ", " + y + ")");
 
         Robot robot = new Robot();
