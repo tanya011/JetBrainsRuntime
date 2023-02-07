@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 JetBrains s.r.o.
+ * Copyright 2000-2023 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,39 +13,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import com.jetbrains.JBR;
+import com.jetbrains.WindowDecorations;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+import java.awt.Component;
+import java.awt.Frame;
+import java.awt.Point;
+import java.awt.Robot;
 import java.awt.event.InputEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.lang.reflect.Method;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-/**
+/*
  * @test
  * @summary Regression test for JBR-3157 Maximized window with custom decorations isn't focused on showing
- * @key headful
- * @run main/othervm --add-opens java.desktop/java.awt=ALL-UNNAMED MaximizedCustomDecorationsTest
+ * @requires (os.family == "windows" | os.family == "mac")
+ * @run shell run.sh
+ * @run main/othervm MaximizedWindowFocusTest
+ * @run main/othervm MaximizedWindowFocusTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0
+ * @run main/othervm MaximizedWindowFocusTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=2.0
  */
+public class MaximizedWindowFocusTest {
 
-public class MaximizedCustomDecorationsTest {
-    private static final CompletableFuture<Boolean> frame2Focused = new CompletableFuture<>();
     private static Robot robot;
     private static JFrame frame1;
     private static JFrame frame2;
     private static JButton button;
+    private static final CompletableFuture<Boolean> frame2Focused = new CompletableFuture<>();
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String... args) throws Exception {
         robot = new Robot();
         try {
-            SwingUtilities.invokeAndWait(MaximizedCustomDecorationsTest::initUI);
+            SwingUtilities.invokeAndWait(MaximizedWindowFocusTest::initUI);
             robot.delay(1000);
             clickOn(button);
             frame2Focused.get(5, TimeUnit.SECONDS);
         } finally {
-            SwingUtilities.invokeAndWait(MaximizedCustomDecorationsTest::disposeUI);
+            SwingUtilities.invokeAndWait(MaximizedWindowFocusTest::disposeUI);
         }
     }
 
@@ -55,7 +64,10 @@ public class MaximizedCustomDecorationsTest {
         button.addActionListener(e -> {
             frame1.dispose();
             frame2 = new JFrame("Frame with custom decorations");
-            enableCustomDecorations(frame2);
+            WindowDecorations.CustomTitleBar titleBar = JBR.getWindowDecorations().createCustomTitleBar();
+            titleBar.setHeight(50);
+            JBR.getWindowDecorations().setCustomTitleBar(frame2, titleBar);
+
             frame2.addWindowFocusListener(new WindowAdapter() {
                 @Override
                 public void windowGainedFocus(WindowEvent e) {
@@ -68,17 +80,6 @@ public class MaximizedCustomDecorationsTest {
         frame1.add(button);
         frame1.pack();
         frame1.setVisible(true);
-    }
-
-    private static void enableCustomDecorations(Window window) {
-        try {
-            Method setHasCustomDecoration = Window.class.getDeclaredMethod("setHasCustomDecoration");
-            setHasCustomDecoration.setAccessible(true);
-            setHasCustomDecoration.invoke(window);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
     }
 
     private static void disposeUI() {
