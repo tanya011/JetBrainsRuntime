@@ -134,41 +134,7 @@ public class ScreenShotHelpers {
             int rx = rights.get(i);
 
             System.out.println("lx = " + lx + " rx = " + rx);
-
-            int topY = coords.y1();
-
-            for (int y = coords.y1(); y <= coords.y2(); y++) {
-                boolean isBackground = true;
-                for (int x = lx; x <= rx; x++) {
-                    Color color = adjustColor(new Color(image.getRGB(x, y)));
-                    if (!color.equals(backgroundColor)) {
-                        isBackground = false;
-                        break;
-                    }
-                }
-                if (!isBackground) {
-                    topY = y;
-                }
-            }
-
-            int bottomY = coords.y2();
-            for (int y = coords.y2(); y > topY; y--) {
-                boolean isBackground = true;
-                for (int x = lx; x <= rx; x++) {
-                    Color color = adjustColor(new Color(image.getRGB(x, y)));
-                    if (!color.equals(backgroundColor)) {
-                        isBackground = false;
-                        break;
-                    }
-                }
-                if (!isBackground) {
-                    bottomY = y;
-                }
-            }
-
-            if (coords.y1() <= topY && topY <= bottomY && bottomY <= coords.y2()) {
-                result.add(new Rect(lx, topY, rx, bottomY, 0, Color.BLACK));
-            }
+            result.add(new Rect(lx, coords.y1(), rx, coords.y2(), 0, Color.BLACK));
         }
         return result;
     }
