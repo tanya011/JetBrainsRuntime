@@ -75,8 +75,9 @@ public class NativeControlsVisibilityTest {
 
             BufferedImage image = ScreenShotHelpers.takeScreenshot(window);
 
-            List<Rect> foundControls = ScreenShotHelpers.detectControls(image, (int) titleBar.getHeight(),
-                    (int) titleBar.getLeftInset(), (int) titleBar.getRightInset());
+//            List<Rect> foundControls = ScreenShotHelpers.detectControls(image, (int) titleBar.getHeight(),
+//                    (int) titleBar.getLeftInset(), (int) titleBar.getRightInset());
+            List<Rect> foundControls = ScreenShotHelpers.detectControlsByBackground(image, (int) titleBar.getHeight(), TestUtils.TITLE_BAR_COLOR);
             System.out.println("Found controls at the title bar:");
             foundControls.forEach(System.out::println);
 

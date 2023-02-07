@@ -21,6 +21,7 @@ import util.ScreenShotHelpers;
 import util.Task;
 import util.TestUtils;
 
+import java.awt.Color;
 import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -72,11 +73,6 @@ public class WindowsControlWidthTest {
 
         @Override
         public void test() throws Exception {
-            Robot robot = new Robot();
-            robot.delay(1000);
-            robot.mouseMove(0, 0);
-            robot.delay(1000);
-
             passed = passed && TestUtils.checkTitleBarHeight(titleBar, TestUtils.TITLE_BAR_HEIGHT);
             passed = passed && TestUtils.checkFrameInsets(window);
 
@@ -87,8 +83,7 @@ public class WindowsControlWidthTest {
 
             BufferedImage image = ScreenShotHelpers.takeScreenshot(window);
 
-            List<Rect> foundControls = ScreenShotHelpers.detectControls(image, (int) titleBar.getHeight(),
-                    (int) titleBar.getLeftInset(), (int) titleBar.getRightInset());
+            List<Rect> foundControls = ScreenShotHelpers.detectControlsByBackground(image, (int) titleBar.getHeight(), TestUtils.TITLE_BAR_COLOR);
 
             foundControls.forEach(control -> {
                 System.out.println("Detected control: " + control);

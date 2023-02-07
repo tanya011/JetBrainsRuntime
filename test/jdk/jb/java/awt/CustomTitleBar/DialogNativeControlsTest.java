@@ -104,8 +104,7 @@ public class DialogNativeControlsTest {
             robot.delay(1000);
 
             BufferedImage image = ScreenShotHelpers.takeScreenshot(window);
-            List<Rect> foundControls = ScreenShotHelpers.detectControls(image,
-                    (int) titleBar.getHeight(), (int) titleBar.getLeftInset(), (int) titleBar.getRightInset());
+            List<Rect> foundControls = ScreenShotHelpers.detectControlsByBackground(image, (int) titleBar.getHeight(), TestUtils.TITLE_BAR_COLOR);
 
             if (foundControls.size() == 0) {
                 passed = false;

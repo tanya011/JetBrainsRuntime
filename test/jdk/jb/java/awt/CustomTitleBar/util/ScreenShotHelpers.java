@@ -54,11 +54,12 @@ public class ScreenShotHelpers {
         int centerX = image.getWidth() / 2;
         int centerY = titleBarHeight / 2;
 
-        final int color = image.getRGB(centerX, centerY);
+        final Color centerColor = adjustColor(new Color(image.getRGB(centerX, centerY)));
 
         int startY = centerY;
         for (int y = centerY; y >= 0; y--) {
-            if (image.getRGB(centerX, y) != color) {
+            Color adjustedColor = adjustColor(new Color(image.getRGB(centerX, y)));
+            if (!adjustedColor.equals(centerColor)) {
                 startY = y + 1;
                 break;
             }
@@ -66,7 +67,8 @@ public class ScreenShotHelpers {
 
         int endY = centerY;
         for (int y = centerY; y <= (int) TestUtils.TITLE_BAR_HEIGHT; y++) {
-            if (image.getRGB(centerX, y) != color) {
+            Color adjustedColor = adjustColor(new Color(image.getRGB(centerX, y)));
+            if (!adjustedColor.equals(centerColor)) {
                 endY = y - 1;
                 break;
             }
@@ -74,7 +76,8 @@ public class ScreenShotHelpers {
 
         int startX = centerX;
         for (int x = centerX; x >= 0; x--) {
-            if (image.getRGB(x, startY) != color) {
+            Color adjustedColor = adjustColor(new Color(image.getRGB(x, startY)));
+            if (!adjustedColor.equals(centerColor)) {
                 startX = x + 1;
                 break;
             }
@@ -82,13 +85,92 @@ public class ScreenShotHelpers {
 
         int endX = centerX;
         for (int x = centerX; x < image.getWidth(); x++) {
-            if (image.getRGB(x, startY) != color) {
+            Color adjustedColor = adjustColor(new Color(image.getRGB(x, startY)));
+            if (!adjustedColor.equals(centerColor)) {
                 endX = x - 1;
                 break;
             }
         }
 
         return new RectCoordinates(startX, startY, endX, endY);
+    }
+
+    public static List<Rect> detectControlsByBackground(BufferedImage image, int titleBarHeight, Color backgroundColor) {
+        RectCoordinates coords = findRectangleTitleBar(image, titleBarHeight);
+        List<Rect> result = new ArrayList<>();
+
+        System.out.println(coords);
+
+        List<Integer> lefts = new ArrayList<>();
+        List<Integer> rights = new ArrayList<>();
+
+        int leftX = -1;
+        int rightX = -1;
+
+        for (int x = coords.x1(); x <= coords.x2(); x++) {
+            boolean isBackground = true;
+            for (int y = coords.y1(); y <= coords.y2(); y++) {
+                Color color = adjustColor(new Color(image.getRGB(x, y)));
+                if (!color.equals(backgroundColor)) {
+                    isBackground = false;
+                    break;
+                }
+            }
+            if (!isBackground) {
+                if (leftX == -1) {
+                    leftX = x;
+                }
+                rightX = x;
+            } else if (leftX != -1) {
+                lefts.add(leftX);
+                rights.add(rightX);
+                leftX = -1;
+                rightX = -1;
+            }
+        }
+
+        for (int i = 0; i < lefts.size(); i++) {
+            int lx = lefts.get(i);
+            int rx = rights.get(i);
+
+            System.out.println("lx = " + lx + " rx = " + rx);
+
+            int topY = coords.y1();
+
+            for (int y = coords.y1(); y <= coords.y2(); y++) {
+                boolean isBackground = true;
+                for (int x = lx; x <= rx; x++) {
+                    Color color = adjustColor(new Color(image.getRGB(x, y)));
+                    if (!color.equals(backgroundColor)) {
+                        isBackground = false;
+                        break;
+                    }
+                }
+                if (!isBackground) {
+                    topY = y;
+                }
+            }
+
+            int bottomY = coords.y2();
+            for (int y = coords.y2(); y > topY; y--) {
+                boolean isBackground = true;
+                for (int x = lx; x <= rx; x++) {
+                    Color color = adjustColor(new Color(image.getRGB(x, y)));
+                    if (!color.equals(backgroundColor)) {
+                        isBackground = false;
+                        break;
+                    }
+                }
+                if (!isBackground) {
+                    bottomY = y;
+                }
+            }
+
+            if (coords.y1() <= topY && topY <= bottomY && bottomY <= coords.y2()) {
+                result.add(new Rect(lx, topY, rx, bottomY, 0, Color.BLACK));
+            }
+        }
+        return result;
     }
 
     public static List<Rect> detectControls(BufferedImage image, int titleBarHeight, int leftInset, int rightInset) {
