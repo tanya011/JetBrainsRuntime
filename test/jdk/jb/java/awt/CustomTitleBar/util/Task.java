@@ -28,6 +28,7 @@ abstract public class Task {
     protected WindowDecorations.CustomTitleBar titleBar;
     protected Window window;
     protected boolean passed = true;
+    protected Robot robot;
 
 
     public Task(String name) {
@@ -35,6 +36,13 @@ abstract public class Task {
     }
 
     public final boolean run(Function<WindowDecorations.CustomTitleBar, Window> windowCreator) {
+        try {
+            robot = new Robot();
+        } catch (AWTException e) {
+            System.out.println("ERROR: unable to initialize robot");
+            e.printStackTrace();
+            return false;
+        }
         init();
         System.out.printf("RUN TEST CASE: %s%n", name);
         passed = true;
