@@ -61,9 +61,10 @@ public class NativeControlsVisibilityTest {
         @Override
         public void test() throws Exception {
             Robot robot = new Robot();
-            robot.delay(1000);
-            robot.mouseMove(0, 0);
-            robot.delay(1000);
+            robot.delay(500);
+            robot.mouseMove(window.getLocationOnScreen().x + window.getWidth() / 2,
+                    window.getLocationOnScreen().y + window.getHeight() / 2);
+            robot.delay(500);
 
             passed = passed && TestUtils.checkTitleBarHeight(titleBar, TestUtils.TITLE_BAR_HEIGHT);
             passed = passed && TestUtils.checkFrameInsets(window);
