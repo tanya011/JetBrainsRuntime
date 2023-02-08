@@ -161,6 +161,10 @@ public class MouseEventsOnClientArea {
             robot.delay(500);
 
             for (int i = 0; i < BUTTON_MASKS.size(); i++) {
+                System.out.println("Button mask: " + BUTTON_MASKS.get(i));
+                System.out.println("pressed = " + buttonsPressed[i]);
+                System.out.println("released = " + buttonsReleased[i]);
+                System.out.println("clicked = " + buttonsClicked[i]);
                 passed = buttonsPressed[i] && buttonsReleased[i] && buttonsClicked[i];
             }
 

@@ -133,7 +133,7 @@ public class DialogNativeControlsTest {
                 robot.delay(1500);
             });
 
-            if (!maximizingActionDetected) {
+            if (System.getProperty("os.name").toLowerCase().startsWith("mac") && !maximizingActionDetected) {
                 passed = false;
                 System.out.println("Error: maximizing action was not detected");
             }

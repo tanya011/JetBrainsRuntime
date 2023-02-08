@@ -74,14 +74,20 @@ public class ActionListenerTest {
             final int initialHeight = window.getHeight();
             final int initialWidth = window.getWidth();
 
+            System.out.println("Initial bounds: " + window.getBounds());
+
             Robot robot = new Robot();
-            robot.delay(1000);
-            robot.mouseMove(button.getBounds().x + button.getBounds().width / 2, button.getBounds().y + button.getBounds().height / 2);
+            robot.delay(500);
+            int x = button.getBounds().x + button.getBounds().width / 2;
+            int y = button.getBounds().y + button.getBounds().height / 2;
+            System.out.println("Click at (" + x + ", " + y + ")");
+            robot.mouseMove(x, y);
+            robot.delay(300);
             robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
             robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
             robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
             robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-            robot.delay(1000);
+            robot.delay(2000);
 
             if (window.getHeight() != initialHeight || window.getWidth() != initialWidth) {
                 passed = false;
