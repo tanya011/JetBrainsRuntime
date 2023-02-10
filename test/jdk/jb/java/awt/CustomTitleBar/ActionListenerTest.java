@@ -78,8 +78,8 @@ public class ActionListenerTest {
 
             Robot robot = new Robot();
             robot.delay(500);
-            int x = button.getBounds().x + button.getBounds().width / 2;
-            int y = button.getBounds().y + button.getBounds().height / 2;
+            int x = button.getLocationOnScreen().x + button.getWidth() / 2;
+            int y = button.getLocationOnScreen().y + button.getHeight() / 2;
             System.out.println("Click at (" + x + ", " + y + ")");
             robot.mouseMove(x, y);
             robot.delay(300);
