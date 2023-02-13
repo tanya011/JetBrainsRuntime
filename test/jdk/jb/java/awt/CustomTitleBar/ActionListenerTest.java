@@ -28,7 +28,7 @@ import java.awt.event.InputEvent;
  * @test
  * @summary Verify mouse events in custom title bar's area added by ActionListener
  * @requires (os.family == "windows" | os.family == "mac")
- * @run shell run.sh
+ * @run shell ${test.root}/jb/build-jbr-api.sh
  * @run main ActionListenerTest
  * @run main ActionListenerTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0
  * @run main ActionListenerTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.25

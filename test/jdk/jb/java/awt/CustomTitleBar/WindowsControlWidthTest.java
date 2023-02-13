@@ -30,7 +30,7 @@ import java.util.List;
  * @test
  * @summary Verify a property to change visibility of native controls
  * @requires os.family == "windows"
- * @run shell run.sh
+ * @run shell ${test.root}/jb/build-jbr-api.sh
  * @run main WindowsControlWidthTest
  * @run main WindowsControlWidthTest -Dos.version=10 -Dos.name="Windows 10" -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0
  * @run main WindowsControlWidthTest -Dos.version=10 -Dos.name="Windows 11" -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0

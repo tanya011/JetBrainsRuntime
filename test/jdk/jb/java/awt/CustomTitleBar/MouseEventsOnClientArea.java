@@ -34,7 +34,7 @@ import java.util.List;
  * @test
  * @summary Verify mouse events on custom title bar area
  * @requires (os.family == "windows" | os.family == "mac")
- * @run shell run.sh
+ * @run shell ${test.root}/jb/build-jbr-api.sh
  * @run main MouseEventsOnClientArea
  * @run main MouseEventsOnClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0
  * @run main MouseEventsOnClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.25

@@ -16,7 +16,7 @@ import java.io.IOException;
  * @test
  * @summary Verify modifying of title bar height
  * @requires (os.family == "windows" | os.family == "mac")
- * @run shell run.sh
+ * @run shell ${test.root}/jb/build-jbr-api.sh
  * @run main CheckFullScreen
  * @run main CheckFullScreen -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0
  * @run main CheckFullScreen -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.25
