@@ -21,7 +21,6 @@
   @summary Test that window state changes on titlebar double-click
   @library    ../../../../java/awt/regtesthelpers
   @build      Util
-  @run shell build.sh
   @run main CustomTitleBarDoubleClick
 */
 
