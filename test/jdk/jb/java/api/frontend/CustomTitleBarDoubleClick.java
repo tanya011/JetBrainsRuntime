@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2021 JetBrains s.r.o.
+ * Copyright 2000-2023 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@
 */
 
 import com.jetbrains.JBR;
+import com.jetbrains.WindowDecorations;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -54,8 +56,10 @@ public class CustomTitleBarDoubleClick implements WindowListener, WindowStateLis
         frame.setBounds(BOUNDS);
         frame.addWindowListener(this);
         frame.addWindowStateListener(this);
-        JBR.getCustomWindowDecoration().setCustomDecorationEnabled(frame, true);
-        JBR.getCustomWindowDecoration().setCustomDecorationTitleBarHeight(frame, 50);
+
+        WindowDecorations.CustomTitleBar titleBar = JBR.getWindowDecorations().createCustomTitleBar();
+        titleBar.setHeight(50);
+        JBR.getWindowDecorations().setCustomTitleBar(frame, titleBar);
         frame.setVisible(true);
         robot.delay(2000);
         if (!stateChanged) throw new AWTError("Test failed");
