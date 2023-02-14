@@ -28,7 +28,6 @@ import java.util.List;
  * @test
  * @summary Verify a property to change visibility of native controls
  * @requires (os.family == "windows" | os.family == "mac")
- * @run shell ${test.root}/jb/build-jbr-api.sh
  * @run main HiddenNativeControlsTest
  * @run main HiddenNativeControlsTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0
  * @run main HiddenNativeControlsTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.25

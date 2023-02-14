@@ -33,7 +33,6 @@ import java.awt.event.InputEvent;
  * @test
  * @summary Verify ability to maximize window by clicking to custom title bar area
  * @requires (os.family == "windows" | os.family == "mac")
- * @run shell ${test.root}/jb/build-jbr-api.sh
  * @run main MaximizeWindowTest
  * @run main MaximizeWindowTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0
  * @run main MaximizeWindowTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.25

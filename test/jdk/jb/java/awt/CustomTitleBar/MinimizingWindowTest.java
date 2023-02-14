@@ -33,7 +33,6 @@ import java.util.List;
  * @test
  * @summary Detect and check behavior of clicking to native controls
  * @requires (os.family == "windows" | os.family == "mac")
- * @run shell ${test.root}/jb/build-jbr-api.sh
  * @run main MinimizingWindowTest
  * @run main MinimizingWindowTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0
  * @run main MinimizingWindowTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.25

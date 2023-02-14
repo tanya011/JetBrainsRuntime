@@ -33,7 +33,6 @@ import java.util.concurrent.TimeUnit;
  * @test
  * @summary Regression test for JBR-3157 Maximized window with custom decorations isn't focused on showing
  * @requires (os.family == "windows" | os.family == "mac")
- * @run shell ${test.root}/jb/build-jbr-api.sh
  * @run main/othervm MaximizedWindowFocusTest
  * @run main/othervm MaximizedWindowFocusTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0
  * @run main/othervm MaximizedWindowFocusTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=2.0

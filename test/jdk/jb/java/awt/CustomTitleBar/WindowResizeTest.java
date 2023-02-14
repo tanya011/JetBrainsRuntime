@@ -29,7 +29,6 @@ import java.awt.image.BufferedImage;
  * @test
  * @summary Verify custom title bar in case of window resizing
  * @requires (os.family == "windows" | os.family == "mac")
- * @run shell ${test.root}/jb/build-jbr-api.sh
  * @run main WindowResizeTest
  * @run main WindowResizeTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0
  * @run main WindowResizeTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.25

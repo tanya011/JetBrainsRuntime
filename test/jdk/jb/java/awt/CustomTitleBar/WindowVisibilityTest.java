@@ -24,7 +24,6 @@ import java.awt.Robot;
  * @test
  * @summary Verify custom title bar in case of changing visibility of a window
  * @requires (os.family == "windows" | os.family == "mac")
- * @run shell ${test.root}/jb/build-jbr-api.sh
  * @run main WindowVisibilityTest
  * @run main WindowVisibilityTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0
  * @run main WindowVisibilityTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.25
