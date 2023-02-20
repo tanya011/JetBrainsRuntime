@@ -25,7 +25,6 @@ import util.CommonAPISuite;
 import util.Task;
 import util.TestUtils;
 
-import javax.swing.JPanel;
 import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -55,17 +54,14 @@ import java.util.List;
 public class MouseEventsOnClientArea {
 
     public static void main(String... args) {
-        boolean statusAWT = CommonAPISuite.runTestSuite(List.of(TestUtils::createFrameWithCustomTitleBar, TestUtils::createDialogWithCustomTitleBar), mouseClicksAWT);
-        boolean statusSwing = CommonAPISuite.runTestSuite(List.of(TestUtils::createJFrameWithCustomTitleBar, TestUtils::createDialogWithCustomTitleBar), mouseClicksSwing);
-
-        boolean status = statusAWT && statusSwing;
+        boolean status = CommonAPISuite.runTestSuite(TestUtils.getWindowCreationFunctions(), mouseClicks);
 
         if (!status) {
             throw new RuntimeException("MouseEventsOnClientArea FAILED");
         }
     }
 
-    private static final Task mouseClicksAWT = new Task("mouseClicks") {
+    private static final Task mouseClicks = new Task("mouseClicks") {
 
         private static final List<Integer> BUTTON_MASKS = List.of(
                 InputEvent.BUTTON1_DOWN_MASK,
@@ -152,164 +148,23 @@ public class MouseEventsOnClientArea {
             Robot robot = new Robot();
 
             BUTTON_MASKS.forEach(mask -> {
-                robot.waitForIdle();
+                robot.delay(500);
 
                 robot.mouseMove(panel.getLocationOnScreen().x + panel.getWidth() / 2,
                         panel.getLocationOnScreen().y + panel.getHeight() / 2);
                 robot.mousePress(mask);
                 robot.mouseRelease(mask);
 
-                robot.waitForIdle();
+                robot.delay(500);
             });
 
-            robot.waitForIdle();
+            robot.delay(500);
             robot.mouseMove(panel.getLocationOnScreen().x + panel.getWidth() / 2,
                     panel.getLocationOnScreen().y + panel.getHeight() / 2);
-            robot.waitForIdle();
+            robot.delay(500);
             robot.mouseMove(panel.getLocationOnScreen().x + panel.getWidth() + 10,
                     panel.getLocationOnScreen().y + panel.getWidth() + 10);
-            robot.waitForIdle();
-            robot.mouseMove(panel.getLocationOnScreen().x + panel.getWidth() + 20,
-                    panel.getLocationOnScreen().y + panel.getWidth() + 20);
-            robot.waitForIdle();
-
-            int xOutOfWindow = window.getLocationOnScreen().x > 0 ? 0 : window.getLocationOnScreen().x + window.getWidth() + 1;
-            int yOutOfWindow = window.getLocationOnScreen().y > 0 ? 0 : window.getLocationOnScreen().y + window.getHeight() + 1;
-            robot.mouseMove(xOutOfWindow, yOutOfWindow);
-            robot.waitForIdle();
-
-
-            for (int i = 0; i < BUTTON_MASKS.size(); i++) {
-                System.out.println("Button mask: " + BUTTON_MASKS.get(i));
-                System.out.println("pressed = " + buttonsPressed[i]);
-                System.out.println("released = " + buttonsReleased[i]);
-                System.out.println("clicked = " + buttonsClicked[i]);
-                passed = buttonsPressed[i] && buttonsReleased[i] && buttonsClicked[i];
-            }
-
-            if (!mouseEntered) {
-                System.out.println("Error: mouse enter wasn't detected");
-                passed = false;
-            }
-            if (!mouseExited) {
-                System.out.println("Error: mouse exit wasn't detected");
-                passed = false;
-            }
-        }
-    };
-
-    private static final Task mouseClicksSwing = new Task("mouseClicks") {
-
-        private static final List<Integer> BUTTON_MASKS = List.of(
-                InputEvent.BUTTON1_DOWN_MASK,
-                InputEvent.BUTTON2_DOWN_MASK,
-                InputEvent.BUTTON3_DOWN_MASK
-        );
-        private static final int PANEL_WIDTH = 400;
-        private static final int PANEL_HEIGHT = (int) TestUtils.TITLE_BAR_HEIGHT;
-
-        private final boolean[] buttonsPressed = new boolean[BUTTON_MASKS.size()];
-        private final boolean[] buttonsReleased = new boolean[BUTTON_MASKS.size()];
-        private final boolean[] buttonsClicked = new boolean[BUTTON_MASKS.size()];
-        private boolean mouseEntered;
-        private boolean mouseExited;
-
-        private JPanel panel;
-
-        @Override
-        protected void init() {
-            Arrays.fill(buttonsPressed, false);
-            Arrays.fill(buttonsReleased, false);
-            Arrays.fill(buttonsClicked, false);
-            mouseEntered = false;
-            mouseExited = false;
-        }
-
-        @Override
-        public void prepareTitleBar() {
-            titleBar = JBR.getWindowDecorations().createCustomTitleBar();
-            titleBar.setHeight(TestUtils.TITLE_BAR_HEIGHT);
-        }
-
-        @Override
-        protected void customizeWindow() {
-            panel = new JPanel() {
-                @Override
-                protected void paintComponent(Graphics g) {
-                    super.paintComponent(g);
-                    Rectangle r = g.getClipBounds();
-                    g.setColor(Color.CYAN);
-                    g.fillRect(r.x, r.y, PANEL_WIDTH, PANEL_HEIGHT);
-                }
-            };
-            panel.setBounds(0, 0, PANEL_WIDTH, PANEL_HEIGHT);
-            panel.setSize(PANEL_WIDTH, PANEL_HEIGHT);
-            panel.addMouseListener(new MouseAdapter() {
-
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    if (e.getButton() >= 1 && e.getButton() <= 3) {
-                        buttonsClicked[e.getButton() - 1] = true;
-                    }
-                }
-
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (e.getButton() >= 1 && e.getButton() <= 3) {
-                        buttonsPressed[e.getButton() - 1] = true;
-                    }
-                }
-
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    if (e.getButton() >= 1 && e.getButton() <= 3) {
-                        buttonsReleased[e.getButton() - 1] = true;
-                    }
-                }
-
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    mouseEntered = true;
-                }
-
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    mouseExited = true;
-                }
-            });
-            window.add(panel);
-        }
-
-        @Override
-        public void test() throws AWTException {
-            Robot robot = new Robot();
-
-            BUTTON_MASKS.forEach(mask -> {
-                robot.waitForIdle();
-
-                robot.mouseMove(panel.getLocationOnScreen().x + panel.getWidth() / 2,
-                        panel.getLocationOnScreen().y + panel.getHeight() / 2);
-                robot.mousePress(mask);
-                robot.mouseRelease(mask);
-
-                robot.waitForIdle();
-            });
-
-            robot.waitForIdle();
-            robot.mouseMove(panel.getLocationOnScreen().x + panel.getWidth() / 2,
-                    panel.getLocationOnScreen().y + panel.getHeight() / 2);
-            robot.waitForIdle();
-            robot.mouseMove(panel.getLocationOnScreen().x + panel.getWidth() + 10,
-                    panel.getLocationOnScreen().y + panel.getWidth() + 10);
-            robot.waitForIdle();
-            robot.mouseMove(panel.getLocationOnScreen().x + panel.getWidth() + 20,
-                    panel.getLocationOnScreen().y + panel.getWidth() + 20);
-            robot.waitForIdle();
-
-            int xOutOfWindow = window.getLocationOnScreen().x > 0 ? 0 : window.getLocationOnScreen().x + window.getWidth() + 1;
-            int yOutOfWindow = window.getLocationOnScreen().y > 0 ? 0 : window.getLocationOnScreen().y + window.getHeight() + 1;
-            robot.mouseMove(xOutOfWindow, yOutOfWindow);
-            robot.waitForIdle();
+            robot.delay(500);
 
             for (int i = 0; i < BUTTON_MASKS.size(); i++) {
                 System.out.println("Button mask: " + BUTTON_MASKS.get(i));
