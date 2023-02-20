@@ -22,7 +22,6 @@
  */
 
 import com.jetbrains.JBR;
-import com.jetbrains.WindowDecorations;
 import util.CommonAPISuite;
 import util.Task;
 import util.TestUtils;
@@ -43,21 +42,19 @@ import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.List;
 
-// * @run main HitTestClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0
-// * @run main HitTestClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.25
-//        * @run main HitTestClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.5
-//        * @run main HitTestClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=2.0
-//        * @run main HitTestClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=2.5
-//        * @run main HitTestClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=3.0
-//        * @run main HitTestClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=3.5
-//        * @run main HitTestClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=4.0
-
 /*
  * @test
  * @summary Verify control under native actions in custom title bar
  * @requires (os.family == "windows" | os.family == "mac")
  * @run main HitTestClientArea
-
+ * @run main HitTestClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0
+ * @run main HitTestClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.25
+ * @run main HitTestClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.5
+ * @run main HitTestClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=2.0
+ * @run main HitTestClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=2.5
+ * @run main HitTestClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=3.0
+ * @run main HitTestClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=3.5
+ * @run main HitTestClientArea -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=4.0
  */
 public class HitTestClientArea {
 
@@ -220,6 +217,7 @@ public class HitTestClientArea {
             Arrays.fill(gotClicks, 0);
             mousePressed = false;
             mouseReleased = false;
+            titleBar = null;
         }
 
         @Override
