@@ -149,8 +149,8 @@ public class HitTestClientArea {
             BUTTON_MASKS.forEach(mask -> {
                 robot.delay(500);
 
-                robot.mouseMove(panel.getLocationOnScreen().x + panel.getWidth() / 2,
-                        panel.getLocationOnScreen().y + panel.getHeight() / 2);
+                robot.mouseMove(window.getLocationOnScreen().x + panel.getWidth() / 2,
+                        window.getLocationOnScreen().y + panel.getHeight() / 2);
                 robot.mousePress(mask);
                 robot.mouseRelease(mask);
 
@@ -159,8 +159,8 @@ public class HitTestClientArea {
 
             Point initialLocation = window.getLocationOnScreen();
             robot.delay(500);
-            int initialX = panel.getLocationOnScreen().x + panel.getWidth() / 2;
-            int initialY = panel.getLocationOnScreen().y + panel.getHeight() / 2;
+            int initialX = window.getLocationOnScreen().x + panel.getWidth() / 2;
+            int initialY = window.getLocationOnScreen().y + panel.getHeight() / 2;
             robot.mouseMove(initialX, initialY);
             robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
             for (int i = 0; i < 10; i++) {

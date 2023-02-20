@@ -69,7 +69,6 @@ public class MinimizingWindowTest {
             @Override
             public void windowIconified(WindowEvent e) {
                 iconifyingActionCalled = true;
-                window.setVisible(true);
             }
         };
 
@@ -133,14 +132,14 @@ public class MinimizingWindowTest {
                 int h = window.getBounds().height;
                 int w = window.getBounds().width;
 
-                robot.delay(500);
+                robot.waitForIdle();
                 robot.mouseMove(x, y);
                 robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
                 robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-                robot.delay(1500);
+                robot.waitForIdle();
                 window.setBounds(screenX, screenY, w, h);
                 window.setVisible(true);
-                robot.delay(1500);
+                robot.waitForIdle();
             });
 
             if (!iconifyingActionCalled || !iconifyingActionDetected) {
