@@ -105,10 +105,10 @@ public class DialogNativeControlsTest {
 
         @Override
         public void test() throws Exception {
-            robot.delay(500);
+            robot.waitForIdle();
             robot.mouseMove(window.getLocationOnScreen().x + window.getWidth() / 2,
                     window.getLocationOnScreen().y + window.getHeight() / 2);
-            robot.delay(500);
+            robot.waitForIdle();
 
             BufferedImage image = ScreenShotHelpers.takeScreenshot(window);
             List<Rect> foundControls = ScreenShotHelpers.detectControlsByBackground(image, (int) titleBar.getHeight(), TestUtils.TITLE_BAR_COLOR);
