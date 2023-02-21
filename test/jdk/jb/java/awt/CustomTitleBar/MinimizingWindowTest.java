@@ -27,6 +27,7 @@ import util.ScreenShotHelpers;
 import util.Task;
 import util.TestUtils;
 
+import java.awt.Frame;
 import java.awt.Robot;
 import java.awt.event.InputEvent;
 import java.awt.event.WindowAdapter;
@@ -78,6 +79,8 @@ public class MinimizingWindowTest {
                 System.out.println("change " + e.getOldState() + " -> " + e.getNewState());
                 if (e.getOldState() == 0 && e.getNewState() == 1) {
                     iconifyingActionDetected = true;
+					((Frame) window).setState(Frame.NORMAL);
+					window.setVisible(true);
                 }
             }
         };
