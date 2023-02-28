@@ -37,6 +37,8 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.event.WindowStateListener;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Function;
 
@@ -44,6 +46,8 @@ import java.util.function.Function;
  * @test
  * @summary Detect and check behavior of clicking to native controls
  * @requires (os.family == "windows" | os.family == "mac")
+ * @modules java.desktop/com.apple.eawt
+ *          java.desktop/com.apple.eawt.event
  * @run main FrameNativeControlsTest
  * @run main FrameNativeControlsTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.0
  * @run main FrameNativeControlsTest -Dsun.java2d.uiScale.enabled=true -Dsun.java2d.uiScale=1.25
@@ -130,6 +134,29 @@ public class FrameNativeControlsTest {
         protected void customizeWindow() {
             window.addWindowListener(windowListener);
             window.addWindowStateListener(windowStateListener);
+
+            final String os = System.getProperty("os.name").toLowerCase();
+            if (window.getName().equals("JFrame") && os.startsWith("mac os")) {
+                com.apple.eawt.FullScreenUtilities.addFullScreenListenerTo(window, new com.apple.eawt.FullScreenListener() {
+                    @Override
+                    public void windowEnteringFullScreen(com.apple.eawt.event.FullScreenEvent fse) {
+                        maximizingActionDetected = true;
+                    }
+
+                    @Override
+                    public void windowEnteredFullScreen(com.apple.eawt.event.FullScreenEvent fse) {
+                    }
+
+                    @Override
+                    public void windowExitingFullScreen(com.apple.eawt.event.FullScreenEvent fse) {
+
+                    }
+
+                    @Override
+                    public void windowExitedFullScreen(com.apple.eawt.event.FullScreenEvent fse) {
+                    }
+                });
+            }
         }
 
         @Override
@@ -185,6 +212,33 @@ public class FrameNativeControlsTest {
             if (!deiconifyindActionDetected) {
                 passed = false;
                 System.out.println("Error: deiconifying action was not detected");
+            }
+        }
+
+        private static void enableOSXFullscreen(Window window) {
+            try {
+                Class util = Class.forName("com.apple.eawt.FullScreenUtilities");
+                Class params[] = new Class[]{Window.class, Boolean.TYPE};
+                Method method = util.getMethod("setWindowCanFullScreen", params);
+                method.invoke(util, window, true);
+            } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException |
+                     InvocationTargetException | ClassNotFoundException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        private static void requestOSXFullscreen(Window window) {
+            try {
+                Class appClass = Class.forName("com.apple.eawt.Application");
+                Class params[] = new Class[]{};
+
+                Method getApplication = appClass.getMethod("getApplication", params);
+                Object application = getApplication.invoke(appClass);
+                Method requestToggleFulLScreen = application.getClass().getMethod("requestToggleFullScreen", Window.class);
+
+                requestToggleFulLScreen.invoke(application, window);
+            } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                ex.printStackTrace();
             }
         }
     };
