@@ -15,6 +15,7 @@ import java.util.PriorityQueue;
  * @run main/othervm -Djtreg.test.initialSize=1000 -Djtreg.test.sampleSize=50 TypingLatencyTest
  * @run main/othervm -Djtreg.test.initialSize=5000 -Djtreg.test.sampleSize=50 TypingLatencyTest
  * @run main/othervm -Djtreg.test.initialSize=10000 -Djtreg.test.sampleSize=50 TypingLatencyTest
+ * @run main/othervm -Djtreg.test.initialSize=30000 -Djtreg.test.sampleSize=50 TypingLatencyTest
  */
 public class TypingLatencyTest {
 
