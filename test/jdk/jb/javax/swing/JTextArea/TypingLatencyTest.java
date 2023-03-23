@@ -121,7 +121,7 @@ public class TypingLatencyTest {
         System.out.println("average (ms): " + df.format((average / 1_000_000.0)));
         System.out.println("median (ms): " + df.format((median / 1_000_000.0)));
 
-        return median < 500_000_000;
+        return median < 200_000_000;
     }
 
     private static String generateText(int size) {
