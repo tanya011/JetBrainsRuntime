@@ -186,13 +186,11 @@ jobs:
         run: make CONF_NAME=macos-aarch64
         working-directory: jdk
 
-      - name: Persist test bundles
-        uses: actions/upload-artifact@v2
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
         with:
-          name: transient_jdk-macos-aarch64${{ matrix.artifact }}_${{ needs.prerequisites.outputs.bundle_id }}
-          path: |
-            jdk/build/macos-aarch64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_macos-aarch64_bin${{ matrix.artifact }}.tar.gz
-            jdk/build/macos-aarch64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_macos-aarch64_bin-tests${{ matrix.artifact }}.tar.gz
+          name: build-macos-aarch64
+          path: jdk/build
 
   artifacts:
     name: Post-process artifacts
