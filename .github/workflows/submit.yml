@@ -1570,11 +1570,6 @@ jobs:
     continue-on-error: true
     needs:
       - prerequisites
-      - linux_additional_build
-      - linux_x64_test
-      - linux_x86_test
-      - windows_x64_test
-      - macos_x64_test
       - macos_aarch64_build
 
     steps:
