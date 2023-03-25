@@ -190,7 +190,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build-macos-aarch64
-          path: jdk/build
+          path: jdk/build/macos-aarch64/bundles/*.tar.gz
 
   artifacts:
     name: Post-process artifacts
