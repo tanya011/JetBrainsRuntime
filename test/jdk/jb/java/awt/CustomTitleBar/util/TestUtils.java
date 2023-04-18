@@ -35,6 +35,7 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
@@ -211,6 +212,10 @@ public class TestUtils {
             uiScale = Float.parseFloat(System.getProperty("sun.java2d.uiScale"));
         }
         return uiScale;
+    }
+
+    public static void mouseMoveIfAppropriateArea(Robot robot, Window window, Point point) {
+        mouseMoveIfAppropriateArea(robot, window, point.x, point.y);
     }
 
     public static void mouseMoveIfAppropriateArea(Robot robot, Window window, int x, int y) {

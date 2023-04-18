@@ -88,8 +88,8 @@ public class ActionListenerTest {
         }
 
         @Override
-        public void test() throws AWTException {
-            doClick(button.getLocationOnScreen(), button.getWidth(), button.getHeight());
+        public void test() {
+            doClick(robot, window, button.getLocationOnScreen(), button.getWidth(), button.getHeight());
 
             if (!actionListenerGotEvent) {
                 err("button didn't get event by action listener");
@@ -124,8 +124,8 @@ public class ActionListenerTest {
         }
 
         @Override
-        public void test() throws AWTException {
-            doClick(button.getLocationOnScreen(), button.getWidth(), button.getHeight());
+        public void test() {
+            doClick(robot, window, button.getLocationOnScreen(), button.getWidth(), button.getHeight());
 
             if (!actionListenerGotEvent) {
                 err("button didn't get event by action listener");
@@ -133,13 +133,11 @@ public class ActionListenerTest {
         }
     };
 
-    private static void doClick(Point location, int w, int h) throws AWTException {
-        Robot robot = new Robot();
-        robot.waitForIdle();
+    private static void doClick(Robot robot, Window window, Point location, int w, int h) {
         int x = location.x + w / 2;
         int y = location.y + h / 2;
         System.out.println("Click at (" + x + ", " + y + ")");
-        robot.mouseMove(x, y);
+        TestUtils.mouseMoveIfAppropriateArea(robot, window, x, y);
         robot.waitForIdle();
         robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
         robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
