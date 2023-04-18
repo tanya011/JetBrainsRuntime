@@ -83,12 +83,17 @@ public class MaximizeWindowTest {
         }
 
         @Override
-        public void test() throws AWTException {
+        protected void customizeWindow() {
+            window.setAlwaysOnTop(true);
+        }
+
+        @Override
+        public void test() {
             setResizable(true);
             setWindowSize(window, titleBar);
             int initialWidth = window.getWidth();
             int initialHeight = window.getHeight();
-            doubleClickToTitleBar(window, titleBar);
+            doubleClickToTitleBar(robot, window, titleBar);
 
             System.out.printf(String.format("Initial size (w = %d, h = %d)%n", window.getWidth(), window.getHeight()));
             System.out.printf(String.format("New size (w = %d, h = %d)%n", window.getWidth(), window.getHeight()));
@@ -100,7 +105,7 @@ public class MaximizeWindowTest {
             setWindowSize(window, titleBar);
             initialWidth = window.getWidth();
             initialHeight = window.getHeight();
-            doubleClickToTitleBar(window, titleBar);
+            doubleClickToTitleBar(robot, window, titleBar);
             System.out.printf(String.format("Initial size (w = %d, h = %d)%n", window.getWidth(), window.getHeight()));
             System.out.printf(String.format("New size (w = %d, h = %d)%n", window.getWidth(), window.getHeight()));
             if (initialHeight != window.getHeight() || initialWidth != window.getWidth()) {
@@ -129,7 +134,7 @@ public class MaximizeWindowTest {
         window.setSize(w, h);
     }
 
-    private static void doubleClickToTitleBar(Window window, WindowDecorations.CustomTitleBar titleBar) throws AWTException {
+    private static void doubleClickToTitleBar(Robot robot, Window window, WindowDecorations.CustomTitleBar titleBar) {
         int leftX = window.getInsets().left + (int) titleBar.getLeftInset();
         int rightX = window.getBounds().width - window.getInsets().right - (int) titleBar.getRightInset();
         int x = window.getLocationOnScreen().x + leftX + (rightX - leftX) / 2;
@@ -144,10 +149,9 @@ public class MaximizeWindowTest {
         System.out.println("topY = " + topY + ", bottomY = " + bottomY);
         System.out.println("Double click to (" + x + ", " + y + ")");
 
-        Robot robot = new Robot();
-
         robot.delay(1000);
-        robot.mouseMove(x, y);
+        TestUtils.mouseMoveIfAppropriateArea(robot, window, x, y);
+        robot.waitForIdle();
         robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
         robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
         robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
