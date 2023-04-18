@@ -26,6 +26,7 @@ package util;
 import com.jetbrains.WindowDecorations;
 
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
 
 abstract public class Task {
@@ -43,42 +44,55 @@ abstract public class Task {
         this.name = name;
     }
 
-    public final TaskResult run(Function<WindowDecorations.CustomTitleBar, Window> windowCreator) {
-        try {
-            robot = new Robot();
-        } catch (AWTException e) {
-            final String message = "ERROR: unable to initialize robot";
-            e.printStackTrace();
-            return new TaskResult(false, message);
-        }
-        init();
-        System.out.printf("RUN TEST CASE: %s%n", name);
-        passed = true;
-        error = "";
-        prepareTitleBar();
-        window = windowCreator.apply(titleBar);
-        System.out.println("Created a window with the custom title bar. Window name: " + window.getName());
-        customizeWindow();
-
-        window.setVisible(true);
-        try {
-            test();
-        } catch (Exception e) {
-            System.out.println("ERROR: An error occurred during tests execution");
-            e.printStackTrace();
-            passed = false;
-        }
-
-        cleanup();
-        titleBar = null;
-        window.dispose();
-
+    public final TaskResult run(Function<WindowDecorations.CustomTitleBar, Window> windowCreator) throws InterruptedException, InvocationTargetException {
         if (!TestUtils.isBasicTestCase()) {
             boolean isMetConditions = TestUtils.checkScreenSizeConditions(window);
             if (!isMetConditions) {
                 error += "SKIPPED: environment don't match screen size conditions";
                 return new TaskResult(false, true, error);
             }
+        }
+
+        try {
+            robot = new Robot();
+            robot.setAutoDelay(50);
+        } catch (AWTException e) {
+            final String message = "ERROR: unable to initialize robot";
+            e.printStackTrace();
+            return new TaskResult(false, message);
+        }
+
+        try {
+
+            EventQueue.invokeAndWait(() -> {
+                init();
+                System.out.printf("RUN TEST CASE: %s%n", name);
+                passed = true;
+                error = "";
+                prepareTitleBar();
+                window = windowCreator.apply(titleBar);
+                System.out.println("Created a window with the custom title bar. Window name: " + window.getName());
+                customizeWindow();
+
+                window.setVisible(true);
+            });
+            try {
+                test();
+            } catch (Exception e) {
+                System.out.println("ERROR: An error occurred during tests execution");
+                e.printStackTrace();
+                passed = false;
+            }
+        } catch (InterruptedException | InvocationTargetException e) {
+            passed = false;
+            e.printStackTrace();
+            return new TaskResult(passed, e.getMessage());
+        } finally {
+            EventQueue.invokeAndWait(() -> {
+                cleanup();
+                titleBar = null;
+                window.dispose();
+            });
         }
 
         return new TaskResult(passed, error);

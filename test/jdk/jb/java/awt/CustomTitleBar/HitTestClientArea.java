@@ -37,6 +37,7 @@ import java.awt.Panel;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Robot;
+import java.awt.Window;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -85,8 +86,6 @@ public class HitTestClientArea {
         private static boolean mousePressed = false;
         private static boolean mouseReleased = false;
 
-        private Panel panel;
-
         @Override
         protected void cleanup() {
             Arrays.fill(gotClicks, 0);
@@ -102,7 +101,7 @@ public class HitTestClientArea {
 
         @Override
         protected void customizeWindow() {
-            panel = new Panel(){
+            Panel panel = new Panel() {
                 @Override
                 public void paint(Graphics g) {
                     Rectangle r = g.getClipBounds();
@@ -140,6 +139,7 @@ public class HitTestClientArea {
             });
 
             window.add(panel);
+            window.setAlwaysOnTop(true);
         }
 
         @Override
@@ -153,7 +153,7 @@ public class HitTestClientArea {
             for (Integer mask: BUTTON_MASKS) {
                 robot.waitForIdle();
 
-                robot.mouseMove(initialX, initialY);
+                TestUtils.mouseMoveIfAppropriateArea(robot, window, initialX, initialY);
                 robot.mousePress(mask);
                 robot.mouseRelease(mask);
 

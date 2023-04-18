@@ -36,6 +36,7 @@ import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.util.List;
@@ -210,6 +211,24 @@ public class TestUtils {
             uiScale = Float.parseFloat(System.getProperty("sun.java2d.uiScale"));
         }
         return uiScale;
+    }
+
+    public static void mouseMoveIfAppropriateArea(Robot robot, Window window, int x, int y) {
+        int x1 = window.getLocationOnScreen().x + window.getInsets().left;
+        int x2 = x1 + window.getWidth() - window.getInsets().right;
+        int y1 = window.getLocationOnScreen().y + window.getInsets().top;
+        int y2 = y1 + window.getHeight() - window.getInsets().bottom;
+
+        boolean isValidLocation = x1 <= x && x <= x2 && y1 <= y && y <= y2;
+        if (!isValidLocation) {
+            throw new RuntimeException("Given coordinates (" + x + " ," + y + ") is out of clickable area");
+        }
+
+        if (!window.isVisible()) {
+            throw new RuntimeException("Window isn't visible");
+        }
+
+        robot.mouseMove(x, y);
     }
 
 }

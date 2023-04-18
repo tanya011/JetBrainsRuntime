@@ -26,6 +26,7 @@ package util;
 import com.jetbrains.WindowDecorations;
 
 import java.awt.Window;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -38,7 +39,13 @@ public class CommonAPISuite {
         AtomicBoolean testPassed = new AtomicBoolean(true);
         List<String> errors = new ArrayList<>();
         functions.forEach(function -> {
-            TaskResult result = task.run(function);
+            TaskResult result = null;
+            try {
+                result = task.run(function);
+            } catch (InterruptedException | InvocationTargetException e) {
+                e.printStackTrace();
+                result = new TaskResult(false, e.getMessage());
+            }
             testPassed.set(testPassed.get() && result.isPassed());
             errors.add(result.getError());
         });
