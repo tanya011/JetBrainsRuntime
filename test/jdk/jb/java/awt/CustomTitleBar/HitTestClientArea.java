@@ -154,6 +154,7 @@ public class HitTestClientArea {
                 robot.waitForIdle();
 
                 TestUtils.mouseMoveIfAppropriateArea(robot, window, initialX, initialY);
+                robot.waitForIdle();
                 robot.mousePress(mask);
                 robot.mouseRelease(mask);
 
@@ -162,7 +163,8 @@ public class HitTestClientArea {
 
             Point initialLocation = window.getLocationOnScreen();
             robot.waitForIdle();
-            robot.mouseMove(initialX, initialY);
+            TestUtils.mouseMoveIfAppropriateArea(robot, window, initialX, initialY);
+            robot.waitForIdle();
             robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
             for (int i = 0; i < 10; i++) {
                 initialX += 3;
@@ -227,7 +229,6 @@ public class HitTestClientArea {
 
         @Override
         protected void customizeWindow() {
-
             panel = new JPanel() {
                 @Override
                 protected void paintComponent(Graphics g) {
@@ -271,6 +272,8 @@ public class HitTestClientArea {
                     mouseReleased = true;
                 }
             });
+            window.add(panel);
+            window.setAlwaysOnTop(true);
         }
 
         @Override
@@ -283,7 +286,8 @@ public class HitTestClientArea {
             for (Integer mask: BUTTON_MASKS) {
                 robot.waitForIdle();
 
-                robot.mouseMove(initialX, initialY);
+                TestUtils.mouseMoveIfAppropriateArea(robot, window, initialX, initialY);
+                robot.waitForIdle();
                 robot.mousePress(mask);
                 robot.mouseRelease(mask);
 
@@ -292,7 +296,8 @@ public class HitTestClientArea {
 
             Point initialLocation = window.getLocationOnScreen();
             robot.waitForIdle();
-            robot.mouseMove(initialX, initialY);
+            TestUtils.mouseMoveIfAppropriateArea(robot, window, initialX, initialY);
+            robot.waitForIdle();
             robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
             for (int i = 0; i < 10; i++) {
                 initialX += 3;

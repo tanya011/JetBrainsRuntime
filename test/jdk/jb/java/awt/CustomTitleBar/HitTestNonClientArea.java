@@ -126,6 +126,7 @@ public class HitTestNonClientArea {
             panel.setBounds(300, 20, 100, 50);
             panel.add(button);
             window.add(panel);
+            window.setAlwaysOnTop(true);
         }
 
         @Override
@@ -135,10 +136,12 @@ public class HitTestNonClientArea {
             int initialX = button.getLocationOnScreen().x + button.getWidth() / 2;
             int initialY = button.getLocationOnScreen().y + button.getHeight() / 2;
 
+            window.requestFocus();
             for (Integer mask: BUTTON_MASKS) {
                 robot.waitForIdle();
 
-                robot.mouseMove(initialX, initialY);
+                TestUtils.mouseMoveIfAppropriateArea(robot, window, initialX, initialY);
+                robot.waitForIdle();
                 robot.mousePress(mask);
                 robot.mouseRelease(mask);
 
@@ -147,7 +150,8 @@ public class HitTestNonClientArea {
 
             Point initialLocation = window.getLocationOnScreen();
             robot.waitForIdle();
-            robot.mouseMove(initialX, initialY);
+            TestUtils.mouseMoveIfAppropriateArea(robot, window, initialX, initialY);
+            robot.waitForIdle();
             robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
             for (int i = 0; i < 10; i++) {
                 initialX += 3;
