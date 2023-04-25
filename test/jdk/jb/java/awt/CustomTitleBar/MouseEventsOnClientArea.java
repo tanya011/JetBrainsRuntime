@@ -68,7 +68,7 @@ public class MouseEventsOnClientArea {
 
         private final int[] BUTTON_MASKS = {
                 InputEvent.BUTTON1_DOWN_MASK,
-                InputEvent.BUTTON2_DOWN_MASK,
+                //InputEvent.BUTTON2_DOWN_MASK,
                 InputEvent.BUTTON3_DOWN_MASK
         };
 
