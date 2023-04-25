@@ -113,23 +113,38 @@ public class MouseEventsOnClientArea {
 
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    if (e.getButton() >= 1 && e.getButton() <= 3) {
-                        buttonsClicked[e.getButton() - 1] = true;
+                    if (e.getButton() == 1) {
+                        buttonsClicked[0] = true;
+                    } else if (e.getButton() == 3) {
+                        buttonsClicked[1] = true;
                     }
+//                    if (e.getButton() >= 1 && e.getButton() <= 3) {
+//                        buttonsClicked[e.getButton() - 1] = true;
+//                    }
                 }
 
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    if (e.getButton() >= 1 && e.getButton() <= 3) {
-                        buttonsPressed[e.getButton() - 1] = true;
+                    if (e.getButton() == 1) {
+                        buttonsPressed[0] = true;
+                    } else if (e.getButton() == 3) {
+                        buttonsPressed[1] = true;
                     }
+//                    if (e.getButton() >= 1 && e.getButton() <= 3) {
+//                        buttonsPressed[e.getButton() - 1] = true;
+//                    }
                 }
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    if (e.getButton() >= 1 && e.getButton() <= 3) {
-                        buttonsReleased[e.getButton() - 1] = true;
+                    if (e.getButton() == 1) {
+                        buttonsReleased[0] = true;
+                    } else if (e.getButton() == 3) {
+                        buttonsReleased[1] = true;
                     }
+//                    if (e.getButton() >= 1 && e.getButton() <= 3) {
+//                        buttonsReleased[e.getButton() - 1] = true;
+//                    }
                 }
             });
             window.add(panel);
@@ -139,8 +154,11 @@ public class MouseEventsOnClientArea {
         public void test() throws AWTException {
             Robot robot = new Robot();
 
-            int x = panel.getLocationOnScreen().x + panel.getWidth() / 2;
-            int y = panel.getLocationOnScreen().y + panel.getHeight() / 2;
+//            int x = panel.getLocationOnScreen().x + panel.getWidth() / 2;
+//            int y = panel.getLocationOnScreen().y + panel.getHeight() / 2;
+
+            int x = panel.getLocationOnScreen().x + window.getWidth() / 2;
+            int y = panel.getLocationOnScreen().y + window.getHeight() / 2;
 
             for (int i = 0; i < BUTTON_MASKS.length; i++) {
                 robot.delay(500);
