@@ -66,16 +66,20 @@ public class MouseEventsOnClientArea {
 
     private static final Task mouseClicks = new Task("mouseClicks") {
 
-        private static final List<Integer> BUTTON_MASKS = List.of(
+        private final int[] BUTTON_MASKS = {
                 InputEvent.BUTTON1_DOWN_MASK,
-                InputEvent.BUTTON2_DOWN_MASK
-        );
+                InputEvent.BUTTON2_DOWN_MASK,
+                InputEvent.BUTTON3_DOWN_MASK
+        };
+
+        private final Object mouseLock = new Object();
+
         private static final int PANEL_WIDTH = 400;
         private static final int PANEL_HEIGHT = (int) TestUtils.TITLE_BAR_HEIGHT;
 
-        private final boolean[] buttonsPressed = new boolean[BUTTON_MASKS.size()];
-        private final boolean[] buttonsReleased = new boolean[BUTTON_MASKS.size()];
-        private final boolean[] buttonsClicked = new boolean[BUTTON_MASKS.size()];
+        private final boolean[] buttonsPressed = new boolean[BUTTON_MASKS.length];
+        private final boolean[] buttonsReleased = new boolean[BUTTON_MASKS.length];
+        private final boolean[] buttonsClicked = new boolean[BUTTON_MASKS.length];
 
         private Panel panel;
 
@@ -138,19 +142,30 @@ public class MouseEventsOnClientArea {
             int x = panel.getLocationOnScreen().x + panel.getWidth() / 2;
             int y = panel.getLocationOnScreen().y + panel.getHeight() / 2;
 
-            BUTTON_MASKS.forEach(mask -> {
+            for (int i = 0; i < BUTTON_MASKS.length; i++) {
                 robot.delay(500);
 
                 robot.mouseMove(x, y);
-                robot.mousePress(mask);
-                robot.mouseRelease(mask);
-
+                robot.mousePress(BUTTON_MASKS[i]);
+                robot.mouseRelease(BUTTON_MASKS[i]);
                 robot.delay(500);
-            });
+
+                if (!buttonsReleased[i]) {
+                    synchronized (mouseLock) {
+                        try {
+                            mouseLock.wait(3000);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            err("Unable to release mouse lock");
+                        }
+                    }
+                }
+            }
+
 
             boolean status = true;
-            for (int i = 0; i < BUTTON_MASKS.size(); i++) {
-                System.out.println("Button mask: " + BUTTON_MASKS.get(i));
+            for (int i = 0; i < BUTTON_MASKS.length; i++) {
+                System.out.println("Button mask: " + BUTTON_MASKS[i]);
                 System.out.println("pressed = " + buttonsPressed[i]);
                 System.out.println("released = " + buttonsReleased[i]);
                 System.out.println("clicked = " + buttonsClicked[i]);
