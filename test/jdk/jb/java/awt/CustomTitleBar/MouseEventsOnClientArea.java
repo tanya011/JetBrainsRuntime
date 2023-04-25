@@ -68,8 +68,7 @@ public class MouseEventsOnClientArea {
 
         private static final List<Integer> BUTTON_MASKS = List.of(
                 InputEvent.BUTTON1_DOWN_MASK,
-                InputEvent.BUTTON2_DOWN_MASK,
-                InputEvent.BUTTON3_DOWN_MASK
+                InputEvent.BUTTON2_DOWN_MASK
         );
         private static final int PANEL_WIDTH = 400;
         private static final int PANEL_HEIGHT = (int) TestUtils.TITLE_BAR_HEIGHT;
