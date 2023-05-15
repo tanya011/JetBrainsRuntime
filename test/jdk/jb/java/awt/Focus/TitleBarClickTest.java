@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
  * @test
  * @summary Regression test for JBR-2652 Window is not focused in some cases on Linux
  * @key headful
+ * @library ../../../helpers
  */
 public class TitleBarClickTest {
     private static final CompletableFuture<Boolean> f1Opened = new CompletableFuture<>();
@@ -46,6 +47,7 @@ public class TitleBarClickTest {
     private static Robot robot;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(TitleBarClickTest.class.getName());
         robot = new Robot();
 
         try {
@@ -65,7 +67,10 @@ public class TitleBarClickTest {
             f2.toFront();
             t2Focused.get(10, TimeUnit.SECONDS);
         } finally {
-            SwingUtilities.invokeAndWait(TitleBarClickTest::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.verify(TitleBarClickTest.class.getName());
+            });
         }
     }
 

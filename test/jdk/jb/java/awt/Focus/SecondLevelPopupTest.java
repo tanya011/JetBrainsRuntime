@@ -30,6 +30,7 @@ import java.util.concurrent.*;
  * @test
  * @summary Regression test for JBR-3054 Focus is not returned to frame after closing of second-level popup on Windows
  * @key headful
+ * @library ../../../helpers
  */
 
 public class SecondLevelPopupTest {
@@ -41,6 +42,7 @@ public class SecondLevelPopupTest {
     private static JButton button3;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(SecondLevelPopupTest.class.getName());
         robot = new Robot();
         try {
             SwingUtilities.invokeAndWait(SecondLevelPopupTest::initUI);
@@ -53,7 +55,10 @@ public class SecondLevelPopupTest {
             clickOn(button3);
             button1Focused.get(5, TimeUnit.SECONDS);
         } finally {
-            SwingUtilities.invokeAndWait(SecondLevelPopupTest::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.verify(SecondLevelPopupTest.class.getName());
+            });
         }
     }
 

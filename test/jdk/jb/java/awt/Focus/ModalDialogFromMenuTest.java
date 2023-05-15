@@ -34,6 +34,7 @@ import java.util.concurrent.locks.LockSupport;
  * @test
  * @summary Test for the case which was broken during development for JBR-2712 (Typeahead mechanism doesn't work on Windows)
  * @key headful
+ * @library ../../../helpers
  */
 
 public class ModalDialogFromMenuTest {
@@ -46,6 +47,7 @@ public class ModalDialogFromMenuTest {
     private static JMenuItem menuItem;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(ModalDialogFromMenuTest.class.getName());
         robot = new Robot();
         robot.setAutoDelay(50); // ensure different timestamps for key events (can impact typeahead logic)
         try {
@@ -57,7 +59,10 @@ public class ModalDialogFromMenuTest {
             pressAndRelease(KeyEvent.VK_A);
             typedInDialog.get(10, TimeUnit.SECONDS);
         } finally {
-            SwingUtilities.invokeAndWait(ModalDialogFromMenuTest::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.verify(ModalDialogFromMenuTest.class.getName());
+            });
         }
     }
 

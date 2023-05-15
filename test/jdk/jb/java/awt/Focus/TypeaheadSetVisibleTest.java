@@ -34,6 +34,7 @@ import java.util.concurrent.locks.LockSupport;
  * @test
  * @summary Regression test for JBR-2712 Typeahead mechanism doesn't work on Windows
  * @key headful
+ * @library ../../../helpers
  */
 
 public class TypeaheadSetVisibleTest {
@@ -44,6 +45,7 @@ public class TypeaheadSetVisibleTest {
     private static JTextField frameField;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(TypeaheadRequestFocusTest.class.getName());
         robot = new Robot();
         robot.setAutoDelay(50); // ensure different timestamps for key events (can impact typeahead logic)
         try {
@@ -54,7 +56,9 @@ public class TypeaheadSetVisibleTest {
             pressAndRelease(KeyEvent.VK_A);
             typedInPopup.get(10, TimeUnit.SECONDS);
         } finally {
-            SwingUtilities.invokeAndWait(TypeaheadSetVisibleTest::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                ScreenshotArtifacts.verify(TypeaheadRequestFocusTest.class.getName());
+            });
         }
     }
 

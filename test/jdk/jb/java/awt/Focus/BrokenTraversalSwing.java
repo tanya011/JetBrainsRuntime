@@ -30,6 +30,7 @@ import javax.swing.*;
  * @test
  * @summary Regression test for JBR-5045 Invisible component can break focus cycle
  * @key headful
+ * @library ../../../helpers
  */
 
 public class BrokenTraversalSwing {
@@ -39,6 +40,7 @@ public class BrokenTraversalSwing {
     private static JButton button2;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(BrokenTraversalSwing.class.getName(), 1);
         robot = new Robot();
         robot.setAutoDelay(50);
         try {
@@ -55,7 +57,10 @@ public class BrokenTraversalSwing {
             checkFocus(button1);
         }
         finally {
-            SwingUtilities.invokeAndWait(BrokenTraversalSwing::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.verify(BrokenTraversalSwing.class.getName());
+            });
         }
     }
 

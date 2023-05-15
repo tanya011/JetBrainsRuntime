@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
  * @test
  * @summary Regression test for JBR-2533 Popup is not focused on click when switching from another application on macOS
  * @key headful
+ * @library ../../../helpers
  */
 
 public class PopupIncomingFocusTest {
@@ -47,6 +48,7 @@ public class PopupIncomingFocusTest {
     private static JTextField field;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(PopupIncomingFocusTest.class.getName());
         robot = new Robot();
         robot.setAutoWaitForIdle(true);
         try {
@@ -61,7 +63,10 @@ public class PopupIncomingFocusTest {
             result.get(10, TimeUnit.SECONDS);
         }
         finally {
-            SwingUtilities.invokeAndWait(PopupIncomingFocusTest::shutdown);
+            SwingUtilities.invokeAndWait(() -> {
+                shutdown();
+                ScreenshotArtifacts.verify(PopupIncomingFocusTest.class.getName());
+            });
         }
     }
 

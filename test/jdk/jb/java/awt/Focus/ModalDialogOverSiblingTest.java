@@ -30,6 +30,7 @@ import java.util.concurrent.*;
  * @test
  * @summary Regression test for JBR-1752 Floating windows overlap modal dialogs
  * @key headful
+ * @library ../../../helpers
  */
 
 public class ModalDialogOverSiblingTest {
@@ -41,6 +42,7 @@ public class ModalDialogOverSiblingTest {
     private static JButton button3;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(ModalDialogOverSiblingTest.class.getName());
         robot = new Robot();
         try {
             SwingUtilities.invokeAndWait(ModalDialogOverSiblingTest::initUI);
@@ -52,7 +54,10 @@ public class ModalDialogOverSiblingTest {
             clickOn(button3);
             modalDialogButtonClicked.get(5, TimeUnit.SECONDS);
         } finally {
-            SwingUtilities.invokeAndWait(ModalDialogOverSiblingTest::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.verify(ModalDialogOverSiblingTest.class.getName());
+            });
         }
     }
 

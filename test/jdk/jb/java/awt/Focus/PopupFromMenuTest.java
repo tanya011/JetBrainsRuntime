@@ -34,6 +34,7 @@ import java.util.concurrent.locks.LockSupport;
  * @test
  * @summary Regression test for JBR-4131 Popup doesn't get focus if created from context menu
  * @key headful
+ * @library ../../../helpers
  */
 
 public class PopupFromMenuTest {
@@ -44,6 +45,7 @@ public class PopupFromMenuTest {
     private static JMenuItem menuItem;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(PopupFromMenuTest.class.getName());
         robot = new Robot();
         try {
             SwingUtilities.invokeAndWait(PopupFromMenuTest::initUI);
@@ -55,7 +57,10 @@ public class PopupFromMenuTest {
             type();
             typedInPopup.get(5, TimeUnit.SECONDS);
         } finally {
-            SwingUtilities.invokeAndWait(PopupFromMenuTest::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.takeScreenshot(PopupFromMenuTest.class.getName());
+            });
         }
     }
 

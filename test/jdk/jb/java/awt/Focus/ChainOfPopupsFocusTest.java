@@ -49,6 +49,7 @@ import java.awt.event.KeyEvent;
  * @test
  * @summary Regression test for JBR-1417: JBR 11 does not support chain of popups
  * @requires (jdk.version.major >= 8)
+ * @library ../../../helpers
  * @run main ChainOfPopupsFocusTest
  */
 
@@ -70,7 +71,7 @@ public class ChainOfPopupsFocusTest implements Runnable, ActionListener {
     private JFrame frame;
 
     public static void main(String[] args) throws Exception {
-
+        ScreenshotArtifacts.takeScreenshot(ChainOfPopupsFocusTest.class.getName(), 1);
         robot = new Robot();
         robot.setAutoDelay(50);
 
@@ -116,7 +117,10 @@ public class ChainOfPopupsFocusTest implements Runnable, ActionListener {
                 }
             }
         } finally {
-            SwingUtilities.invokeAndWait(() -> test.frame.dispose());
+            SwingUtilities.invokeAndWait(() -> {
+                test.frame.dispose();
+                ScreenshotArtifacts.verify(ChainOfPopupsFocusTest.class.getName());
+            });
             robot.delay(2000);
         }
         System.out.println("Test PASSED");

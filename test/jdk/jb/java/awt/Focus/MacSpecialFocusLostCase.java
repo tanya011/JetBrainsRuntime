@@ -30,6 +30,7 @@ import java.awt.event.KeyEvent;
  * @summary Regression test for JBR-4281 Window losing focus isn't detected in some cases on macOS
  * @key headful
  * @requires (os.family == "mac")
+ * @library ../../../helpers
  */
 
 public class MacSpecialFocusLostCase {
@@ -37,6 +38,7 @@ public class MacSpecialFocusLostCase {
     private static JFrame frame;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(MacSpecialFocusLostCase.class.getName());
         robot = new Robot();
         robot.setAutoDelay(50);
         try {
@@ -48,7 +50,10 @@ public class MacSpecialFocusLostCase {
             checkFocusedStatus(true);
         } finally {
             pressEsc(); // make sure popup is closed in any case
-            SwingUtilities.invokeAndWait(MacSpecialFocusLostCase::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.verify(MacSpecialFocusLostCase.class.getName());
+            });
         }
     }
 

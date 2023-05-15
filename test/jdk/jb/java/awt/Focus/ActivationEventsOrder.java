@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
  * @summary Regression test for JBR-3989 Broken focus state after a quick succession of activation/deactivation events
  *          on Windows
  * @key headful
+ * @library ../../../helpers
  */
 
 public class ActivationEventsOrder {
@@ -45,6 +46,7 @@ public class ActivationEventsOrder {
     private static JTextField field2;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(ActivationEventsOrder.class.getName(), 1);
         robot = new Robot();
         try {
             SwingUtilities.invokeAndWait(ActivationEventsOrder::initUI);
@@ -59,7 +61,10 @@ public class ActivationEventsOrder {
             success.get(5, TimeUnit.SECONDS);
         }
         finally {
-            SwingUtilities.invokeAndWait(ActivationEventsOrder::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.verify(ActivationEventsOrder.class.getName());
+            });
         }
     }
 

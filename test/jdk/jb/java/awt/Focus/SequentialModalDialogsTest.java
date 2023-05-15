@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
  * @test
  * @summary Regression test for JBR-2843 No caret in merge window
  * @key headful
+ * @library ../../../helpers
  */
 
 public class SequentialModalDialogsTest {
@@ -45,6 +46,7 @@ public class SequentialModalDialogsTest {
     private static JTextField windowField;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(SequentialModalDialogsTest.class.getName());
         robot = new Robot();
         try {
             SwingUtilities.invokeAndWait(SequentialModalDialogsTest::initUI);
@@ -54,7 +56,10 @@ public class SequentialModalDialogsTest {
             pressAndRelease(KeyEvent.VK_ENTER);
             typedInDialog.get(10, TimeUnit.SECONDS);
         } finally {
-            SwingUtilities.invokeAndWait(SequentialModalDialogsTest::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.verify(SequentialModalDialogsTest.class.getName());
+            });
         }
     }
 

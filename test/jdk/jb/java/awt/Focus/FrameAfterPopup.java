@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
  * @summary Regression test for JBR-5109 New frame doesn't get focused sometimes if it's shown right after popup is
  *          closed
  * @key headful
+ * @library ../../../helpers
  */
 
 public class FrameAfterPopup {
@@ -44,6 +45,7 @@ public class FrameAfterPopup {
     private static JButton button;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(FrameAfterPopup.class.getName());
         robot = new Robot();
         robot.setAutoDelay(50);
         try {
@@ -55,7 +57,10 @@ public class FrameAfterPopup {
             success.get(5, TimeUnit.SECONDS);
         }
         finally {
-            SwingUtilities.invokeAndWait(FrameAfterPopup::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.verify(FrameAfterPopup.class.getName());
+            });
         }
     }
 

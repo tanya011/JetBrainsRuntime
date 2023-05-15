@@ -34,6 +34,7 @@ import java.nio.file.Files;
  * @key headful
  * @requires (os.family == "mac")
  * @modules java.desktop/com.apple.eawt
+ * @library ../../../helpers
  */
 
 public class FullScreenFocusStealing {
@@ -41,6 +42,7 @@ public class FullScreenFocusStealing {
     private static Process otherProcess;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(FullScreenFocusStealing.class.getName());
         try {
             SwingUtilities.invokeAndWait(FullScreenFocusStealing::initUI);
             launchProcessWithWindow();
@@ -49,7 +51,10 @@ public class FullScreenFocusStealing {
             assertProcessWindowIsStillFocused();
         }
         finally {
-            SwingUtilities.invokeAndWait(FullScreenFocusStealing::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.verify(FullScreenFocusStealing.class.getName());
+            });
         }
     }
 

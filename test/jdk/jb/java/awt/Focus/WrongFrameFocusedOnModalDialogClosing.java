@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
  * @test
  * @summary Regression test for JBR-3662 Focus jumps to another project tab after closing modal dialog
  * @key headful
+ * @library ../../../helpers
  */
 
 public class WrongFrameFocusedOnModalDialogClosing {
@@ -43,6 +44,7 @@ public class WrongFrameFocusedOnModalDialogClosing {
     private static JButton button;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(WrongFrameFocusedOnModalDialogClosing.class.getName());
         robot = new Robot();
         try {
             SwingUtilities.invokeAndWait(WrongFrameFocusedOnModalDialogClosing::initUI);
@@ -57,7 +59,10 @@ public class WrongFrameFocusedOnModalDialogClosing {
                 throw new RuntimeException("Wrong frame focused");
             }
         } finally {
-            SwingUtilities.invokeAndWait(WrongFrameFocusedOnModalDialogClosing::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.verify(WrongFrameFocusedOnModalDialogClosing.class.getName());
+            });
         }
     }
 

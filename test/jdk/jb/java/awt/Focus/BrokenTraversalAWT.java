@@ -29,6 +29,7 @@ import java.awt.event.KeyEvent;
  * @test
  * @summary Regression test for JBR-5045 Invisible component can break focus cycle
  * @key headful
+ * @library ../../../helpers
  */
 
 public class BrokenTraversalAWT {
@@ -38,6 +39,7 @@ public class BrokenTraversalAWT {
     private static Button button2;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(BrokenTraversalAWT.class.getName(), 1);
         robot = new Robot();
         robot.setAutoDelay(50);
         try {
@@ -54,7 +56,10 @@ public class BrokenTraversalAWT {
             checkFocus(button1);
         }
         finally {
-            EventQueue.invokeAndWait(BrokenTraversalAWT::disposeUI);
+            EventQueue.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.verify(BrokenTraversalAWT.class.getName());
+            });
         }
     }
 

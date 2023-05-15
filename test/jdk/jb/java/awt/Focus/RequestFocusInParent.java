@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
  * @test
  * @summary Regression test for JBR-3979 Focus is not transferred to parent window
  * @key headful
+ * @library ../../../helpers
  */
 
 public class RequestFocusInParent {
@@ -42,6 +43,7 @@ public class RequestFocusInParent {
     private static JButton button2;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(RequestFocusInParent.class.getName());
         robot = new Robot();
         try {
             SwingUtilities.invokeAndWait(RequestFocusInParent::initUI);
@@ -52,7 +54,10 @@ public class RequestFocusInParent {
             clickOn(button2);
             result.get(5, TimeUnit.SECONDS);
         } finally {
-            SwingUtilities.invokeAndWait(RequestFocusInParent::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.verify(RequestFocusInParent.class.getName());
+            });
         }
     }
 

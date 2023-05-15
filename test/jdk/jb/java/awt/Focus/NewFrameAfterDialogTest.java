@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
  * @test
  * @summary Regression test for JBR-2977 Opening a recent project in a new window doesn't bring this window to the front
  * @key headful
+ * @library ../../../helpers
  */
 
 public class NewFrameAfterDialogTest {
@@ -41,6 +42,7 @@ public class NewFrameAfterDialogTest {
     private static JFrame frame2;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(NewFrameAfterDialogTest.class.getName());
         robot = new Robot();
         try {
             SwingUtilities.invokeAndWait(NewFrameAfterDialogTest::initUI);
@@ -52,7 +54,10 @@ public class NewFrameAfterDialogTest {
             clickOn(frame2);
             success.get(10, TimeUnit.SECONDS);
         } finally {
-            SwingUtilities.invokeAndWait(NewFrameAfterDialogTest::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.takeScreenshot(NewFrameAfterDialogTest.class.getName());
+            });
         }
     }
 

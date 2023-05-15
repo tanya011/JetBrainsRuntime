@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @test
  * @summary Regression test for JBR-4546 Focus is not returned back to IDE after closing "Open" dialog
  * @key headful
+ * @library ../../../helpers
  */
 
 public class FileDialogClosing {
@@ -41,6 +42,7 @@ public class FileDialogClosing {
     private static Button button;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(FileDialogClosing.class.getName());
         robot = new Robot();
         try {
             SwingUtilities.invokeAndWait(FileDialogClosing::initUI);
@@ -55,7 +57,10 @@ public class FileDialogClosing {
                 throw new RuntimeException("Unexpected pressed count: " + pressedCount);
             }
         } finally {
-            SwingUtilities.invokeAndWait(FileDialogClosing::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.verify(FileDialogClosing.class.getName());
+            });
         }
     }
 

@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
  * @test
  * @summary Regression test for JBR-2854 [macOS] Undecorated window without parent steals focus on showing
  * @key headful
+ * @library ../../../helpers
  */
 
 public class WindowWithoutParentTest {
@@ -44,6 +45,7 @@ public class WindowWithoutParentTest {
     private static JWindow window;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(WindowWithoutParentTest.class.getName());
         robot = new Robot();
         robot.setAutoDelay(50); // ensure different timestamps for key events (can impact typeahead logic)
         try {
@@ -54,7 +56,10 @@ public class WindowWithoutParentTest {
             pressAndRelease(KeyEvent.VK_A);
             typedInField.get(10, TimeUnit.SECONDS);
         } finally {
-            SwingUtilities.invokeAndWait(WindowWithoutParentTest::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.verify(WindowWithoutParentTest.class.getName());
+            });
         }
     }
 

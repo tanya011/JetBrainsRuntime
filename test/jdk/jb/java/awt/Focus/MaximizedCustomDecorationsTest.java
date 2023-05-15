@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
  * @summary Regression test for JBR-3157 Maximized window with custom decorations isn't focused on showing
  * @requires (os.family == "windows" | os.family == "mac")
  * @key headful
+ * @library ../../../helpers
  * @run main/othervm --add-opens java.desktop/java.awt=ALL-UNNAMED MaximizedCustomDecorationsTest
  */
 
@@ -48,6 +49,7 @@ public class MaximizedCustomDecorationsTest {
     private static JButton button;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(MaximizedCustomDecorationsTest.class.getName());
         robot = new Robot();
         try {
             SwingUtilities.invokeAndWait(MaximizedCustomDecorationsTest::initUI);
@@ -55,7 +57,10 @@ public class MaximizedCustomDecorationsTest {
             clickOn(button);
             frame2Focused.get(5, TimeUnit.SECONDS);
         } finally {
-            SwingUtilities.invokeAndWait(MaximizedCustomDecorationsTest::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.verify(MaximizedCustomDecorationsTest.class.getName());
+            });
         }
     }
 

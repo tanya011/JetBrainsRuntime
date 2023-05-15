@@ -29,6 +29,7 @@ import java.awt.event.*;
  * @test
  * @summary Regression test for JBR-4820 Focus lost after showing popup and context menu
  * @key headful
+ * @library ../../../helpers
  */
 
 public class ContextMenuAfterPopup {
@@ -37,6 +38,7 @@ public class ContextMenuAfterPopup {
     private static JTextField frameField;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(ContextMenuAfterPopup.class.getName(), 1);
         robot = new Robot();
         robot.setAutoDelay(50);
         try {
@@ -56,7 +58,10 @@ public class ContextMenuAfterPopup {
                 throw new RuntimeException();
             }
         } finally {
-            SwingUtilities.invokeAndWait(ContextMenuAfterPopup::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.verify(ContextMenuAfterPopup.class.getName());
+            });
         }
     }
 

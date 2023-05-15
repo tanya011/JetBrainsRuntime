@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @test
  * @summary Regression test for JBR-4021 Unexpected focus event order on window showing
  * @key headful
+ * @library ../../../helpers
  */
 
 public class EventsOnPopupShowing {
@@ -42,6 +43,7 @@ public class EventsOnPopupShowing {
     private static JButton button;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(EventsOnPopupShowing.class.getName());
         robot = new Robot();
         try {
             SwingUtilities.invokeAndWait(EventsOnPopupShowing::initUI);
@@ -52,7 +54,10 @@ public class EventsOnPopupShowing {
                 throw new RuntimeException("Unexpected 'focus gained' count: " + gainedCount);
             }
         } finally {
-            SwingUtilities.invokeAndWait(EventsOnPopupShowing::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.verify(EventsOnPopupShowing.class.getName());
+            });
         }
     }
 

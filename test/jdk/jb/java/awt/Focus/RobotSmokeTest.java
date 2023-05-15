@@ -30,6 +30,7 @@ import java.util.concurrent.*;
  * @test
  * @summary Test validating basic java.awt.Robot functionality (mouse clicks and key presses)
  * @key headful
+ * @library ../../../helpers
  */
 
 public class RobotSmokeTest {
@@ -40,6 +41,7 @@ public class RobotSmokeTest {
     private static JTextField field;
 
     public static void main(String[] args) throws Exception {
+        ScreenshotArtifacts.takeScreenshot(RobotSmokeTest.class.getName());
         robot = new Robot();
         try {
             SwingUtilities.invokeAndWait(RobotSmokeTest::initUI);
@@ -49,7 +51,10 @@ public class RobotSmokeTest {
             pressAndRelease(KeyEvent.VK_A);
             keyTyped.get(10, TimeUnit.SECONDS);
         } finally {
-            SwingUtilities.invokeAndWait(RobotSmokeTest::disposeUI);
+            SwingUtilities.invokeAndWait(() -> {
+                disposeUI();
+                ScreenshotArtifacts.verify(RobotSmokeTest.class.getName());
+            });
         }
     }
 
