@@ -26,18 +26,15 @@ import util.Task;
 import util.TaskResult;
 import util.TestUtils;
 
-import java.awt.AWTException;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Panel;
-import java.awt.Rectangle;
-import java.awt.Robot;
+import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /*
  * @test
@@ -67,18 +64,24 @@ public class MouseEventsOnClientArea {
     private static final Task mouseClicks = new Task("mouseClicks") {
 
         private static final List<Integer> BUTTON_MASKS = List.of(
-                InputEvent.BUTTON1_DOWN_MASK,
+                InputEvent.BUTTON3_DOWN_MASK,
                 InputEvent.BUTTON2_DOWN_MASK,
-                InputEvent.BUTTON3_DOWN_MASK
+                InputEvent.BUTTON1_DOWN_MASK
         );
         private static final int PANEL_WIDTH = 400;
         private static final int PANEL_HEIGHT = (int) TestUtils.TITLE_BAR_HEIGHT;
 
+        private final CountDownLatch latch = new CountDownLatch(12);
         private final boolean[] buttonsPressed = new boolean[BUTTON_MASKS.size()];
         private final boolean[] buttonsReleased = new boolean[BUTTON_MASKS.size()];
         private final boolean[] buttonsClicked = new boolean[BUTTON_MASKS.size()];
 
-        private Panel panel;
+        private boolean contentPressed = false;
+        private boolean contentReleased = false;
+        private boolean contentClicked = false;
+
+        private Panel titlePanel;
+        private Panel contentPanel;
 
         @Override
         protected void init() {
@@ -95,7 +98,7 @@ public class MouseEventsOnClientArea {
 
         @Override
         protected void customizeWindow() {
-            panel = new Panel() {
+            titlePanel = new Panel() {
                 @Override
                 public void paint(Graphics g) {
                     Rectangle r = g.getClipBounds();
@@ -104,40 +107,90 @@ public class MouseEventsOnClientArea {
                     super.paint(g);
                 }
             };
-            panel.setBounds(0, 0, PANEL_WIDTH, PANEL_HEIGHT);
-            panel.setSize(PANEL_WIDTH, PANEL_HEIGHT);
-            panel.addMouseListener(new MouseAdapter() {
+            final int effectiveWidth = window.getWidth() - window.getInsets().left - window.getInsets().right;
+            titlePanel.setPreferredSize(new Dimension(effectiveWidth, (int) TestUtils.TITLE_BAR_HEIGHT));
+            titlePanel.setBounds(0, 0, effectiveWidth, (int) TestUtils.TITLE_BAR_HEIGHT);
+            titlePanel.addMouseListener(new MouseAdapter() {
 
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     if (e.getButton() >= 1 && e.getButton() <= 3) {
-                        buttonsClicked[e.getButton() - 1] = true;
+                        if (!buttonsClicked[e.getButton() - 1]) {
+                            buttonsClicked[e.getButton() - 1] = true;
+                            latch.countDown();
+                        }
                     }
                 }
 
                 @Override
                 public void mousePressed(MouseEvent e) {
                     if (e.getButton() >= 1 && e.getButton() <= 3) {
-                        buttonsPressed[e.getButton() - 1] = true;
+                        if (!buttonsPressed[e.getButton() - 1]) {
+                            buttonsPressed[e.getButton() - 1] = true;
+                            latch.countDown();
+                        }
                     }
                 }
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     if (e.getButton() >= 1 && e.getButton() <= 3) {
-                        buttonsReleased[e.getButton() - 1] = true;
+                        if (!buttonsReleased[e.getButton() - 1]) {
+                            buttonsReleased[e.getButton() - 1] = true;
+                            latch.countDown();
+                        }
                     }
                 }
             });
-            window.add(panel);
+            window.add(titlePanel);
+
+            final int contentHeight = window.getHeight() - window.getInsets().top - window.getInsets().bottom - (int) TestUtils.TITLE_BAR_HEIGHT;
+            contentPanel = new Panel() {
+                @Override
+                public void paint(Graphics g) {
+                    Rectangle r = g.getClipBounds();
+                    g.setColor(Color.GREEN);
+                    g.fillRect(r.x, r.y, effectiveWidth, contentHeight);
+                }
+            };
+            contentPanel.setPreferredSize(new Dimension(effectiveWidth, contentHeight));
+            contentPanel.setBounds(0, (int) TestUtils.TITLE_BAR_HEIGHT, effectiveWidth, contentHeight);
+
+            contentPanel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (!contentClicked) {
+                        contentClicked = true;
+                        latch.countDown();
+                    }
+                }
+
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    if (!contentPressed) {
+                        contentPressed = true;
+                        latch.countDown();
+                    }
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    if (!contentReleased) {
+                        contentReleased = true;
+                        latch.countDown();
+                    }
+                }
+            });
+
+            window.add(contentPanel);
         }
 
         @Override
-        public void test() throws AWTException {
+        public void test() throws AWTException, InterruptedException {
             Robot robot = new Robot();
 
-            int x = panel.getLocationOnScreen().x + panel.getWidth() / 2;
-            int y = panel.getLocationOnScreen().y + panel.getHeight() / 2;
+            int x = titlePanel.getLocationOnScreen().x + titlePanel.getWidth() / 2;
+            int y = titlePanel.getLocationOnScreen().y + titlePanel.getHeight() / 2;
 
             BUTTON_MASKS.forEach(mask -> {
                 robot.delay(500);
@@ -148,6 +201,17 @@ public class MouseEventsOnClientArea {
 
                 robot.delay(500);
             });
+
+            int centerX = contentPanel.getLocationOnScreen().x + contentPanel.getWidth() / 2;
+            int centerY = contentPanel.getLocationOnScreen().y + contentPanel.getHeight() / 2;
+            robot.delay(500);
+            robot.mouseMove(centerX, centerY);
+            robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+            robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+            robot.waitForIdle();
+
+            boolean result = latch.await(3, TimeUnit.SECONDS);
+            System.out.println("result = " + result);
 
             boolean status = true;
             for (int i = 0; i < BUTTON_MASKS.size(); i++) {

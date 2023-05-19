@@ -25,7 +25,9 @@ package util;
 
 import com.jetbrains.WindowDecorations;
 
+import javax.swing.*;
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
 
 abstract public class Task {
@@ -51,27 +53,42 @@ abstract public class Task {
             e.printStackTrace();
             return new TaskResult(false, message);
         }
-        init();
-        System.out.printf("RUN TEST CASE: %s%n", name);
+
         passed = true;
         error = "";
-        prepareTitleBar();
-        window = windowCreator.apply(titleBar);
-        System.out.println("Created a window with the custom title bar. Window name: " + window.getName());
-        customizeWindow();
+        System.out.printf("RUN TEST CASE: %s%n", name);
 
-        window.setVisible(true);
         try {
-            test();
-        } catch (Exception e) {
-            System.out.println("ERROR: An error occurred during tests execution");
+            SwingUtilities.invokeAndWait(() -> {
+                init();
+                prepareTitleBar();
+                window = windowCreator.apply(titleBar);
+                customizeWindow();
+                window.setVisible(true);
+            });
+        } catch (InterruptedException | InvocationTargetException e) {
             e.printStackTrace();
-            passed = false;
+            return new TaskResult(false, "Unable to initialize test " + e.getMessage());
+        } finally {
+            System.out.println("Created a window with the custom title bar. Window name: " + window.getName());
         }
 
-        cleanup();
-        titleBar = null;
-        window.dispose();
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                try {
+                    test();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (InterruptedException | InvocationTargetException e) {
+            e.printStackTrace();
+            return new TaskResult(false, "Error happened during test execution " + e.getMessage());
+        } finally {
+            cleanup();
+            titleBar = null;
+            window.dispose();
+        }
 
         if (!TestUtils.isBasicTestCase()) {
             boolean isMetConditions = TestUtils.checkScreenSizeConditions(window);
