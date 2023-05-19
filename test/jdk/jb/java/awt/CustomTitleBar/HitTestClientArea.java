@@ -22,10 +22,7 @@
  */
 
 import com.jetbrains.JBR;
-import util.CommonAPISuite;
-import util.Task;
-import util.TaskResult;
-import util.TestUtils;
+import util.*;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -139,6 +136,7 @@ public class HitTestClientArea {
                 }
             });
 
+            window.setAlwaysOnTop(true);
             window.add(panel);
         }
 
@@ -151,24 +149,17 @@ public class HitTestClientArea {
 
             window.requestFocus();
             for (Integer mask: BUTTON_MASKS) {
-                robot.waitForIdle();
-
-                robot.mouseMove(initialX, initialY);
-                robot.mousePress(mask);
-                robot.mouseRelease(mask);
-
-                robot.waitForIdle();
+                MouseUtils.verifyLocationAndClick(robot, window, initialX, initialY, mask);
             }
 
             Point initialLocation = window.getLocationOnScreen();
-            robot.waitForIdle();
-            robot.mouseMove(initialX, initialY);
+            MouseUtils.verifyLocationAndMove(robot, window, initialX, initialY);
             robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
             for (int i = 0; i < 10; i++) {
                 initialX += 3;
                 initialY += 3;
                 robot.delay(300);
-                robot.mouseMove(initialX, initialY);
+                MouseUtils.verifyLocationAndMove(robot, window, initialX, initialY);
             }
             robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
             robot.waitForIdle();
@@ -271,6 +262,8 @@ public class HitTestClientArea {
                     mouseReleased = true;
                 }
             });
+            window.add(panel);
+            window.setAlwaysOnTop(true);
         }
 
         @Override
@@ -291,14 +284,13 @@ public class HitTestClientArea {
             }
 
             Point initialLocation = window.getLocationOnScreen();
-            robot.waitForIdle();
-            robot.mouseMove(initialX, initialY);
+            MouseUtils.verifyLocationAndMove(robot, window, initialX, initialY);
             robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
             for (int i = 0; i < 10; i++) {
                 initialX += 3;
                 initialY += 3;
                 robot.delay(300);
-                robot.mouseMove(initialX, initialY);
+                MouseUtils.verifyLocationAndMove(robot, window, initialX, initialY);
             }
             robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
             robot.waitForIdle();
