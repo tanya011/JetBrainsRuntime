@@ -96,7 +96,7 @@ public class JPopupMenuOutOfWindowTest {
         });
 
         menu = new JPopupMenu();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < BUTTONS_COUNT; i++) {
             final int buttonNumber = i;
             final String name = "Item " + buttonNumber;
             JMenuItem item = new JMenuItem(name);
@@ -116,6 +116,11 @@ public class JPopupMenuOutOfWindowTest {
         frame.setVisible(true);
     }
 
+    /**
+     * Change visibility of the popup menu.
+     *  Show the menu at the mouse location if it's hidden
+     * @param e MouseEvent
+     */
     private static void toggleMenu(MouseEvent e) {
         menu.setLocation(e.getLocationOnScreen().x, e.getLocationOnScreen().y);
         menu.setVisible(!menu.isShowing());
