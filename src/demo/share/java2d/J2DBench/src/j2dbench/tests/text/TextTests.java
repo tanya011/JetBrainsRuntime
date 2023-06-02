@@ -109,7 +109,7 @@ public abstract class TextTests extends Test {
     static Float[] floatObjectList(float[] input) {
         Float[] result = new Float[input.length];
         for (int i = 0; i < result.length; ++i) {
-            result[i] = new Float(input[i]);
+            result[i] = input[i];
         }
         return result;
     }
@@ -224,7 +224,7 @@ public abstract class TextTests extends Test {
 
         HashMap simpleMap = new HashMap();
         simpleMap.put(TextAttribute.FAMILY, "Lucida Sans");
-        simpleMap.put(TextAttribute.SIZE, new Float(14));
+        simpleMap.put(TextAttribute.SIZE, 14);
         simpleMap.put(TextAttribute.FOREGROUND, Color.blue);
 
         HashMap complexMap = new HashMap();
@@ -656,7 +656,7 @@ public abstract class TextTests extends Test {
             lenMap = new HashMap();
             physicalMap.put(textname, lenMap);
         }
-        Integer key = new Integer(textlen);
+        Integer key = textlen;
         Font textfont = (Font)lenMap.get(key);
         if (textfont == null) {
             Font[] fontsToTry = null;

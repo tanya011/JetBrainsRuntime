@@ -91,14 +91,14 @@ public class Result {
             "Auto-scaled Operations",
         };
         Integer[] workObjects = {
-            new Integer(WORK_UNITS),
-            new Integer(WORK_THOUSANDS),
-            new Integer(WORK_MILLIONS),
-            new Integer(WORK_AUTO),
-            new Integer(WORK_OPS | WORK_UNITS),
-            new Integer(WORK_OPS | WORK_THOUSANDS),
-            new Integer(WORK_OPS | WORK_MILLIONS),
-            new Integer(WORK_OPS | WORK_AUTO),
+            WORK_UNITS,
+            WORK_THOUSANDS,
+            WORK_MILLIONS,
+            WORK_AUTO,
+            WORK_OPS | WORK_UNITS,
+            WORK_OPS | WORK_THOUSANDS,
+            WORK_OPS | WORK_MILLIONS,
+            WORK_OPS | WORK_AUTO,
         };
         workOpt = new Option.ObjectChoice(resultoptroot,
                                           "workunits", "Work Units",
@@ -120,11 +120,11 @@ public class Result {
             "Auto-scaled seconds",
         };
         Integer[] timeObjects = {
-            new Integer(TIME_SECONDS),
-            new Integer(TIME_MILLIS),
-            new Integer(TIME_MICROS),
-            new Integer(TIME_NANOS),
-            new Integer(TIME_AUTO),
+            TIME_SECONDS,
+            TIME_MILLIS,
+            TIME_MICROS,
+            TIME_NANOS,
+            TIME_AUTO,
         };
         timeOpt = new Option.ObjectChoice(resultoptroot,
                                           "timeunits", "Time Units",
@@ -209,25 +209,25 @@ public class Result {
 
     static {
         unitMap = new HashMap();
-        unitMap.put("U",  new Integer(WORK_UNITS));
-        unitMap.put("M",  new Integer(WORK_MILLIONS));
-        unitMap.put("K",  new Integer(WORK_THOUSANDS));
-        unitMap.put("A",  new Integer(WORK_AUTO));
-        unitMap.put("MU", new Integer(WORK_MILLIONS));
-        unitMap.put("KU", new Integer(WORK_THOUSANDS));
-        unitMap.put("AU", new Integer(WORK_AUTO));
+        unitMap.put("U",  WORK_UNITS);
+        unitMap.put("M",  WORK_MILLIONS);
+        unitMap.put("K",  WORK_THOUSANDS);
+        unitMap.put("A",  WORK_AUTO);
+        unitMap.put("MU", WORK_MILLIONS);
+        unitMap.put("KU", WORK_THOUSANDS);
+        unitMap.put("AU", WORK_AUTO);
 
-        unitMap.put("O",  new Integer(WORK_UNITS | WORK_OPS));
-        unitMap.put("NO", new Integer(WORK_UNITS | WORK_OPS));
-        unitMap.put("MO", new Integer(WORK_MILLIONS | WORK_OPS));
-        unitMap.put("KO", new Integer(WORK_THOUSANDS | WORK_OPS));
-        unitMap.put("AO", new Integer(WORK_AUTO | WORK_OPS));
+        unitMap.put("O",  WORK_UNITS | WORK_OPS);
+        unitMap.put("NO", WORK_UNITS | WORK_OPS);
+        unitMap.put("MO", WORK_MILLIONS | WORK_OPS);
+        unitMap.put("KO", WORK_THOUSANDS | WORK_OPS);
+        unitMap.put("AO", WORK_AUTO | WORK_OPS);
 
-        unitMap.put("s",  new Integer(TIME_SECONDS));
-        unitMap.put("m",  new Integer(TIME_MILLIS));
-        unitMap.put("u",  new Integer(TIME_MICROS));
-        unitMap.put("n",  new Integer(TIME_NANOS));
-        unitMap.put("a",  new Integer(TIME_AUTO));
+        unitMap.put("s",  TIME_SECONDS);
+        unitMap.put("m",  TIME_MILLIS);
+        unitMap.put("u",  TIME_MICROS);
+        unitMap.put("n",  TIME_NANOS);
+        unitMap.put("a",  TIME_AUTO);
     }
 
     public static int parseUnit(String c) {
@@ -270,7 +270,7 @@ public class Result {
             System.out.println(test+" took "+time+"ms for "+
                                getRepsPerRun()+" reps");
         }
-        times.addElement(new Long(time));
+        times.addElement(time);
     }
 
     public void setError(Throwable t) {

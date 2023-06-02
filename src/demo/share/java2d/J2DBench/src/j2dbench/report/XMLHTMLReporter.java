@@ -401,8 +401,7 @@ public class XMLHTMLReporter {
                                    (curTestCount - 1), baseTCR);
             testCaseTargetResult.put(targetTCR.getName() + "_" +
                                      (curTestCount - 1), targetTCR);
-            testCaseResultCount.put(baseTCR.getName(),
-                                    new Integer(curTestCount));
+            testCaseResultCount.put(baseTCR.getName(), curTestCount);
 
             /******************************************************************
              * Add the Test to Group List
@@ -463,7 +462,7 @@ public class XMLHTMLReporter {
                 curTotalScore = ((Double) curTotalScoreObj).doubleValue();
             }
             curTotalScore = curTotalScore + baseTCR.getScore();
-            consolBaseRes.put(baseTCR.getName(), new Double(curTotalScore));
+            consolBaseRes.put(baseTCR.getName(), curTotalScore);
 
             curTotalScoreObj = consolTargetResult.get(targetTCR.getName());
             curTotalScore = 0;
@@ -471,8 +470,7 @@ public class XMLHTMLReporter {
                 curTotalScore = ((Double) curTotalScoreObj).doubleValue();
             }
             curTotalScore = curTotalScore + targetTCR.getScore();
-            consolTargetResult.put(targetTCR.getName(),
-                                   new Double(curTotalScore));
+            consolTargetResult.put(targetTCR.getName(), curTotalScore);
         }
 
         writer.println("<br><hr WIDTH=\"100%\" size=\"1\">");
@@ -552,8 +550,8 @@ public class XMLHTMLReporter {
         String tempGroup = null;
         for(int i=0; i<groups.size(); i++) {
             tempGroup = groups.get(i).toString();
-            baseValuesMap.put(tempGroup, new Double(0));
-            targetValuesMap.put(tempGroup, new Double(0));
+            baseValuesMap.put(tempGroup, 0.0);
+            targetValuesMap.put(tempGroup, 0.0);
         }
 
 
@@ -578,7 +576,7 @@ public class XMLHTMLReporter {
                 curTotalScore = ((Double) curTotalScoreObj).doubleValue();
             }
             curTotalScore = curTotalScore + baseValue;
-            baseValuesMap.put(tempGroup, new Double(curTotalScore));
+            baseValuesMap.put(tempGroup, curTotalScore);
 
             curTotalScore = 0;
             curTotalScoreObj = targetValuesMap.get(tempGroup);
@@ -586,7 +584,7 @@ public class XMLHTMLReporter {
                 curTotalScore = ((Double) curTotalScoreObj).doubleValue();
             }
             curTotalScore = curTotalScore + targetValue;
-            targetValuesMap.put(tempGroup, new Double(curTotalScore));
+            targetValuesMap.put(tempGroup, curTotalScore);
         }
 
         writer.println("<A NAME=\"results_summary\"></A>" +

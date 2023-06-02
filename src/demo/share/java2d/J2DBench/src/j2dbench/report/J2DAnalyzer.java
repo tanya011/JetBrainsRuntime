@@ -703,7 +703,7 @@ public class J2DAnalyzer {
         }
 
         public void addTime(long ms) {
-            times.add(new Long(ms));
+            times.add(ms);
             if (numruns == 0) {
                 longest = shortest = ms;
             } else {
@@ -755,9 +755,9 @@ public class J2DAnalyzer {
                 score *= numunits;
             }
             if (mode == BEST) {
-                scores.add(new Double(score / shortest));
+                scores.add(score / shortest);
             } else if (mode == WORST) {
-                scores.add(new Double(score / longest));
+                scores.add(score / longest);
             } else {
                 long elimshort, elimlong;
                 if (mode == AVERAGE || numruns < 3) {
@@ -776,7 +776,7 @@ public class J2DAnalyzer {
                         elimlong = -1;
                         continue;
                     }
-                    scores.add(new Double(score / time));
+                    scores.add(score / time);
                 }
             }
             return scores;

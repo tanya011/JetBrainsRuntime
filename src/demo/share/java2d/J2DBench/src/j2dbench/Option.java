@@ -351,7 +351,7 @@ public abstract class Option extends Node implements Modifier {
         }
 
         public Modifier.Iterator getIterator(TestEnvironment env) {
-            return new SwitchIterator(new Object[] { new Integer(value) }, 1);
+            return new SwitchIterator(new Object[] { value }, 1);
         }
 
         public JComponent getJComponent() {
@@ -623,7 +623,7 @@ public abstract class Option extends Node implements Modifier {
         private static Object[] makeValues(int[] intvalues) {
             Object[] values = new Object[intvalues.length];
             for (int i = 0; i < intvalues.length; i++) {
-                values[i] = new Integer(intvalues[i]);
+                values[i] = intvalues[i];
             }
             return values;
         }
@@ -768,11 +768,11 @@ public abstract class Option extends Node implements Modifier {
          }
 
          public String setValue(int v) {
-             return setValue(new Integer(v));
+             return setValue(Integer.valueOf(v));
          }
 
          public String setValue(boolean v) {
-             return setValue(new Boolean(v));
+             return setValue(Boolean.valueOf(v));
          }
 
          public String setValue(Object value) {

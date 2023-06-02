@@ -131,7 +131,7 @@ public class IIOComparator {
                 testResults = new Hashtable();
                 fmtResults.put(testname, testResults);
             }
-            testResults.put(method, new Double(score));
+            testResults.put(method, score);
         }
 
         if (wikiStyle) {
