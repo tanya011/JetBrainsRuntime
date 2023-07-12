@@ -26,6 +26,7 @@
 name: 'Build (macos)'
 
 on:
+  workflow_dispatch:
   workflow_call:
     inputs:
       platform:
