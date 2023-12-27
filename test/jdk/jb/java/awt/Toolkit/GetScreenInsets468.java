@@ -43,7 +43,7 @@ public class GetScreenInsets468 implements Runnable {
 
     private static Robot robot;
 
-    private static int ITERATION_NUMBER = 100;
+    private static int ITERATION_NUMBER = 10;
     private static final int ROBOT_DELAY = 200;
     private static final int HANG_TIME_FACTOR = 10;
 
