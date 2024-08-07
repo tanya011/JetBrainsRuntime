@@ -64,7 +64,7 @@ javax/swing/plaf/basic/BasicGraphicsUtils/8132119/bug8132119.java JBR-5342 linux
 
 jb/java/awt/event/MouseEvent/ReleaseAndClickModifiers.java JBR-6589 windows-all
 
-sanity/client/SwingSet/src/GridBagLayoutDemoTest.java JBR-6285 linux-all
+sanity/client/SwingSet/src/GridBagLayoutDemoTest.java JBR-6285 linux-all,windows-all
 sanity/client/SwingSet/src/InternalFrameDemoTest.java 8253184,JBR-6685 windows-all,linux-all
 sanity/client/SwingSet/src/ToolTipDemoTest.java 8293001,JBR-6293 linux-all,windows-all
 sun/java2d/GdiRendering/ClipShapeRendering.java JBR-5204 linux-all,macosx-all,windows-all
