@@ -607,10 +607,14 @@ extern gboolean glib_version_2_68;
 } while(0);
 
 static gboolean loadSymbols() {
+    DEBUG_SCREENCAST("LOAD SYMBOLS");
+
     if (!glib_version_2_68) {
         DEBUG_SCREENCAST("glib version 2.68+ required\n", NULL);
         return FALSE;
     }
+
+    DEBUG_SCREENCAST("Glibc OK");
 
     pipewire_libhandle = dlopen(VERSIONED_JNI_LIB_NAME("pipewire-0.3", "0"),
             RTLD_LAZY | RTLD_LOCAL);
@@ -619,31 +623,58 @@ static gboolean loadSymbols() {
         DEBUG_SCREENCAST("could not load pipewire library\n", NULL);
         return FALSE;
     }
+    DEBUG_SCREENCAST("LIBHANDLE OK");
 
     LOAD_SYMBOL(fp_pw_stream_dequeue_buffer, "pw_stream_dequeue_buffer");
+    DEBUG_SCREENCAST("pw_stream_dequeue_buffer");
     LOAD_SYMBOL(fp_pw_stream_state_as_string, "pw_stream_state_as_string");
+    DEBUG_SCREENCAST("pw_stream_state_as_string");
     LOAD_SYMBOL(fp_pw_stream_queue_buffer, "pw_stream_queue_buffer");
+    DEBUG_SCREENCAST("pw_stream_queue_buffer");
     LOAD_SYMBOL(fp_pw_stream_set_active, "pw_stream_set_active");
+    DEBUG_SCREENCAST("pw_stream_set_active");
     LOAD_SYMBOL(fp_pw_stream_connect, "pw_stream_connect");
+    DEBUG_SCREENCAST("pw_stream_connect");
     LOAD_SYMBOL(fp_pw_stream_new, "pw_stream_new");
+    DEBUG_SCREENCAST("pw_stream_new");
     LOAD_SYMBOL(fp_pw_stream_add_listener, "pw_stream_add_listener");
+    DEBUG_SCREENCAST("pw_stream_add_listener");
     LOAD_SYMBOL(fp_pw_stream_disconnect, "pw_stream_disconnect");
+    DEBUG_SCREENCAST("pw_stream_disconnect");
     LOAD_SYMBOL(fp_pw_stream_destroy, "pw_stream_destroy");
+    DEBUG_SCREENCAST("pw_stream_destroy");
     LOAD_SYMBOL(fp_pw_init, "pw_init");
+    DEBUG_SCREENCAST("pw_init");
     LOAD_SYMBOL(fp_pw_context_connect_fd, "pw_context_connect_fd");
+    DEBUG_SCREENCAST("pw_context_connect_fd");
     LOAD_SYMBOL(fp_pw_core_disconnect, "pw_core_disconnect");
+    DEBUG_SCREENCAST("pw_core_disconnect");
     LOAD_SYMBOL(fp_pw_context_new, "pw_context_new");
+    DEBUG_SCREENCAST("pw_context_new");
     LOAD_SYMBOL(fp_pw_thread_loop_new, "pw_thread_loop_new");
+    DEBUG_SCREENCAST("pw_thread_loop_new");
     LOAD_SYMBOL(fp_pw_thread_loop_get_loop, "pw_thread_loop_get_loop");
+    DEBUG_SCREENCAST("pw_thread_loop_get_loop");
     LOAD_SYMBOL(fp_pw_thread_loop_signal, "pw_thread_loop_signal");
+    DEBUG_SCREENCAST("pw_thread_loop_signal");
     LOAD_SYMBOL(fp_pw_thread_loop_wait, "pw_thread_loop_wait");
+    DEBUG_SCREENCAST("pw_thread_loop_wait");
     LOAD_SYMBOL(fp_pw_thread_loop_accept, "pw_thread_loop_accept");
+    DEBUG_SCREENCAST("pw_thread_loop_accept");
     LOAD_SYMBOL(fp_pw_thread_loop_start, "pw_thread_loop_start");
+    DEBUG_SCREENCAST("pw_thread_loop_start");
     LOAD_SYMBOL(fp_pw_thread_loop_stop, "pw_thread_loop_stop");
+    DEBUG_SCREENCAST("pw_thread_loop_stop");
     LOAD_SYMBOL(fp_pw_thread_loop_destroy, "pw_thread_loop_destroy");
+    DEBUG_SCREENCAST("pw_thread_loop_destroy");
     LOAD_SYMBOL(fp_pw_thread_loop_lock, "pw_thread_loop_lock");
+    DEBUG_SCREENCAST("pw_thread_loop_lock");
     LOAD_SYMBOL(fp_pw_thread_loop_unlock, "pw_thread_loop_unlock");
+    DEBUG_SCREENCAST("pw_thread_loop_unlock");
     LOAD_SYMBOL(fp_pw_properties_new, "pw_properties_new");
+    DEBUG_SCREENCAST("pw_properties_new");
+
+    DEBUG_SCREENCAST("SYMBOLS LOADED");
 
     return TRUE;
 
@@ -718,15 +749,20 @@ JNIEXPORT jboolean JNICALL Java_sun_awt_screencast_ScreencastHelper_loadPipewire
         JNIEnv *env, jclass cls, jboolean screencastDebug
 ) {
     DEBUG_SCREENCAST_ENABLED = screencastDebug;
+    DEBUG_SCREENCAST("LOAD PIPEWIRE");
 
     if (!loadSymbols()) {
         return JNI_FALSE;
     }
 
+    DEBUG_SCREENCAST("LOAD SYMBOLS OK");
+
     tokenStorageClass = (*env)->FindClass(env, "sun/awt/screencast/TokenStorage");
     if (!tokenStorageClass) {
         return JNI_FALSE;
     }
+
+    DEBUG_SCREENCAST("TOKEN STORAGE CLASS OK");
 
     tokenStorageClass = (*env)->NewGlobalRef(env, tokenStorageClass);
 
@@ -740,14 +776,18 @@ JNIEXPORT jboolean JNICALL Java_sun_awt_screencast_ScreencastHelper_loadPipewire
         if (!storeTokenMethodID) {
             return JNI_FALSE;
         }
+        DEBUG_SCREENCAST("TOKEN STORAGE CLASS METHOD ID OK");
     } else {
         DEBUG_SCREENCAST("!!! @@@ tokenStorageClass %p\n",
                          tokenStorageClass);
         return JNI_FALSE;
     }
 
+    DEBUG_SCREENCAST("LASTPART");
     gboolean usable = initXdgDesktopPortal();
+    DEBUG_SCREENCAST("INIT XDG");
     portalScreenCastCleanup();
+    DEBUG_SCREENCAST("SCREEN CAST CLEANUP");
     return usable;
 }
 
