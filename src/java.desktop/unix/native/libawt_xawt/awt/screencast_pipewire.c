@@ -607,14 +607,14 @@ extern gboolean glib_version_2_68;
 } while(0);
 
 static gboolean loadSymbols() {
-    DEBUG_SCREENCAST("LOAD SYMBOLS");
+    DEBUG_SCREENCAST("LOAD SYMBOLS\n", NULL);
 
     if (!glib_version_2_68) {
         DEBUG_SCREENCAST("glib version 2.68+ required\n", NULL);
         return FALSE;
     }
 
-    DEBUG_SCREENCAST("Glibc OK");
+    DEBUG_SCREENCAST("Glibc OK\n", NULL);
 
     pipewire_libhandle = dlopen(VERSIONED_JNI_LIB_NAME("pipewire-0.3", "0"),
             RTLD_LAZY | RTLD_LOCAL);
@@ -623,58 +623,58 @@ static gboolean loadSymbols() {
         DEBUG_SCREENCAST("could not load pipewire library\n", NULL);
         return FALSE;
     }
-    DEBUG_SCREENCAST("LIBHANDLE OK");
+    DEBUG_SCREENCAST("LIBHANDLE OK\n", NULL);
 
     LOAD_SYMBOL(fp_pw_stream_dequeue_buffer, "pw_stream_dequeue_buffer");
-    DEBUG_SCREENCAST("pw_stream_dequeue_buffer");
+    DEBUG_SCREENCAST("pw_stream_dequeue_buffer\n", NULL);
     LOAD_SYMBOL(fp_pw_stream_state_as_string, "pw_stream_state_as_string");
-    DEBUG_SCREENCAST("pw_stream_state_as_string");
+    DEBUG_SCREENCAST("pw_stream_state_as_string\n", NULL);
     LOAD_SYMBOL(fp_pw_stream_queue_buffer, "pw_stream_queue_buffer");
-    DEBUG_SCREENCAST("pw_stream_queue_buffer");
+    DEBUG_SCREENCAST("pw_stream_queue_buffer\n", NULL);
     LOAD_SYMBOL(fp_pw_stream_set_active, "pw_stream_set_active");
-    DEBUG_SCREENCAST("pw_stream_set_active");
+    DEBUG_SCREENCAST("pw_stream_set_active\n", NULL);
     LOAD_SYMBOL(fp_pw_stream_connect, "pw_stream_connect");
-    DEBUG_SCREENCAST("pw_stream_connect");
+    DEBUG_SCREENCAST("pw_stream_connect\n", NULL);
     LOAD_SYMBOL(fp_pw_stream_new, "pw_stream_new");
-    DEBUG_SCREENCAST("pw_stream_new");
+    DEBUG_SCREENCAST("pw_stream_new\n", NULL);
     LOAD_SYMBOL(fp_pw_stream_add_listener, "pw_stream_add_listener");
-    DEBUG_SCREENCAST("pw_stream_add_listener");
+    DEBUG_SCREENCAST("pw_stream_add_listener\n", NULL);
     LOAD_SYMBOL(fp_pw_stream_disconnect, "pw_stream_disconnect");
-    DEBUG_SCREENCAST("pw_stream_disconnect");
+    DEBUG_SCREENCAST("pw_stream_disconnect\n", NULL);
     LOAD_SYMBOL(fp_pw_stream_destroy, "pw_stream_destroy");
-    DEBUG_SCREENCAST("pw_stream_destroy");
+    DEBUG_SCREENCAST("pw_stream_destroy\n", NULL);
     LOAD_SYMBOL(fp_pw_init, "pw_init");
-    DEBUG_SCREENCAST("pw_init");
+    DEBUG_SCREENCAST("pw_init\n", NULL);
     LOAD_SYMBOL(fp_pw_context_connect_fd, "pw_context_connect_fd");
-    DEBUG_SCREENCAST("pw_context_connect_fd");
+    DEBUG_SCREENCAST("pw_context_connect_fd\n", NULL);
     LOAD_SYMBOL(fp_pw_core_disconnect, "pw_core_disconnect");
-    DEBUG_SCREENCAST("pw_core_disconnect");
+    DEBUG_SCREENCAST("pw_core_disconnect\n", NULL);
     LOAD_SYMBOL(fp_pw_context_new, "pw_context_new");
-    DEBUG_SCREENCAST("pw_context_new");
+    DEBUG_SCREENCAST("pw_context_new\n", NULL);
     LOAD_SYMBOL(fp_pw_thread_loop_new, "pw_thread_loop_new");
-    DEBUG_SCREENCAST("pw_thread_loop_new");
+    DEBUG_SCREENCAST("pw_thread_loop_new\n", NULL);
     LOAD_SYMBOL(fp_pw_thread_loop_get_loop, "pw_thread_loop_get_loop");
-    DEBUG_SCREENCAST("pw_thread_loop_get_loop");
+    DEBUG_SCREENCAST("pw_thread_loop_get_loop\n", NULL);
     LOAD_SYMBOL(fp_pw_thread_loop_signal, "pw_thread_loop_signal");
-    DEBUG_SCREENCAST("pw_thread_loop_signal");
+    DEBUG_SCREENCAST("pw_thread_loop_signal\n", NULL);
     LOAD_SYMBOL(fp_pw_thread_loop_wait, "pw_thread_loop_wait");
-    DEBUG_SCREENCAST("pw_thread_loop_wait");
+    DEBUG_SCREENCAST("pw_thread_loop_wait\n", NULL);
     LOAD_SYMBOL(fp_pw_thread_loop_accept, "pw_thread_loop_accept");
-    DEBUG_SCREENCAST("pw_thread_loop_accept");
+    DEBUG_SCREENCAST("pw_thread_loop_accept\n", NULL);
     LOAD_SYMBOL(fp_pw_thread_loop_start, "pw_thread_loop_start");
-    DEBUG_SCREENCAST("pw_thread_loop_start");
+    DEBUG_SCREENCAST("pw_thread_loop_start\n", NULL);
     LOAD_SYMBOL(fp_pw_thread_loop_stop, "pw_thread_loop_stop");
-    DEBUG_SCREENCAST("pw_thread_loop_stop");
+    DEBUG_SCREENCAST("pw_thread_loop_stop\n", NULL);
     LOAD_SYMBOL(fp_pw_thread_loop_destroy, "pw_thread_loop_destroy");
-    DEBUG_SCREENCAST("pw_thread_loop_destroy");
+    DEBUG_SCREENCAST("pw_thread_loop_destroy\n", NULL);
     LOAD_SYMBOL(fp_pw_thread_loop_lock, "pw_thread_loop_lock");
-    DEBUG_SCREENCAST("pw_thread_loop_lock");
+    DEBUG_SCREENCAST("pw_thread_loop_lock\n", NULL);
     LOAD_SYMBOL(fp_pw_thread_loop_unlock, "pw_thread_loop_unlock");
-    DEBUG_SCREENCAST("pw_thread_loop_unlock");
+    DEBUG_SCREENCAST("pw_thread_loop_unlock"\n", NULL;
     LOAD_SYMBOL(fp_pw_properties_new, "pw_properties_new");
-    DEBUG_SCREENCAST("pw_properties_new");
+    DEBUG_SCREENCAST("pw_properties_new\n", NULL);
 
-    DEBUG_SCREENCAST("SYMBOLS LOADED");
+    DEBUG_SCREENCAST("SYMBOLS LOADED\n", NULL);
 
     return TRUE;
 
@@ -749,20 +749,20 @@ JNIEXPORT jboolean JNICALL Java_sun_awt_screencast_ScreencastHelper_loadPipewire
         JNIEnv *env, jclass cls, jboolean screencastDebug
 ) {
     DEBUG_SCREENCAST_ENABLED = screencastDebug;
-    DEBUG_SCREENCAST("LOAD PIPEWIRE");
+    DEBUG_SCREENCAST("LOAD PIPEWIRE\n", NULL);
 
     if (!loadSymbols()) {
         return JNI_FALSE;
     }
 
-    DEBUG_SCREENCAST("LOAD SYMBOLS OK");
+    DEBUG_SCREENCAST("LOAD SYMBOLS OK\n", NULL);
 
     tokenStorageClass = (*env)->FindClass(env, "sun/awt/screencast/TokenStorage");
     if (!tokenStorageClass) {
         return JNI_FALSE;
     }
 
-    DEBUG_SCREENCAST("TOKEN STORAGE CLASS OK");
+    DEBUG_SCREENCAST("TOKEN STORAGE CLASS OK\n", NULL);
 
     tokenStorageClass = (*env)->NewGlobalRef(env, tokenStorageClass);
 
@@ -776,18 +776,18 @@ JNIEXPORT jboolean JNICALL Java_sun_awt_screencast_ScreencastHelper_loadPipewire
         if (!storeTokenMethodID) {
             return JNI_FALSE;
         }
-        DEBUG_SCREENCAST("TOKEN STORAGE CLASS METHOD ID OK");
+        DEBUG_SCREENCAST("TOKEN STORAGE CLASS METHOD ID OK\n", NULL);
     } else {
         DEBUG_SCREENCAST("!!! @@@ tokenStorageClass %p\n",
                          tokenStorageClass);
         return JNI_FALSE;
     }
 
-    DEBUG_SCREENCAST("LASTPART");
+    DEBUG_SCREENCAST("LASTPART\n", NULL);
     gboolean usable = initXdgDesktopPortal();
-    DEBUG_SCREENCAST("INIT XDG");
+    DEBUG_SCREENCAST("INIT XDG\n", NULL);
     portalScreenCastCleanup();
-    DEBUG_SCREENCAST("SCREEN CAST CLEANUP");
+    DEBUG_SCREENCAST("SCREEN CAST CLEANUP\n", NULL);
     return usable;
 }
 
