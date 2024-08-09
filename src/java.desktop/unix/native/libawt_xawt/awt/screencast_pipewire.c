@@ -670,7 +670,7 @@ static gboolean loadSymbols() {
     LOAD_SYMBOL(fp_pw_thread_loop_lock, "pw_thread_loop_lock");
     DEBUG_SCREENCAST("pw_thread_loop_lock\n", NULL);
     LOAD_SYMBOL(fp_pw_thread_loop_unlock, "pw_thread_loop_unlock");
-    DEBUG_SCREENCAST("pw_thread_loop_unlock"\n", NULL;
+    DEBUG_SCREENCAST("pw_thread_loop_unlock\n", NULL);
     LOAD_SYMBOL(fp_pw_properties_new, "pw_properties_new");
     DEBUG_SCREENCAST("pw_properties_new\n", NULL);
 
