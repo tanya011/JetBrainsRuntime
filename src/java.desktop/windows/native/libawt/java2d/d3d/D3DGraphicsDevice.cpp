@@ -177,17 +177,17 @@ Java_sun_java2d_d3d_D3DGraphicsDevice_enterFullScreenExclusiveNative
     pMgr->SetFSFocusWindow(adapter, hWnd);
 
     newParams = *pCurParams;
-    newParams.hDeviceWindow = hWnd;
+//    newParams.hDeviceWindow = hWnd;
     newParams.Windowed = FALSE;
-    newParams.BackBufferCount = 1;
-    newParams.BackBufferFormat = dm.Format;
-    newParams.FullScreen_RefreshRateInHz = dm.RefreshRate;
+//    newParams.BackBufferCount = 1;
+//    newParams.BackBufferFormat = dm.Format;
+//    newParams.FullScreen_RefreshRateInHz = dm.RefreshRate;
     newParams.BackBufferWidth = dm.Width;
     newParams.BackBufferHeight = dm.Height;
-    newParams.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
-    newParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
+//    newParams.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
+//    newParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
 
-    res = pCtx->ConfigureContext(&newParams);
+    res = pCtx->ResetContextWIthParams(&newParams);
     D3DRQ_MarkLostIfNeeded(res, D3DRQ_GetCurrentDestination());
     return SUCCEEDED(res);
 }
@@ -273,13 +273,13 @@ Java_sun_java2d_d3d_D3DGraphicsDevice_configDisplayModeNative
     newParams = *pCurParams;
     newParams.BackBufferWidth = width;
     newParams.BackBufferHeight = height;
-    newParams.FullScreen_RefreshRateInHz = refreshRate;
+//    newParams.FullScreen_RefreshRateInHz = refreshRate;
     newParams.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
     // we leave the swap effect so that it's more likely
     // to be the one user selected initially
 //    newParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
 
-    if (bitDepth == 32) {
+/*    if (bitDepth == 32) {
         newParams.BackBufferFormat = D3DFMT_X8R8G8B8;
     } else if (bitDepth == 16) {
         UINT modeNum;
@@ -322,7 +322,7 @@ Java_sun_java2d_d3d_D3DGraphicsDevice_configDisplayModeNative
                        "D3DGD_configDisplayModeNative: unsupported depth: %d",
                        bitDepth);
         return;
-    }
+    }*/
 
     J2dTraceLn4(J2D_TRACE_VERBOSE, "  changing to dm: %dx%dx%d@%d",
                 newParams.BackBufferWidth, newParams.BackBufferHeight,

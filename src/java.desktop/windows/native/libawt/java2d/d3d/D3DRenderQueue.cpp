@@ -42,6 +42,8 @@
 #include "Trace.h"
 #include "awt_Toolkit.h"
 
+#include <d3d9.h>
+
 BOOL DWMIsCompositionEnabled();
 
 /**
@@ -50,6 +52,7 @@ BOOL DWMIsCompositionEnabled();
 static D3DContext *d3dc = NULL;
 static D3DSDOps *dstOps = NULL;
 static BOOL bLostDevices = FALSE;
+static D3DPRESENTSTATS g_PresentStats;
 
 typedef struct {
     byte *buffer;
@@ -156,6 +159,22 @@ D3DRQ_SwapBuffers(D3DPipelineManager *pMgr, D3DSDOps *d3dsdo,
     }
 
     res = pSwapChain->Present(pSrcRect, pDstRect, 0, NULL, 0);
+
+    printf("D3DRender attempt\n");
+    IDirect3DSwapChain9Ex* pSwapChainEx;
+    HRESULT query = pSwapChain->QueryInterface( IID_IDirect3DSwapChain9Ex, (void**)&pSwapChainEx );
+    if( SUCCEEDED(query) )
+    {
+        HRESULT hr = pSwapChainEx->GetLastPresentCount( &g_PresentStats.PresentCount );
+        printf("D3DRender get stats\n");
+        if(SUCCEEDED(hr)) {
+            hr = pSwapChainEx->GetPresentStats(&g_PresentStats);
+            printf("D3DRender stat = %d\n", g_PresentStats.PresentCount);
+            J2dTraceLn1(J2D_TRACE_ERROR, "PresentStats = %d\n", g_PresentStats.PresentCount );
+        }
+        pSwapChainEx->Release();
+    }
+
     res = D3DRQ_MarkLostIfNeeded(res, d3dsdo);
 
     return res;

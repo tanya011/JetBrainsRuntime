@@ -489,6 +489,18 @@ D3DContext::ResetContext()
 }
 
 HRESULT
+D3DContext::ResetContextWIthParams(D3DPRESENT_PARAMETERS *pNewParams)
+{
+    HRESULT res = E_FAIL;
+
+    J2dRlsTraceLn(J2D_TRACE_INFO, "D3DContext::ResetContext");
+    if (pd3dDevice != NULL) {
+        pd3dDevice->Reset(pNewParams);
+    }
+    return res;
+}
+
+HRESULT
 D3DContext::ConfigureContext(D3DPRESENT_PARAMETERS *pNewParams)
 {
     J2dRlsTraceLn1(J2D_TRACE_INFO, "D3DContext::ConfigureContext device %d",
@@ -595,7 +607,7 @@ D3DContext::ConfigureContext(D3DPRESENT_PARAMETERS *pNewParams)
         }
 
         // not preserving fpu control word could cause issues (4860749)
-        dwBehaviorFlags = D3DCREATE_FPU_PRESERVE;
+        dwBehaviorFlags = D3DCREATE_ENABLE_PRESENTSTATS;
 
         J2dRlsTrace(J2D_TRACE_VERBOSE,
                     "[V] dwBehaviorFlags=D3DCREATE_FPU_PRESERVE|");
@@ -613,7 +625,7 @@ D3DContext::ConfigureContext(D3DPRESENT_PARAMETERS *pNewParams)
         // dwBehaviorFlags |= D3DCREATE_NOWINDOWCHANGES;
         J2dRlsTrace(J2D_TRACE_VERBOSE,"\n");
 
-        if (FAILED(res = pd3dObject->CreateDevice(adapterOrdinal, devType,
+        if (FAILED(res = pd3dObject->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL,
                                                   focusHWND,
                                                   dwBehaviorFlags,
                                                   pNewParams, &pd3dDevice)))
@@ -654,8 +666,6 @@ D3DContext::InitContext()
 
     params.hDeviceWindow = 0;
     params.Windowed = TRUE;
-    params.BackBufferCount = 1;
-    params.BackBufferFormat = D3DFMT_UNKNOWN;
     params.SwapEffect = D3DSWAPEFFECT_DISCARD;
     params.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 

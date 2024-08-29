@@ -130,6 +130,7 @@ public:
     // creates or resets a D3D device given the parameters
     HRESULT ConfigureContext(D3DPRESENT_PARAMETERS *pNewParams);
     // resets existing D3D device with the current presentation parameters
+    HRESULT ResetContextWIthParams(D3DPRESENT_PARAMETERS *pNewParams);
     HRESULT ResetContext();
     HRESULT CheckAndResetDevice();
 
