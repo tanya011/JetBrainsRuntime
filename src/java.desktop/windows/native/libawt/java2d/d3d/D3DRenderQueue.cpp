@@ -22,6 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+#define INITGUID
 
 #include "D3DPipeline.h"
 #include <malloc.h>
@@ -169,7 +170,7 @@ D3DRQ_SwapBuffers(D3DPipelineManager *pMgr, D3DSDOps *d3dsdo,
         printf("D3DRender get stats\n");
         if(SUCCEEDED(hr)) {
             hr = pSwapChainEx->GetPresentStats(&g_PresentStats);
-            printf("D3DRender stat = %d\n", g_PresentStats.PresentCount);
+            printf("D3DRender  Hr = %d stat = %d\n", hr, g_PresentStats.PresentCount);
             J2dTraceLn1(J2D_TRACE_ERROR, "PresentStats = %d\n", g_PresentStats.PresentCount );
         }
         pSwapChainEx->Release();

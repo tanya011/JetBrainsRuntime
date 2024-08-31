@@ -176,8 +176,8 @@ Java_sun_java2d_d3d_D3DGraphicsDevice_enterFullScreenExclusiveNative
     // use when creating the device
     pMgr->SetFSFocusWindow(adapter, hWnd);
 
-    newParams = *pCurParams;
-//    newParams.hDeviceWindow = hWnd;
+//    newParams = *pCurParams;
+    newParams.hDeviceWindow = hWnd;
     newParams.Windowed = FALSE;
 //    newParams.BackBufferCount = 1;
 //    newParams.BackBufferFormat = dm.Format;
