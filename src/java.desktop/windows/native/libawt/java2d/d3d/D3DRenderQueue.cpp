@@ -159,7 +159,7 @@ D3DRQ_SwapBuffers(D3DPipelineManager *pMgr, D3DSDOps *d3dsdo,
         pDstRect = NULL;
     }
 
-    res = pSwapChain->Present(pSrcRect, pDstRect, 0, NULL, 0);
+    res = pSwapChain->Present(0, 0, 0, NULL, 0);
 
     printf("D3DRender attempt\n");
     IDirect3DSwapChain9Ex* pSwapChainEx;
@@ -168,6 +168,7 @@ D3DRQ_SwapBuffers(D3DPipelineManager *pMgr, D3DSDOps *d3dsdo,
     {
         HRESULT hr = pSwapChainEx->GetLastPresentCount( &g_PresentStats.PresentCount );
         printf("D3DRender get stats\n");
+        printf("D3DRender  Hr = %d stat = %d\n", hr, g_PresentStats.PresentCount);
         if(SUCCEEDED(hr)) {
             hr = pSwapChainEx->GetPresentStats(&g_PresentStats);
             printf("D3DRender  Hr = %d stat = %d\n", hr, g_PresentStats.PresentCount);

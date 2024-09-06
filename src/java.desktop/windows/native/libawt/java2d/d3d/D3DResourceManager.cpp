@@ -457,7 +457,7 @@ D3DResourceManager::CreateSwapChain(HWND hWnd, UINT numBuffers,
         {
             newParams = *curParams;
             newParams.BackBufferCount = numBuffers;
-            newParams.SwapEffect = swapEffect;
+            newParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
             newParams.PresentationInterval = presentationInterval;
 
             res = pCtx->ConfigureContext(&newParams);

@@ -493,9 +493,9 @@ D3DContext::ResetContextWIthParams(D3DPRESENT_PARAMETERS *pNewParams)
 {
     HRESULT res = E_FAIL;
 
-    J2dRlsTraceLn(J2D_TRACE_INFO, "D3DContext::ResetContext");
+    J2dRlsTraceLn(J2D_TRACE_INFO, "D3DContext::ResetContextWIthParams");
     if (pd3dDevice != NULL) {
-        pd3dDevice->Reset(pNewParams);
+        res = pd3dDevice->Reset(pNewParams);
     }
     return res;
 }
@@ -551,7 +551,7 @@ D3DContext::ConfigureContext(D3DPRESENT_PARAMETERS *pNewParams)
                             "  exiting full-screen mode, reset the device");
                 curParams.Windowed = FALSE;
                 ReleaseDefPoolResources();
-                res = pd3dDevice->Reset(&curParams);
+                res = S_OK;
 
                 if (FAILED(res)) {
                     DebugPrintD3DError(res, "D3DContext::ConfigureContext: "\
@@ -577,7 +577,7 @@ D3DContext::ConfigureContext(D3DPRESENT_PARAMETERS *pNewParams)
             pNewParams->PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
         }
 
-        res = pd3dDevice->Reset(pNewParams);
+        res = S_OK;
         if (FAILED(res)) {
             DebugPrintD3DError(res,
                 "D3DContext::ConfigureContext: could not reset the device");
@@ -666,6 +666,8 @@ D3DContext::InitContext()
 
     params.hDeviceWindow = 0;
     params.Windowed = TRUE;
+    params.BackBufferCount = 1;
+    params.BackBufferFormat = D3DFMT_UNKNOWN;
     params.SwapEffect = D3DSWAPEFFECT_DISCARD;
     params.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 
