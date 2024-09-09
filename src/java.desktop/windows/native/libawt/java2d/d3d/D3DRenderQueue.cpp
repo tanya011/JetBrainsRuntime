@@ -167,7 +167,7 @@ D3DRQ_SwapBuffers(D3DPipelineManager *pMgr, D3DSDOps *d3dsdo,
         HRESULT hr = pSwapChainEx->GetLastPresentCount( &g_PresentStats.PresentCount );
         if(SUCCEEDED(hr)) {
             hr = pSwapChainEx->GetPresentStats(&g_PresentStats);
-            printf("D3DRender  Hr = %d stat = %d stat = %d stat = %d \n", hr, g_PresentStats.PresentCount, g_PresentStats.PresentRefreshCount, g_PresentStats.SyncRefreshCount);
+            printf("D3DRender  Hr = %d stat = %d stat = %d stat = %d RES1 = %lld   RES2 = %lld   \n", hr, g_PresentStats.PresentCount, g_PresentStats.PresentRefreshCount, g_PresentStats.SyncRefreshCount, g_PresentStats.SyncQPCTime.QuadPart, g_PresentStats.SyncGPUTime.QuadPart);
             J2dTraceLn1(J2D_TRACE_ERROR, "PresentStats = %d\n", g_PresentStats.PresentCount );
         }
         pSwapChainEx->Release();

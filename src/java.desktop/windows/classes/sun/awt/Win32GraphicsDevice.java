@@ -375,7 +375,7 @@ public class Win32GraphicsDevice extends GraphicsDevice implements
      */
     @Override
     public boolean isFullScreenSupported() {
-        return true;
+        return isFSExclusiveModeAllowed();
     }
 
     @Override
@@ -414,7 +414,7 @@ public class Win32GraphicsDevice extends GraphicsDevice implements
             }
             removeFSWindowListener(old);
         }
-//        super.setFullScreenWindow(w);
+        super.setFullScreenWindow(w);
         if (w != null) {
             // always record the default display mode prior to going
             // fullscreen
