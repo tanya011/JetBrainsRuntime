@@ -26,23 +26,7 @@
 package javax.swing;
 
 import java.applet.Applet;
-import java.awt.AWTEvent;
-import java.awt.AWTKeyStroke;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.FocusTraversalPolicy;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Insets;
-import java.awt.KeyboardFocusManager;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Shape;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ContainerEvent;
@@ -52,12 +36,7 @@ import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.beans.BeanProperty;
-import java.beans.JavaBean;
-import java.beans.PropertyChangeListener;
-import java.beans.Transient;
-import java.beans.VetoableChangeListener;
-import java.beans.VetoableChangeSupport;
+import java.beans.*;
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
@@ -849,6 +828,17 @@ public abstract class JComponent extends Container implements Serializable,
      * @see ComponentUI
      */
     protected void paintComponent(Graphics g) {
+        if (this.toString().contains("IdeRootPane")) {
+            JComponent component = this;
+            this.addPropertyChangeListener("ide.frame.full.screen", new PropertyChangeListener() {
+                @Override
+                public void propertyChange(PropertyChangeEvent evt) {
+                    GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
+                    device.setFullScreenWindow(SunToolkit.getContainingWindow(component));
+                }
+            });
+        }
+
         if (ui != null) {
             Graphics scratchGraphics = (g == null) ? null : g.create();
             try {
