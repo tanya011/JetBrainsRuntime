@@ -40,6 +40,7 @@ import java.awt.image.DirectColorModel;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.awt.image.SinglePixelPackedSampleModel;
+import sun.awt.AWTAccessor;
 import sun.awt.SunHints;
 import sun.awt.image.DataBufferNative;
 import sun.awt.image.PixelConverter;
@@ -257,6 +258,9 @@ public class D3DSurfaceData extends SurfaceData implements AccelSurface {
             initSurface();
         }
         setBlitProxyKey(gc.getProxyKey());
+
+        Window window = SunToolkit.getContainingWindow((Component) getPeer().getTarget());
+        D3DRenderQueue.setPresentStatistic(AWTAccessor.getWindowAccessor().countersEnabled(window) ? 1 : 0);
     }
 
     @Override
@@ -797,6 +801,15 @@ public class D3DSurfaceData extends SurfaceData implements AccelSurface {
             rq.flushNow();
         } finally {
             rq.unlock();
+        }
+
+        Window window = SunToolkit.getContainingWindow((Component) sd.getPeer().getTarget());
+        if (AWTAccessor.getWindowAccessor().countersEnabled(window)) {
+            if (D3DRenderQueue.getFramePresentedStatus() > 0) {
+                AWTAccessor.getWindowAccessor().bumpCounter(window, "java2d.native.framesPresented");
+            } else {
+                AWTAccessor.getWindowAccessor().bumpCounter(window, "java2d.native.framesDropped");
+            }
         }
     }
 

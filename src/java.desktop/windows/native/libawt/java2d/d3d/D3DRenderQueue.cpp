@@ -51,6 +51,8 @@ BOOL DWMIsCompositionEnabled();
 static D3DContext *d3dc = NULL;
 static D3DSDOps *dstOps = NULL;
 static BOOL bLostDevices = FALSE;
+static BOOL lastFramePresented = FALSE;
+static BOOL enablePresentStatistic = FALSE;
 
 typedef struct {
     byte *buffer;
@@ -158,19 +160,17 @@ D3DRQ_SwapBuffers(D3DPipelineManager *pMgr, D3DSDOps *d3dsdo,
 
     res = pSwapChain->Present(pSrcRect, pDstRect, 0, NULL, 0);
 
-    printf("D3DRender attempt\n");
-    IDirect3DSwapChain9Ex* pSwapChainEx;
-    HRESULT query = pSwapChain->QueryInterface( IID_IDirect3DSwapChain9Ex, (void**)&pSwapChainEx );
-    if( SUCCEEDED(query) )
-    {
-        D3DPRESENTSTATS g_PresentStats;
-        HRESULT hr = pSwapChainEx->GetLastPresentCount( &g_PresentStats.PresentCount );
-        if(SUCCEEDED(hr)) {
-            hr = pSwapChainEx->GetPresentStats(&g_PresentStats);
-            printf("D3DRender  Hr = %d stat = %d stat = %d stat = %d RES1 = %lld   RES2 = %lld   \n", hr, g_PresentStats.PresentCount, g_PresentStats.PresentRefreshCount, g_PresentStats.SyncRefreshCount, g_PresentStats.SyncQPCTime.QuadPart, g_PresentStats.SyncGPUTime.QuadPart);
-            J2dTraceLn1(J2D_TRACE_ERROR, "PresentStats = %d\n", g_PresentStats.PresentCount );
+    if (enablePresentStatistic) {
+        IDirect3DSwapChain9Ex *pSwapChainEx;
+        HRESULT query = pSwapChain->QueryInterface(IID_IDirect3DSwapChain9Ex, (void **) &pSwapChainEx);
+        if (SUCCEEDED(query)) {
+            UINT curPresentCount = 0;
+            static UINT prevPresentCount = 0;
+            HRESULT hr = pSwapChainEx->GetLastPresentCount(&curPresentCount);
+            lastFramePresented = SUCCEEDED(hr) && prevPresentCount != curPresentCount;
+            prevPresentCount = curPresentCount;
+            pSwapChainEx->Release();
         }
-        pSwapChainEx->Release();
     }
 
     res = D3DRQ_MarkLostIfNeeded(res, d3dsdo);
@@ -207,6 +207,16 @@ D3DRQ_MarkLostIfNeeded(HRESULT res, D3DSDOps *d3dops)
 }
 
 extern "C" {
+
+JNIEXPORT BOOL JNICALL
+Java_sun_java2d_d3d_D3DRenderQueue_getFramePresentedStatus(JNIEnv *env, jobject obj) {
+    return lastFramePresented;
+}
+
+JNIEXPORT void JNICALL
+Java_sun_java2d_d3d_D3DRenderQueue_setPresentStatistic(JNIEnv *env, jobject obj, jint enablePresentStatisticStatus) {
+    enablePresentStatistic = enablePresentStatisticStatus;
+}
 
 JNIEXPORT void JNICALL
 Java_sun_java2d_d3d_D3DRenderQueue_flushBuffer
