@@ -38,9 +38,11 @@ BUILD_NAME="$(ls "$EXPLODED")"
 #sed -i '' s/BNDL/APPL/ $EXPLODED/$BUILD_NAME/Contents/Info.plist
 rm -f $EXPLODED/$BUILD_NAME/Contents/CodeResources
 rm "$INPUT_FILE"
-if test -d $EXPLODED/$BUILD_NAME/Contents/Home/jmods; then
-  mv $EXPLODED/$BUILD_NAME/Contents/Home/jmods $BACKUP_JMODS
-fi
+
+# TODO: remove this after testing
+#if test -d $EXPLODED/$BUILD_NAME/Contents/Home/jmods; then
+#  mv $EXPLODED/$BUILD_NAME/Contents/Home/jmods $BACKUP_JMODS
+#fi
 
 log "$INPUT_FILE extracted and removed"
 
@@ -107,10 +109,36 @@ set -e
 
 if [ "$NOTARIZE" = "yes" ]; then
   log "Notarizing..."
-  "$SCRIPT_DIR/notarize.sh" "$PKG_NAME"
+  NOTARIZATION_INFO=$("$SCRIPT_DIR/notarize.sh" "$PKG_NAME")
+  REQUEST_UUID=$(echo "$NOTARIZATION_INFO" | grep 'id' | awk '{print $2}')
+
+   # Wait for and verify notarization status
+  log "Waiting for notarization to complete..."
+  if ! xcrun notarytool wait "$REQUEST_UUID"; then
+    log "Notarization failed"
+    exit 1
+  fi
+
   log "Stapling..."
-  xcrun stapler staple "$APPLICATION_PATH" ||:
-  xcrun stapler staple "$PKG_NAME" ||:
+  if ! xcrun stapler staple "$APPLICATION_PATH"; then
+    log "Stapling application failed"
+    exit 1
+  fi
+  if ! xcrun stapler staple "$PKG_NAME"; then
+    log "Stapling package failed"
+    exit 1
+  fi
+
+  # Verify stapling
+  log "Verifying stapling..."
+  if ! stapler validate "$APPLICATION_PATH"; then
+    log "Stapling verification failed for application"
+    exit 1
+  fi
+  if ! stapler validate "$PKG_NAME"; then
+    log "Stapling verification failed for package"
+    exit 1
+  fi
 else
   log "Notarization disabled"
   log "Stapling disabled"
@@ -120,9 +148,13 @@ log "Zipping $BUILD_NAME to $INPUT_FILE ..."
 (
   #cd "$EXPLODED"
   #ditto -c -k --sequesterRsrc --keepParent "$BUILD_NAME" "../$INPUT_FILE"
-  if test -d $BACKUP_JMODS/jmods; then
-    mv $BACKUP_JMODS/jmods $APPLICATION_PATH/Contents/Home
-  fi
+  
+  # TODO: remove this after testing
+  #if test -d $BACKUP_JMODS/jmods; then
+  #  mv $BACKUP_JMODS/jmods $APPLICATION_PATH/Contents/Home
+  #fi
+  
+  
   if [[ "$APPLICATION_PATH" != "$EXPLODED/$BUILD_NAME" ]]; then
     mv $APPLICATION_PATH $EXPLODED/$BUILD_NAME
   else
